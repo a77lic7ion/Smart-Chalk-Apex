@@ -1,0 +1,116 @@
+body {
+  font-family: 'Inter', sans-serif;
+}
+
+/* Animated Tab Bar Styles */
+.animated-tab-bar {
+  position: relative;
+  background-color: #e2e4e8; /* brand-light-grey */
+  padding: 5px;
+  border-radius: 9999px;
+  display: inline-block;
+  overflow: hidden;
+}
+
+.animated-tab-bar ul {
+  display: flex;
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  position: relative;
+}
+
+.animated-tab-bar li {
+  position: relative;
+  z-index: 10;
+}
+
+.animated-tab-bar button {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem; /* 8px */
+  padding: 0.6rem 1.2rem; /* 10px 18px */
+  font-size: 0.9rem; /* 14.4px */
+  font-weight: 500;
+  color: #00154A; /* brand-navy */
+  background-color: transparent;
+  border: none;
+  border-radius: 9999px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color 0.3s ease-in-out;
+  overflow: hidden;
+  text-transform: uppercase;
+  transform: translateZ(0); /* Fix for rendering glitch */
+}
+
+.animated-tab-bar button.active {
+    font-weight: 700; /* Bold */
+}
+
+.animated-tab-bar button .label-static {
+  display: block;
+  transition: transform .4s cubic-bezier(.2,1,.3,1), opacity .4s;
+}
+
+.animated-tab-bar button .label-animated {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  display: flex;
+}
+
+.animated-tab-bar button .label-animated > div {
+  display: inline-block;
+  transform: translateY(150%); /* Increased from 120% to completely hide it before animation */
+  transition: transform .4s cubic-bezier(.2,1,.3,1);
+}
+
+.animated-tab-bar button.active .label-animated > div {
+  transform: translateY(0);
+  transition-delay: calc(var(--delay) * 25ms);
+}
+
+.animated-tab-bar button.active .label-static {
+  opacity: 0;
+  transform: translateY(-100%);
+}
+
+
+.animated-tab-bar .bubble {
+  position: absolute;
+  top: 5px;
+  bottom: 5px;
+  background-color: #02A552; /* brand-green */
+  border-radius: 9999px;
+  transition: all 0.4s cubic-bezier(0.5, 0.25, 0.5, 1.25), opacity 0.3s, transform 0.3s;
+  z-index: 5;
+}
+
+/* Stacked Fraction Styles */
+.fraction {
+    display: inline-flex;
+    flex-direction: column;
+    text-align: center;
+    vertical-align: middle;
+    position: relative;
+    font-size: 1em;
+    top: -0.3em;
+    margin: 0 0.1em;
+}
+
+.fraction sup,
+.fraction sub {
+    display: block;
+    line-height: 1;
+    font-size: 0.7em;
+}
+
+.fraction sub {
+    border-top: 1px solid currentColor;
+    padding-top: 1px;
+}

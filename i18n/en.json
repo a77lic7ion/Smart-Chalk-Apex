@@ -1,0 +1,126 @@
+{
+    "feature": {
+        "dataGenerator": "Data Generator",
+        "testGenerator": "Test Generator",
+        "presentationGenerator": "Slides Generator"
+    },
+    "presentationGenerator": {
+        "subtitle": "Craft visually-rich presentations with AI-suggested imagery.",
+        "form": {
+            "curriculumLabel": "Curriculum",
+            "gradeLabel": "Grade",
+            "subjectLabel": "Subject",
+            "topicLabel": "Topic / Presentation Title",
+            "topicPlaceholder": "e.g., The Process of Photosynthesis",
+            "presetsLabel": "Structure Presets (Optional)",
+            "questionTypesLabel": "Presentation Outline / Content to Cover",
+            "questionTypesPlaceholder": "e.g., A 10-slide presentation covering the inputs, process, and outputs of photosynthesis.",
+            "questionTypesHelper": "Describe the desired presentation length and key topics.",
+            "bloomsLevelLabel": "Cognitive Level Focus"
+        },
+        "buttons": {
+            "generating": "Generating...",
+            "generateSlides": "Generate Slides",
+            "savePresentation": "Save Presentation"
+        },
+        "errors": {
+            "unexpectedGenerationError": "An unexpected error occurred during slide generation.",
+            "saveFailed": "Failed to save presentation. Please try again."
+        },
+        "alerts": {
+            "saveSuccess": "Presentation '{{name}}' saved successfully!"
+        },
+        "results": {
+            "title": "Generated Presentation",
+            "slidesTitle": "Slides",
+            "imagesTitle": "Images Needed",
+            "noSlides": "The AI did not generate any slides.",
+            "noImages": "The AI did not request any images."
+        }
+    },
+    "testGenerator": {
+        "subtitle": "Craft customized tests for your students.",
+        "loading": {
+            "loadingData": "Loading your data...",
+            "regeneratingTest": "Regenerating test...",
+            "generatingTest": "Generating your test...",
+            "subtext": "This might take a moment."
+        },
+        "form": {
+            "curriculumLabel": "Curriculum",
+            "gradeLabel": "Grade",
+            "subjectLabel": "Subject",
+            "topicLabel": "Topic(s)",
+            "topicPlaceholder": "e.g., Photosynthesis or select a suggestion",
+            "presetsLabel": "Test Structure Presets (Optional)",
+            "questionTypesLabel": "Question Types & Structure",
+            "questionTypesPlaceholder": "e.g., \"{{example}}\"",
+            "questionTypesHelper": "Describe types, number of questions, total marks. Use a preset or type your own.",
+            "bloomsLevelLabel": "Bloom's Taxonomy Level Focus",
+            "uploadedContentLabel": "Base Test on Uploaded Content (Optional)",
+            "uploadedContentHelper": "Select a subject to use your uploaded content for generating this test.",
+            "uploadedContent": {
+                "noneOption": "None (Generate from scratch)"
+            }
+        },
+        "buttons": {
+            "generating": "Generating...",
+            "generateTest": "Generate Test",
+            "saveTestAndMemo": "Save Current Test & Memo",
+            "viewEdit": "View/Edit",
+            "delete": "Delete"
+        },
+        "errors": {
+            "loadInitialData": "Could not load your saved data. Please try again later.",
+            "emptyFields": "Topic and Question Types description cannot be empty.",
+            "noAnswerKey": "Answer key not generated or delimiter missing.",
+            "unexpectedGenerationError": "An unexpected error occurred during test generation.",
+            "saveFailed": "Failed to save test. Please try again.",
+            "deleteFailed": "Failed to delete test. Please try again."
+        },
+        "alerts": {
+            "pdfExportUnavailable": "PDF export functionality is not available or no content to export.",
+            "manualEditWarning": "Important: You've edited the test content. Please review the Answer Key to ensure it's still accurate. The current version of the Answer Key will be saved.",
+            "saveSuccess": "Test saved successfully!",
+            "noTestToSave": "No active test to save.",
+            "deleteSuccess": "Test deleted successfully."
+        },
+        "confirmations": {
+            "deleteTest": "Are you sure you want to delete this saved test?"
+        },
+        "topic": {
+            "comprehensiveCoverage": "Comprehensive coverage of the entire subject: {{subject}}"
+        },
+        "generatedTestView": {
+            "testTitle": "Generated Test Paper",
+            "editableTestAriaLabel": "Editable Generated Test Content",
+            "exportTestPdfButton": "Export Test PDF",
+            "regeneratingButton": "Regenerating...",
+            "regenerateTestButton": "Regenerate Test",
+            "answerKeyTitle": "Answer Key / Marking Rubric",
+            "hideAnswerKeyButton": "Hide Answer Key",
+            "showAnswerKeyButton": "Show Answer Key",
+            "editableAnswerKeyAriaLabel": "Editable Answer Key Content",
+            "exportAnswerKeyPdfButton": "Export Answer Key PDF"
+        },
+        "savedTests": {
+            "title": "My Saved Tests",
+            "savedDate": "Saved: {{date}}",
+            "noTestsFound": "No tests found. Generate and save a test to see it here."
+        },
+        "presets": {
+            "QuickQuiz": "Quick Quiz",
+            "ClassTest": "Class Test",
+            "FormalExam": "Formal Exam"
+        }
+    },
+    "blooms": {
+        "remembering": "Remembering - Recall facts and basic concepts",
+        "understanding": "Understanding - Explain ideas or concepts",
+        "applying": "Applying - Use information in new situations",
+        "analyzing": "Analyzing - Draw connections among ideas",
+        "evaluating": "Evaluating - Justify a stand or decision",
+        "creating": "Creating - Produce new or original work",
+        "balanced": "Balanced - A mix of all levels"
+    }
+}
