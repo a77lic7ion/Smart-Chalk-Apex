@@ -4,6 +4,8 @@ import PptxGenJS from 'pptxgenjs';
 import { db } from '../db';
 import type { SavedTest, Presentation, Slide, ImagePlaceholder, LessonPlan, FormalTestParams, TrainingQuestion, SavedHomework, ManualExam, ParsedExamData, ExamQuestion, Curriculum } from '../types';
 import { Document, Paragraph, TextRun, ImageRun, Packer as DocxPacker, HeadingLevel, AlignmentType, convertInchesToTwip, Header, Footer, PageNumber, PageBorderDisplay, PageBorders, PageBorderOffsetFrom, BorderStyle, ISectionOptions, HeightRule } from 'docx';
+import headerLogo from '@/Header2.png';
+import footerLogo from '@/logo1.png';
 
 const base64ToArrayBuffer = (base64: string): ArrayBuffer => {
     const dataPart = base64.split(',')[1];
@@ -51,7 +53,7 @@ const arrayBufferToBase64 = (buffer: ArrayBuffer): string => {
 
 const getHeaderLogoBuffer = async (): Promise<ArrayBuffer> => {
     try {
-        return await getLogoAsArrayBuffer('/Header2.png');
+        return await getLogoAsArrayBuffer(headerLogo);
     } catch (error) {
         console.error("Failed to fetch header logo for DOCX:", error);
         throw error;
@@ -60,7 +62,7 @@ const getHeaderLogoBuffer = async (): Promise<ArrayBuffer> => {
 
 const getFooterLogoBuffer = async (): Promise<ArrayBuffer> => {
     try {
-        return await getLogoAsArrayBuffer('/logo1.png');
+        return await getLogoAsArrayBuffer(footerLogo);
     } catch (error) {
         console.error("Failed to fetch footer logo for DOCX:", error);
         throw error;
