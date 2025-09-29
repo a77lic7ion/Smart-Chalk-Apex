@@ -1,5 +1,20 @@
-import { db } from '../db';
-import type { SavedTest, LessonPlan, Presentation, Slide, ImagePlaceholder, SavedHomework, SavedExam, SavedParsedExam, ManualExam, DbRecord } from '../types';
+import { db } from '../../db';
+import axios from 'axios';
+import type { SavedTest, LessonPlan, Presentation, Slide, ImagePlaceholder, SavedHomework, SavedExam, SavedParsedExam, ManualExam, DbRecord } from '../../types';
+
+// Create API instance with correct base URL for local development
+const api = axios.create({
+  baseURL: 'http://localhost:3001/api',
+});
+
+// Add interceptor to include Google token in requests
+api.interceptors.request.use(config => {
+  const token = localStorage.getItem('google_token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
 
 // This interface defines the structure of the data that will be sent to the server.
 export interface SyncPayload {
@@ -141,16 +156,7 @@ const performSync = async () => {
     console.log("Sync Service: Found new data. Preparing to send to server...", dirtyData);
 
     try {
-        const response = await fetch('/api/sync', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(dirtyData)
-        });
-
-        if (!response.ok) {
-            const errorData = await response.json().catch(() => ({ message: 'Could not parse error response.' }));
-            throw new Error(`Server responded with status: ${response.status}. ${errorData.message}`);
-        }
+        const response = await api.post('/sync', dirtyData);
 
         await markDataAsSynced(dirtyData);
         console.log("Sync Service: Data successfully sent to the server and local records updated.");
@@ -176,24 +182,15 @@ export const performManualSync = async () => {
     console.log("Manual Sync: Found data. Preparing to send to server...", allData);
 
     try {
-        const response = await fetch('/api/sync', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(allData)
-        });
-
-        if (!response.ok) {
-            const errorData = await response.json().catch(() => ({ message: 'Could not parse error response.' }));
-            throw new Error(`Server responded with status: ${response.status}. ${errorData.message}`);
-        }
+        const response = await api.post('/sync', allData);
 
         await markDataAsSynced(allData);
         console.log("Manual Sync: Data successfully sent to the server and local records updated.");
-        return { success: true, message: 'Data successfully synced with the server.' };
+        return { success: true, message: 'Data successfully synced.' };
 
     } catch (error) {
         console.error("Manual Sync: Failed to send data to the server.", error);
-        return { success: false, message: `Failed to sync data: ${error instanceof Error ? error.message : 'Unknown error'}` };
+        return { success: false, message: 'Failed to sync data.' };
     }
 };
 

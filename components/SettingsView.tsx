@@ -5,7 +5,7 @@ import { db } from '../db';
 import { saveAs } from 'file-saver';
 import { Button } from './Button';
 import { DocumentArrowDownIcon, UploadIcon, RefreshIcon } from './Icons';
-import { performManualSync } from '../services/syncService';
+import { performManualSync } from '../src/services/syncService';
 
 
 const AdminSettings: React.FC<{}> = () => {
