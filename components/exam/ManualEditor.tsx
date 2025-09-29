@@ -216,13 +216,18 @@ export const ManualEditor: React.FC<{ user: UserProfile, initialData?: ManualExa
     
     // --- Save and Export ---
     const handleSave = async () => {
-        const examToSave = {...exam, createdAt: Date.now(), userId: user.sub};
+        const examToSave: ManualExam = {
+            ...exam,
+            createdAt: Date.now(),
+            userId: user.sub,
+            syncStatus: 'dirty'
+        };
         try {
             await db.savedManualExams.put(examToSave);
-            alert(`Exam "${exam.name}" saved successfully!`);
+            alert(`Exam "${exam.name}" saved locally. It will be synced with the server shortly.`);
         } catch (e) {
-            console.error("Failed to save manual exam:", e);
-            alert("Error: Could not save exam to the database.");
+            console.error("Failed to save manual exam locally:", e);
+            alert("Error: Could not save exam to the database locally.");
         }
     };
     

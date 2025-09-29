@@ -87,21 +87,29 @@ export const SlidesGenerator: React.FC<SlidesGeneratorProps> = ({ user, loadId, 
 
     const handleSavePresentation = useCallback(async () => {
         if (!generatedData) return;
-        const presentationWithUser = { ...generatedData.presentation, userId: user.sub };
-        const { slides } = generatedData;
+
+        const presentationToSave: Presentation = {
+            ...generatedData.presentation,
+            userId: user.sub,
+            syncStatus: 'dirty'
+        };
+        const slidesToSave: Slide[] = generatedData.slides.map(slide => ({
+            ...slide,
+            syncStatus: 'dirty'
+        }));
 
         try {
             await db.transaction('rw', db.presentations, db.slides, async () => {
-                await db.presentations.put(presentationWithUser);
-                await db.slides.where({ presentationId: presentationWithUser.id }).delete();
-                if (slides.length > 0) {
-                    await db.slides.bulkAdd(slides);
+                await db.presentations.put(presentationToSave);
+                await db.slides.where({ presentationId: presentationToSave.id }).delete();
+                if (slidesToSave.length > 0) {
+                    await db.slides.bulkPut(slidesToSave);
                 }
             });
-            setSuccessMessage(t('presentationGenerator.alerts.saveSuccess', {name: presentationWithUser.name}));
+            setSuccessMessage(t('presentationGenerator.alerts.saveSuccess', {name: presentationToSave.name}));
             setGeneratedData(null);
         } catch (err) {
-            console.error('Failed to save presentation:', err);
+            console.error('Failed to save presentation locally:', err);
             setError(err instanceof Error ? err.message : t('presentationGenerator.errors.saveFailed'));
         }
     }, [generatedData, user.sub, t]);
