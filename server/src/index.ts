@@ -23,6 +23,7 @@ import lessonPlansRouter from './routes/lesson-plans';
 import savedContentRouter from './routes/saved-content';
 import adminRouter from './routes/admin';
 import syncRouter from './routes/sync';
+import imagesRouter from './routes/images';
 
 app.get('/', (req, res) => {
   res.send('Server is running!');
@@ -50,6 +51,7 @@ app.use('/api/lesson-plans', lessonPlansRouter);
 app.use('/api/content', savedContentRouter);
 app.use('/api/admin', adminRouter);
 app.use('/api/sync', syncRouter);
+app.use('/api/images', imagesRouter);
 
 
 app.listen(port, () => {

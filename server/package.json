@@ -15,11 +15,14 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
+    "@types/multer": "^2.0.0",
+    "@vercel/blob": "^2.0.0",
     "axios": "^1.12.2",
     "cors": "^2.8.5",
     "dotenv": "^17.2.2",
     "express": "^5.1.0",
     "google-auth-library": "^10.3.0",
+    "multer": "^2.0.2",
     "pg": "^8.16.3"
   },
   "devDependencies": {

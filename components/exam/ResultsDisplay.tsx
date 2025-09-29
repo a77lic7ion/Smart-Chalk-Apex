@@ -41,10 +41,30 @@ const EditableParsedQuestion: React.FC<{
 
         setImageError(null);
         try {
-            const base64 = await readFileAsBase64(file);
-            onUpdate({ ...question, imageData: base64, imageRequired: false });
+            // Upload to Vercel Blob storage
+            const formData = new FormData();
+            formData.append('image', file);
+            formData.append('folder', 'exams');
+            
+            const response = await fetch('/api/images/upload', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('googleToken')}`
+                }
+            });
+            
+            if (!response.ok) {
+                throw new Error('Failed to upload image to cloud storage');
+            }
+            
+            const result = await response.json();
+            const imageUrl = result.data.url;
+            
+            // Use the cloud URL instead of base64
+            onUpdate({ ...question, imageData: imageUrl, imageRequired: false });
         } catch (err) {
-            setImageError(err instanceof Error ? err.message : 'Failed to read file');
+            setImageError(err instanceof Error ? err.message : 'Failed to upload image');
         }
     }
 

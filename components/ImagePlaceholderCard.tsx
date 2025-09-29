@@ -55,11 +55,34 @@ export const ImagePlaceholderCard: React.FC<ImagePlaceholderCardProps> = ({ plac
         setIsProcessing(true);
         setImageError(null);
         try {
+            // Upload to Vercel Blob storage
+            const formData = new FormData();
+            formData.append('image', file);
+            formData.append('folder', 'presentations');
+            
+            const response = await fetch('/api/images/upload', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('googleToken')}`
+                }
+            });
+            
+            if (!response.ok) {
+                throw new Error('Failed to upload image to cloud storage');
+            }
+            
+            const result = await response.json();
+            const imageUrl = result.data.url;
+            
+            // Use the cloud URL instead of base64
+            onImageUpload(placeholder.id, imageUrl, 'uploaded');
+            
+            // Also save to local library for offline access (keep base64 for this)
             const base64 = await readFileAsBase64(file as File);
-            onImageUpload(placeholder.id, base64, 'uploaded');
             await saveImageToLibrary(base64);
         } catch (e) {
-            setImageError(e instanceof Error ? e.message : "Failed to read image file.");
+            setImageError(e instanceof Error ? e.message : "Failed to upload image.");
         } finally {
             setIsProcessing(false);
         }

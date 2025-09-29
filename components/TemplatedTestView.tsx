@@ -45,11 +45,31 @@ const AddCustomQuestionModal: React.FC<{
         setIsProcessing(true);
         setError(null);
         try {
-            const base64 = await readFileAsBase64(file);
-            setImageData(base64);
+            // Upload to Vercel Blob storage
+            const formData = new FormData();
+            formData.append('image', file);
+            formData.append('folder', 'tests');
+            
+            const response = await fetch('/api/images/upload', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('googleToken')}`
+                }
+            });
+            
+            if (!response.ok) {
+                throw new Error('Failed to upload image to cloud storage');
+            }
+            
+            const result = await response.json();
+            const imageUrl = result.data.url;
+            
+            // Use the cloud URL instead of base64
+            setImageData(imageUrl);
             setImageName(file.name);
         } catch (e) {
-            setError(e instanceof Error ? e.message : "Failed to process image.");
+            setError(e instanceof Error ? e.message : "Failed to upload image.");
         } finally {
             setIsProcessing(false);
         }

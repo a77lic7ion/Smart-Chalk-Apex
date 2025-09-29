@@ -1,6 +1,19 @@
 import { Router } from 'express';
 import pool from '../db';
-import { SyncPayload } from '../../../types'; // Assuming types can be shared
+
+// Define SyncPayload interface locally since it's not in the shared types
+interface SyncPayload {
+    savedTests: any[];
+    lessonPlans: any[];
+    presentations: any[];
+    slides: any[];
+    imagePlaceholders: any[];
+    savedHomework: any[];
+    savedExams: any[];
+    savedParsedExams: any[];
+    savedManualExams: any[];
+    trainingData: any[];
+}
 
 const router = Router();
 
@@ -9,7 +22,7 @@ const router = Router();
 const upsert = async (client: any, tableName: string, data: any[], columns: string[]) => {
     if (data.length === 0) return;
 
-    const values = data.map(item => `(${columns.map(col => `'${JSON.stringify(item[col])}'`).join(', ')})`).join(', ');
+    const values = data.map((item: any) => `(${columns.map(col => `'${JSON.stringify(item[col])}'`).join(', ')})`).join(', ');
     const query = `
         INSERT INTO ${tableName} (${columns.join(', ')})
         VALUES ${values}

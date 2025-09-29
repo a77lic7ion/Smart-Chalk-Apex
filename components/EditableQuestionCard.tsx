@@ -113,7 +113,7 @@ export const EditableQuestionCard: React.FC<EditableQuestionCardProps> = ({ ques
         setEditedData(prev => ({ ...prev, [name]: value } as TrainingQuestion));
     };
 
-    const handleImageFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
+    const handleImageUpload = async (event: ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
         if (!file) return;
 
@@ -124,10 +124,30 @@ export const EditableQuestionCard: React.FC<EditableQuestionCardProps> = ({ ques
 
         setImageError(null);
         try {
-            const base64 = await readFileAsBase64(file);
-            setEditedData(prev => ({ ...prev, imageData: base64 }));
+            // Upload to Vercel Blob storage
+            const formData = new FormData();
+            formData.append('image', file);
+            formData.append('folder', 'questions');
+            
+            const response = await fetch('/api/images/upload', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('googleToken')}`
+                }
+            });
+            
+            if (!response.ok) {
+                throw new Error('Failed to upload image to cloud storage');
+            }
+            
+            const result = await response.json();
+            const imageUrl = result.data.url;
+            
+            // Use the cloud URL instead of base64
+            setEditedData(prev => ({ ...prev, imageData: imageUrl }));
         } catch(e) {
-            setImageError(e instanceof Error ? e.message : "Failed to read image file.");
+            setImageError(e instanceof Error ? e.message : "Failed to upload image.");
         }
     };
 
@@ -168,7 +188,7 @@ export const EditableQuestionCard: React.FC<EditableQuestionCardProps> = ({ ques
                         {editedData.imageData && (
                             <img src={editedData.imageData} alt="Question preview" className="h-20 w-auto rounded border p-1" />
                         )}
-                        <input type="file" ref={fileInputRef} onChange={handleImageFileChange} className="hidden" accept="image/*" />
+                        <input type="file" ref={fileInputRef} onChange={handleImageUpload} className="hidden" accept="image/*" />
                     </div>
                     {imageError && <p className="text-xs text-red-600 mt-2">{imageError}</p>}
                 </FormField>
