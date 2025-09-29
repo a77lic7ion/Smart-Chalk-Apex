@@ -7,6 +7,7 @@ export const GOOGLE_CLIENT_ID = "837793169445-o4tq3tvbci7q2outrp56rrpr6bn4oeiv.a
 // List of admin user emails. Case is ignored during checks.
 export const ADMIN_EMAILS = [
     'admin@smartchalk.co.za',
+    'Admin@smartchalk.co.za',
     'shaunwgordon@gmail.com'
 ];
 

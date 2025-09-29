@@ -13,6 +13,8 @@ const AdminSettings: React.FC<{}> = () => {
     const [isImporting, setIsImporting] = React.useState(false);
     const [isSyncing, setIsSyncing] = React.useState(false);
     const [syncStatus, setSyncStatus] = React.useState('');
+    const [syncServerUrl, setSyncServerUrl] = React.useState('http://localhost:3001');
+    const [dbConnectionString, setDbConnectionString] = React.useState('');
     const fileInputRef = React.useRef<HTMLInputElement>(null);
     
     const handleExportDatabase = async () => {
@@ -39,18 +41,19 @@ const AdminSettings: React.FC<{}> = () => {
         setSyncStatus('Testing server connection...');
 
         try {
-            // 1. Test server and database connection
-            const healthResponse = await fetch('/api/health');
+            // 1. Test server and database connection using the configured URL
+            const healthUrl = `${syncServerUrl}/api/health`;
+            const healthResponse = await fetch(healthUrl);
             const healthData = await healthResponse.json();
 
             if (!healthResponse.ok) {
                 throw new Error(healthData.message || 'Health check failed.');
             }
 
-            setSyncStatus(`Connection successful. ${healthData.message} Starting sync...`);
+            setSyncStatus(`Connection successful to ${syncServerUrl}. ${healthData.message} Starting sync...`);
 
-            // 2. Perform the manual sync
-            const syncResult = await performManualSync();
+            // 2. Perform the manual sync with the configured server URL
+            const syncResult = await performManualSync(syncServerUrl);
 
             if (syncResult.success) {
                 setSyncStatus(`Sync successful! ${syncResult.message}`);
@@ -107,7 +110,44 @@ const AdminSettings: React.FC<{}> = () => {
     return (
         <div className="bg-white p-6 rounded-xl shadow-md border border-slate-200 mt-8">
             <h3 className="text-xl font-bold text-brand-navy mb-1">Admin Tools</h3>
-            <p className="text-sm text-slate-500 mb-4">Advanced tools for database management.</p>
+            <p className="text-sm text-slate-500 mb-4">Advanced tools for database management and sync configuration.</p>
+            
+            {/* Database Connection Settings */}
+            <div className="mb-6 p-4 bg-slate-50 rounded-lg border border-slate-200">
+                <h4 className="text-lg font-semibold text-brand-navy mb-3">Database Connection</h4>
+                <div className="space-y-3">
+                    <div>
+                        <label htmlFor="sync-server-url" className="text-sm font-medium text-slate-700 block mb-1.5">
+                            Sync Server URL
+                        </label>
+                        <input
+                            id="sync-server-url"
+                            type="text"
+                            placeholder="http://localhost:3001"
+                            value={syncServerUrl}
+                            onChange={(e) => setSyncServerUrl(e.target.value)}
+                            className="w-full p-2 border border-slate-300 rounded-lg focus:ring-1 focus:ring-brand-green focus:border-brand-green transition-shadow duration-200 text-sm"
+                        />
+                        <p className="text-xs text-slate-500 mt-1">URL of the backend server for syncing data</p>
+                    </div>
+                    <div>
+                        <label htmlFor="db-connection" className="text-sm font-medium text-slate-700 block mb-1.5">
+                            Database Connection String (Optional)
+                        </label>
+                        <input
+                            id="db-connection"
+                            type="password"
+                            placeholder="postgresql://user:password@host:port/database"
+                            value={dbConnectionString}
+                            onChange={(e) => setDbConnectionString(e.target.value)}
+                            className="w-full p-2 border border-slate-300 rounded-lg focus:ring-1 focus:ring-brand-green focus:border-brand-green transition-shadow duration-200 text-sm"
+                        />
+                        <p className="text-xs text-slate-500 mt-1">Direct database connection for advanced sync operations</p>
+                    </div>
+                </div>
+            </div>
+
+            {/* Admin Actions */}
             <div className="flex flex-wrap gap-4">
                 <Button onClick={handleExportDatabase} isLoading={isExporting} variant="secondary">
                     <DocumentArrowDownIcon className="h-5 w-5 mr-2" />

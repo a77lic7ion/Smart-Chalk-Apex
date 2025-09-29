@@ -170,7 +170,7 @@ const performSync = async () => {
  * Performs a manual sync. It gathers all data and sends it to the server.
  * This is intended to be triggered by a user action.
  */
-export const performManualSync = async () => {
+export const performManualSync = async (serverUrl?: string) => {
     console.log("Manual Sync: Checking for all data to sync with the server...");
     const allData = await gatherAllData();
 
@@ -182,7 +182,25 @@ export const performManualSync = async () => {
     console.log("Manual Sync: Found data. Preparing to send to server...", allData);
 
     try {
-        const response = await api.post('/sync', allData);
+        // Use provided server URL or default to the configured API instance
+        if (serverUrl) {
+            const customApi = axios.create({
+                baseURL: `${serverUrl}/api`,
+            });
+            
+            // Add interceptor for custom API instance
+            customApi.interceptors.request.use(config => {
+                const token = localStorage.getItem('google_token');
+                if (token) {
+                    config.headers.Authorization = `Bearer ${token}`;
+                }
+                return config;
+            });
+            
+            const response = await customApi.post('/sync', allData);
+        } else {
+            const response = await api.post('/sync', allData);
+        }
 
         await markDataAsSynced(allData);
         console.log("Manual Sync: Data successfully sent to the server and local records updated.");
