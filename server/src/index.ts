@@ -15,7 +15,8 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
-app.use(express.json());
+app.use(express.json({ limit: '1gb' }));
+app.use(express.urlencoded({ limit: '1gb', extended: true }));
 
 import testsRouter from './routes/tests';
 import presentationsRouter from './routes/presentations';

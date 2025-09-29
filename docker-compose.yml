@@ -1,0 +1,57 @@
+services:
+  # PostgreSQL Database
+  database:
+    image: postgres:15-alpine
+    container_name: smart-chalk-db
+    environment:
+      POSTGRES_DB: smart_chalk
+      POSTGRES_USER: smart_chalk_user
+      POSTGRES_PASSWORD: smart_chalk_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U smart_chalk_user -d smart_chalk"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    restart: unless-stopped
+
+  # Backend API Server
+  backend:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: smart-chalk-backend
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+      DATABASE_URL: postgresql://smart_chalk_user:smart_chalk_password@database:5432/smart_chalk
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      VERCEL_BLOB_READ_WRITE_TOKEN: ${VERCEL_BLOB_READ_WRITE_TOKEN}
+    ports:
+      - "3001:3001"
+    depends_on:
+      database:
+        condition: service_healthy
+    volumes:
+      - ./server/uploads:/app/uploads
+    restart: unless-stopped
+
+  # Frontend Web Application
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: smart-chalk-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+    driver: local

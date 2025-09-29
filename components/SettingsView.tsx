@@ -6,15 +6,22 @@ import { saveAs } from 'file-saver';
 import { Button } from './Button';
 import { DocumentArrowDownIcon, UploadIcon, RefreshIcon } from './Icons';
 import { performManualSync } from '../src/services/syncService';
+import { ADMIN_EMAILS } from '../config';
 
 
-const AdminSettings: React.FC<{}> = () => {
+const AdminSettings: React.FC<{ user: UserProfile }> = ({ user }) => {
     const [isExporting, setIsExporting] = React.useState(false);
     const [isImporting, setIsImporting] = React.useState(false);
     const [isSyncing, setIsSyncing] = React.useState(false);
     const [syncStatus, setSyncStatus] = React.useState('');
-    const [syncServerUrl, setSyncServerUrl] = React.useState('http://localhost:3001');
-    const [dbConnectionString, setDbConnectionString] = React.useState('');
+    
+    // Check if user is admin@smartchalk.co.za and set default URL accordingly
+    const isSmartChalkAdmin = user.email.toLowerCase() === 'admin@smartchalk.co.za';
+    const defaultSyncUrl = isSmartChalkAdmin ? 'http://localhost:3001' : 'https://smart-chalk-apex.vercel.app/api';
+    const defaultDbConnection = isSmartChalkAdmin ? 'postgresql://postgres:password@localhost:5432/smart_chalk_db' : '';
+    
+    const [syncServerUrl, setSyncServerUrl] = React.useState(defaultSyncUrl);
+    const [dbConnectionString, setDbConnectionString] = React.useState(defaultDbConnection);
     const fileInputRef = React.useRef<HTMLInputElement>(null);
     
     const handleExportDatabase = async () => {
@@ -123,7 +130,7 @@ const AdminSettings: React.FC<{}> = () => {
                         <input
                             id="sync-server-url"
                             type="text"
-                            placeholder="http://localhost:3001"
+                            placeholder="https://smart-chalk-apex.vercel.app/api"
                             value={syncServerUrl}
                             onChange={(e) => setSyncServerUrl(e.target.value)}
                             className="w-full p-2 border border-slate-300 rounded-lg focus:ring-1 focus:ring-brand-green focus:border-brand-green transition-shadow duration-200 text-sm"
@@ -264,7 +271,7 @@ const SettingsContent: React.FC<{ user: UserProfile; isAdmin: boolean }> = ({ us
                 </div>
             )}
         </div>
-        {isAdmin && <AdminSettings />}
+        {isAdmin && <AdminSettings user={user} />}
     </div>
   );
 };

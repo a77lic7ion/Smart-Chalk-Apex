@@ -1,10 +1,34 @@
 import { db } from '../../db';
 import axios from 'axios';
 import type { SavedTest, LessonPlan, Presentation, Slide, ImagePlaceholder, SavedHomework, SavedExam, SavedParsedExam, ManualExam, DbRecord } from '../../types';
+import { ADMIN_EMAILS } from '../../config';
 
-// Create API instance with correct base URL for local development
+// Get current user email from localStorage
+const getCurrentUserEmail = (): string | null => {
+    try {
+        const userProfile = localStorage.getItem('user_profile');
+        if (userProfile) {
+            const user = JSON.parse(userProfile);
+            return user.email;
+        }
+    } catch (error) {
+        console.error('Error getting user email:', error);
+    }
+    return null;
+};
+
+// Determine the appropriate base URL based on user
+const getBaseURL = (): string => {
+    const userEmail = getCurrentUserEmail();
+    if (userEmail && userEmail.toLowerCase() === 'admin@smartchalk.co.za') {
+        return 'http://localhost:3001/api';
+    }
+    return 'https://smart-chalk-apex.vercel.app/api';
+};
+
+// Create API instance with dynamic URL
 const api = axios.create({
-  baseURL: 'http://localhost:3001/api',
+  baseURL: getBaseURL(),
 });
 
 // Add interceptor to include Google token in requests
@@ -145,24 +169,37 @@ const markDataAsSynced = async (syncedData: SyncPayload): Promise<void> => {
  * The main sync function. It gathers dirty data and will eventually send it to the server.
  */
 const performSync = async () => {
-    console.log("Sync Service: Checking for data to sync with the server...");
+    console.log("Sync: Checking for dirty data to sync with the server...");
     const dirtyData = await gatherDirtyData();
 
     if (!dirtyData) {
-        console.log("Sync Service: No new data to sync.");
+        console.log("Sync: No dirty data to sync.");
         return;
     }
 
-    console.log("Sync Service: Found new data. Preparing to send to server...", dirtyData);
+    console.log("Sync: Found dirty data. Preparing to send to server...", dirtyData);
 
     try {
-        const response = await api.post('/sync', dirtyData);
-
+        // Recreate API instance with current base URL in case user changed
+        const currentApi = axios.create({
+            baseURL: getBaseURL(),
+        });
+        
+        // Add interceptor for current API instance
+        currentApi.interceptors.request.use(config => {
+            const token = localStorage.getItem('google_token');
+            if (token) {
+                config.headers.Authorization = `Bearer ${token}`;
+            }
+            return config;
+        });
+        
+        const response = await currentApi.post('/sync', dirtyData);
         await markDataAsSynced(dirtyData);
-        console.log("Sync Service: Data successfully sent to the server and local records updated.");
+        console.log("Sync: Data successfully sent to the server and local records updated.");
 
     } catch (error) {
-        console.error("Sync Service: Failed to send data to the server.", error);
+        console.error("Sync: Failed to send data to the server.", error);
     }
 };
 
@@ -182,25 +219,31 @@ export const performManualSync = async (serverUrl?: string) => {
     console.log("Manual Sync: Found data. Preparing to send to server...", allData);
 
     try {
-        // Use provided server URL or default to the configured API instance
-        if (serverUrl) {
-            const customApi = axios.create({
-                baseURL: `${serverUrl}/api`,
-            });
-            
-            // Add interceptor for custom API instance
-            customApi.interceptors.request.use(config => {
-                const token = localStorage.getItem('google_token');
-                if (token) {
-                    config.headers.Authorization = `Bearer ${token}`;
-                }
-                return config;
-            });
-            
-            const response = await customApi.post('/sync', allData);
-        } else {
-            const response = await api.post('/sync', allData);
+        // Use provided server URL or determine based on current user
+        let targetUrl = serverUrl;
+        if (!targetUrl) {
+            const userEmail = getCurrentUserEmail();
+            if (userEmail && userEmail.toLowerCase() === 'admin@smartchalk.co.za') {
+                targetUrl = 'http://localhost:3001';
+            } else {
+                targetUrl = 'https://smart-chalk-apex.vercel.app/api';
+            }
         }
+        
+        const customApi = axios.create({
+            baseURL: `${targetUrl}/api`,
+        });
+        
+        // Add interceptor for custom API instance
+        customApi.interceptors.request.use(config => {
+            const token = localStorage.getItem('google_token');
+            if (token) {
+                config.headers.Authorization = `Bearer ${token}`;
+            }
+            return config;
+        });
+        
+        const response = await customApi.post('/sync', allData);
 
         await markDataAsSynced(allData);
         console.log("Manual Sync: Data successfully sent to the server and local records updated.");
