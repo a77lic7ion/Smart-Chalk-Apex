@@ -157,17 +157,35 @@ export const LessonGenerator: React.FC<LessonGeneratorProps> = ({ user, loadId, 
     const handleSaveLesson = useCallback(async () => {
         if (!generatedData) return;
         const { lessonPlan, placeholders } = generatedData;
-        const lessonPlanWithUser = { ...lessonPlan, userId: user.sub };
+
+        const lessonPlanToSave: LessonPlan = {
+            ...lessonPlan,
+            userId: user.sub,
+            syncStatus: 'dirty'
+        };
+
+        const placeholdersToSave: ImagePlaceholder[] = placeholders.map(p => ({
+            ...p,
+            syncStatus: 'dirty'
+        }));
 
         try {
             await db.transaction('rw', db.lessonPlans, db.imagePlaceholders, db.trainingData, async () => {
-                await db.lessonPlans.put(lessonPlanWithUser);
+                await db.lessonPlans.put(lessonPlanToSave);
+
+                // We assume placeholders are always saved with the lesson, so we can overwrite.
                 await db.imagePlaceholders.where({ presentationId: lessonPlan.id }).delete();
-                if (placeholders.length > 0) {
-                    await db.imagePlaceholders.bulkPut(placeholders);
+                if (placeholdersToSave.length > 0) {
+                    await db.imagePlaceholders.bulkPut(placeholdersToSave);
                 }
+
+                // Questions are linked to the lesson, so we handle them similarly.
                 if (lessonPlan.questions.length > 0) {
-                    const recordsToSave: Omit<DbRecord, 'id'>[] = lessonPlan.questions.map(q => ({
+                    // First, remove old questions associated with this lesson to avoid duplicates.
+                    await db.trainingData.where({ sourceId: lessonPlan.id }).delete();
+
+                    const recordsToSave: DbRecord[] = lessonPlan.questions.map(q => ({
+                        // id is auto-incremented by Dexie
                         question: q.question,
                         answer: q.answer,
                         curriculum: q.curriculum,
@@ -175,16 +193,18 @@ export const LessonGenerator: React.FC<LessonGeneratorProps> = ({ user, loadId, 
                         grade: q.grade,
                         subject: q.subject,
                         createdAt: Date.now(),
-                        sourceId: lessonPlan.id, // Link question to lesson plan
+                        sourceId: lessonPlan.id,
+                        imageData: q.imageData,
+                        syncStatus: 'dirty',
                     }));
                     await db.trainingData.bulkAdd(recordsToSave);
                 }
             });
-            setSuccessMessage(`Lesson "${lessonPlan.name}" saved successfully!`);
+            setSuccessMessage(`Lesson "${lessonPlan.name}" saved locally. It will be synced with the server shortly.`);
             setGeneratedData(null);
         } catch (err) {
-            console.error('Failed to save lesson:', err);
-            setError(err instanceof Error ? err.message : 'Failed to save lesson plan.');
+            console.error('Failed to save lesson locally:', err);
+            setError(err instanceof Error ? err.message : 'Failed to save lesson plan locally.');
         }
     }, [generatedData, user.sub]);
 

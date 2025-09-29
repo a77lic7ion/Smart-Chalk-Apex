@@ -15,6 +15,7 @@ import { ADMIN_EMAILS } from './config';
 import { HomeworkGenerator } from './components/HomeworkGenerator';
 import { Footer } from './components/Footer';
 import { ManualExamBuilderView } from './components/ManualExamBuilderView';
+import { startSyncService } from './services/syncService';
 
 
 export type AppView = 'dashboard' | 'manualExamBuilder' | 'testGenerator' | 'slidesGenerator' | 'lessonGenerator' | 'exam' | 'homeworkGenerator' | 'myContent' | 'settings';
@@ -33,6 +34,7 @@ const App: React.FC = () => {
     setUser(profile);
     setIsAdmin(userIsAdmin);
     setView('dashboard');
+    startSyncService();
   };
   
   const handleLogout = () => {

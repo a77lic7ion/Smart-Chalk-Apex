@@ -1,5 +1,3 @@
-
-
 export type AIProvider = 'gemini' | 'openai' | 'ollama';
 export type ContentType = 'test' | 'presentation' | 'lesson' | 'exam' | 'homework' | 'parsedExam' | 'manualExam';
 
@@ -12,6 +10,7 @@ export interface AISettings {
 }
 
 export type Curriculum = 'CAPS' | 'IEB' | 'Cambridge' | 'Other';
+export type SyncStatus = 'synced' | 'dirty';
 
 // Type for the data structure used in the staging area (after AI processing).
 // A client-side UUID is used for React keys and edit/delete operations.
@@ -39,6 +38,7 @@ export interface DbRecord {
   createdAt: number;
   imageData?: string; // Optional base64 encoded image
   sourceId?: string; // Links back to the parent document (SavedTest, LessonPlan etc.)
+  syncStatus: SyncStatus;
 }
 
 // --- User Profile ---
@@ -68,6 +68,7 @@ export interface SavedTest {
   questions: TrainingQuestion[];
   createdAt: number;
   userId?: string;
+  syncStatus: SyncStatus;
 }
 
 // --- Formal Test Generator Types ---
@@ -84,6 +85,7 @@ export interface SavedExam {
   questions: TrainingQuestion[];
   createdAt: number;
   userId?: string;
+  syncStatus: SyncStatus;
 }
 
 
@@ -95,6 +97,7 @@ export interface Presentation {
     params: TestGenerationParams;
     createdAt: number;
     userId?: string;
+    syncStatus: SyncStatus;
 }
 
 export interface Slide {
@@ -105,6 +108,7 @@ export interface Slide {
     content: string;
     imageData?: string;
     isIntro?: boolean;
+    syncStatus: SyncStatus;
 }
 
 export interface ImagePlaceholder {
@@ -115,6 +119,7 @@ export interface ImagePlaceholder {
     description: string;
     status: 'pending' | 'generating' | 'uploaded';
     imageData?: string; // Base64 encoded image data
+    syncStatus: SyncStatus;
 }
 
 // --- Lesson Plan Types ---
@@ -130,6 +135,7 @@ export interface LessonPlan {
     questions: TrainingQuestion[]; // Assessment questions
     createdAt: number;
     userId?: string;
+    syncStatus: SyncStatus;
 }
 
 // --- Homework Generator Types ---
@@ -144,6 +150,7 @@ export interface SavedHomework {
   questions: TrainingQuestion[];
   createdAt: number;
   userId?: string;
+  syncStatus: SyncStatus;
 }
 
 // --- Intelligent Exam Parser Types ---
@@ -197,6 +204,7 @@ export interface SavedParsedExam {
   sourceFileName: string;
   createdAt: number;
   userId?: string;
+  syncStatus: SyncStatus;
 }
 
 // --- Manual Exam Builder Types ---
@@ -228,6 +236,7 @@ export interface ManualExam {
   sections: ManualSection[];
   createdAt: number;
   userId?: string;
+  syncStatus: SyncStatus;
 }
 
 // --- Image Library Types ---
@@ -237,4 +246,5 @@ export interface ImageLibraryRecord {
     subject: string;
     topic: string;
     createdAt: number;
+    syncStatus: SyncStatus;
 }

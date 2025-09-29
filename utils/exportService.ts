@@ -417,10 +417,68 @@ export const exportPresentationAsPptx = async (presentation: Presentation): Prom
     pptx.writeFile({ fileName: `${presentation.name.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.pptx` });
 };
 
+const createLessonContentWithImages = async (content: string, imageMap: Map<string, string>): Promise<Paragraph[]> => {
+    const paragraphs: Paragraph[] = [];
+    const lines = content.split('\n');
+    const placeholderRegex = /\[IMAGE_PLACEHOLDER:(.*?)\]/;
+
+    for (const line of lines) {
+        const match = line.match(placeholderRegex);
+        if (match && match[1]) {
+            const placeholderId = match[1];
+            const imageData = imageMap.get(placeholderId);
+
+            if (imageData) {
+                try {
+                    const imageBuffer = base64ToArrayBuffer(imageData);
+                    const dimensions = await getImageDimensions(imageData);
+                    const targetWidth = 400;
+                    const aspectRatio = dimensions.height / dimensions.width;
+                    const targetHeight = Math.round(targetWidth * aspectRatio);
+                    let imageType = (imageData.match(/data:image\/(.*?);base64,/) || [])[1] || 'png';
+                    if (imageType === 'jpeg') imageType = 'jpg';
+
+                    if (['png', 'jpg', 'gif', 'bmp'].includes(imageType)) {
+                        paragraphs.push(new Paragraph({
+                            children: [new ImageRun({
+                                data: imageBuffer,
+                                transformation: { width: targetWidth, height: targetHeight },
+                                type: imageType as "png" | "jpg" | "gif" | "bmp",
+                            })],
+                            alignment: AlignmentType.CENTER,
+                        }));
+                    }
+                } catch (e) {
+                    console.error(`Failed to process image for placeholder ${placeholderId}:`, e);
+                    paragraphs.push(new Paragraph({ children: [new TextRun({ text: `[Error: Image for ${placeholderId} could not be embedded]`, color: "ff0000", italics: true })] }));
+                }
+            } else {
+                // Handle case where placeholder is found but no image data is available
+                 paragraphs.push(new Paragraph({ children: [new TextRun({ text: `[Image placeholder: ${placeholderId} - image not found]`, font: "Montserrat", size: 24, italics: true, color: "888888" })]}));
+            }
+        } else {
+            paragraphs.push(new Paragraph({
+                children: [new TextRun({ text: line, font: "Montserrat", size: 24 })],
+                spacing: { after: 150 }
+            }));
+        }
+    }
+
+    return paragraphs;
+};
+
 export const exportLessonAsDocx = async (lesson: LessonPlan): Promise<void> => {
     const headerLogoBuffer = await getHeaderLogoBuffer();
     const footerLogoBuffer = await getFooterLogoBuffer();
     const footer = createFooter(footerLogoBuffer);
+
+    const imagePlaceholders = await db.imagePlaceholders.where({ presentationId: lesson.id }).toArray();
+    const imageMap = new Map<string, string>();
+    for (const placeholder of imagePlaceholders) {
+        if (placeholder.imageData) {
+            imageMap.set(placeholder.placeholderId, placeholder.imageData);
+        }
+    }
 
     const coverPage = await createCoverPage({
         name: lesson.name,
@@ -432,12 +490,7 @@ export const exportLessonAsDocx = async (lesson: LessonPlan): Promise<void> => {
     }, headerLogoBuffer);
     
     // Process lesson content for DOCX
-    const lessonContentParagraphs = lesson.content
-        .split('\n')
-        .map(line => new Paragraph({ 
-            children: [new TextRun({ text: line, font: "Montserrat", size: 24 })],
-            spacing: { after: 150 } 
-        }));
+    const lessonContentParagraphs = await createLessonContentWithImages(lesson.content, imageMap);
 
     // Process assessment questions
     const assessmentHeader = new Paragraph({

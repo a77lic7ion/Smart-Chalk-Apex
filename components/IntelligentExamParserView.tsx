@@ -124,10 +124,11 @@ export const IntelligentExamParserView: React.FC<IntelligentExamParserViewProps>
             unmatchedAnnexures: dataToCommit.unmatchedAnnexures,
             metadata: metadata,
             sourceFileName: sourceFileName,
-            createdAt: Date.now()
+            createdAt: Date.now(),
+            syncStatus: 'dirty'
         };
 
-        const individualQuestions: Omit<DbRecord, 'id'>[] = dataToCommit.questions.map(q => ({
+        const individualQuestions: DbRecord[] = dataToCommit.questions.map(q => ({
             question: q.text,
             answer: q.annexure ? q.annexure.text : 'No specific answer text in annexure.',
             curriculum: metadata.curriculum,
@@ -136,19 +137,21 @@ export const IntelligentExamParserView: React.FC<IntelligentExamParserViewProps>
             standard: `${metadata.grade} - ${metadata.subject} - Parsed from ${sourceFileName}`,
             imageData: q.imageData,
             createdAt: Date.now(),
-            sourceId: savedExamRecord.id
+            sourceId: savedExamRecord.id,
+            syncStatus: 'dirty'
         }));
 
         try {
             await db.transaction('rw', db.trainingData, db.savedParsedExams, async () => {
+                await db.savedParsedExams.put(savedExamRecord);
+                await db.trainingData.where({ sourceId: savedExamRecord.id }).delete();
                 await db.trainingData.bulkAdd(individualQuestions);
-                await db.savedParsedExams.add(savedExamRecord);
             });
-            setSuccessMessage(`${individualQuestions.length} questions committed and exam "${examName}" saved to My Content.`);
+            setSuccessMessage(`${individualQuestions.length} questions committed and exam "${examName}" saved locally. It will be synced with the server shortly.`);
             handleReset(); // Clear the view after successful commit
         } catch (e) {
-            console.error("Failed to commit to database:", e);
-            setError(e instanceof Error ? `Database error: ${e.message}` : 'An unknown error occurred while saving.');
+            console.error("Failed to commit to database locally:", e);
+            setError(e instanceof Error ? `Database error: ${e.message}` : 'An unknown error occurred while saving locally.');
         } finally {
             setIsCommitting(false);
         }

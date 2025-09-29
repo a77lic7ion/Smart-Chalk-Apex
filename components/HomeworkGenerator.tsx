@@ -349,15 +349,16 @@ export const HomeworkGenerator: React.FC<{ user: UserProfile, loadId: string | n
             name: homeworkName,
             params: params,
             questions: stagedQuestions,
-            createdAt: Date.now()
+            createdAt: Date.now(),
+            syncStatus: 'dirty'
         };
         
         try {
-            await db.savedHomework.add(newSavedHomework);
-            setSuccessMessage(`Homework "${homeworkName}" saved successfully.`);
+            await db.savedHomework.put(newSavedHomework);
+            setSuccessMessage(`Homework "${homeworkName}" saved locally. It will be synced with the server shortly.`);
         } catch (err) {
-            console.error('Failed to save homework:', err);
-            setError(err instanceof Error ? `Failed to save: ${err.message}` : 'Could not save the homework.');
+            console.error('Failed to save homework locally:', err);
+            setError(err instanceof Error ? `Failed to save: ${err.message}` : 'Could not save the homework locally.');
         } finally {
             setIsSaving(false);
         }

@@ -305,10 +305,11 @@ export const TestGenerator: React.FC<{ user: UserProfile, loadId: string | null;
             name: testName,
             params: params,
             questions: stagedQuestions,
-            createdAt: Date.now()
+            createdAt: Date.now(),
+            syncStatus: 'dirty'
         };
         
-        const recordsToSave: Omit<DbRecord, 'id'>[] = stagedQuestions.map(q => ({
+        const recordsToSave: DbRecord[] = stagedQuestions.map(q => ({
             question: q.question,
             answer: q.answer,
             curriculum: q.curriculum,
@@ -318,19 +319,21 @@ export const TestGenerator: React.FC<{ user: UserProfile, loadId: string | null;
             imageData: q.imageData,
             createdAt: Date.now(),
             sourceId: newSavedTest.id,
+            syncStatus: 'dirty'
         }));
     
         try {
             await db.transaction('rw', db.savedTests, db.trainingData, async () => {
-                await db.savedTests.add(newSavedTest);
+                await db.savedTests.put(newSavedTest);
+                await db.trainingData.where({ sourceId: newSavedTest.id }).delete();
                 await db.trainingData.bulkAdd(recordsToSave);
             });
             
             setStagedQuestions(null); // Reset after saving
-            setLastSavedTestMessage(`Test "${testName}" saved and all questions committed to the database.`);
+            setLastSavedTestMessage(`Test "${testName}" saved locally. It will be synced with the server shortly.`);
         } catch (err) {
-            console.error('Failed to save test and commit questions:', err);
-            setError(err instanceof Error ? `Failed to save: ${err.message}` : 'Could not save the test and commit questions.');
+            console.error('Failed to save test locally:', err);
+            setError(err instanceof Error ? `Failed to save: ${err.message}` : 'Could not save the test locally.');
         } finally {
             setIsSaving(false);
         }

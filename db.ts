@@ -19,16 +19,16 @@ export const db = new Dexie('TrainingDataGeneratorDB') as Dexie & {
 };
 
 // Now define the database versions and stores. This is the runtime part.
-db.version(18).stores({
-    trainingData: '++id, sourceId, userId, curriculum, standard, grade, subject, createdAt',
-    savedTests: 'id, userId, name, createdAt',
-    presentations: 'id, userId, name, createdAt',
-    slides: 'id, presentationId',
-    imagePlaceholders: 'id, presentationId',
-    lessonPlans: 'id, userId, name, createdAt',
-    savedExams: 'id, userId, name, createdAt',
-    savedHomework: 'id, userId, name, createdAt',
-    savedParsedExams: 'id, userId, name, createdAt',
-    savedManualExams: 'id, userId, name, createdAt',
-    imageLibrary: 'id, subject, topic, createdAt' // New table for reusable images
+db.version(19).stores({
+    trainingData: '++id, sourceId, userId, curriculum, standard, grade, subject, createdAt, syncStatus',
+    savedTests: 'id, userId, name, createdAt, syncStatus',
+    presentations: 'id, userId, name, createdAt, syncStatus',
+    slides: 'id, presentationId, syncStatus',
+    imagePlaceholders: 'id, presentationId, syncStatus',
+    lessonPlans: 'id, userId, name, createdAt, syncStatus',
+    savedExams: 'id, userId, name, createdAt, syncStatus',
+    savedHomework: 'id, userId, name, createdAt, syncStatus',
+    savedParsedExams: 'id, userId, name, createdAt, syncStatus',
+    savedManualExams: 'id, userId, name, createdAt, syncStatus',
+    imageLibrary: 'id, subject, topic, createdAt, syncStatus'
 });
