@@ -95,7 +95,7 @@ const performSync = async () => {
     console.log("Sync Service: Found new data. Preparing to send to server...", dirtyData);
 
     try {
-        const response = await fetch('http://localhost:3001/api/sync', {
+        const response = await fetch('/api/sync', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(dirtyData)
