@@ -4,11 +4,15 @@ import type { AIProvider, UserProfile, AISettings } from '../types';
 import { db } from '../db';
 import { saveAs } from 'file-saver';
 import { Button } from './Button';
-import { DocumentArrowDownIcon, UploadIcon } from './Icons';
+import { DocumentArrowDownIcon, UploadIcon, RefreshIcon } from './Icons';
+import { performManualSync } from '../services/syncService';
+
 
 const AdminSettings: React.FC<{}> = () => {
     const [isExporting, setIsExporting] = React.useState(false);
     const [isImporting, setIsImporting] = React.useState(false);
+    const [isSyncing, setIsSyncing] = React.useState(false);
+    const [syncStatus, setSyncStatus] = React.useState('');
     const fileInputRef = React.useRef<HTMLInputElement>(null);
     
     const handleExportDatabase = async () => {
@@ -27,6 +31,39 @@ const AdminSettings: React.FC<{}> = () => {
             alert("Could not export the database. Check the console for more details.");
         } finally {
             setIsExporting(false);
+        }
+    };
+
+    const handleForceSync = async () => {
+        setIsSyncing(true);
+        setSyncStatus('Testing server connection...');
+
+        try {
+            // 1. Test server and database connection
+            const healthResponse = await fetch('/api/health');
+            const healthData = await healthResponse.json();
+
+            if (!healthResponse.ok) {
+                throw new Error(healthData.message || 'Health check failed.');
+            }
+
+            setSyncStatus(`Connection successful. ${healthData.message} Starting sync...`);
+
+            // 2. Perform the manual sync
+            const syncResult = await performManualSync();
+
+            if (syncResult.success) {
+                setSyncStatus(`Sync successful! ${syncResult.message}`);
+            } else {
+                throw new Error(syncResult.message);
+            }
+
+        } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred.';
+            console.error("Force sync failed:", errorMessage);
+            setSyncStatus(`Error: ${errorMessage}`);
+        } finally {
+            setIsSyncing(false);
         }
     };
 
@@ -80,7 +117,16 @@ const AdminSettings: React.FC<{}> = () => {
                     <UploadIcon className="h-5 w-5 mr-2" />
                     Import Database (JSON)
                 </Button>
+                <Button onClick={handleForceSync} isLoading={isSyncing} variant="secondary">
+                    <RefreshIcon className="h-5 w-5 mr-2" />
+                    Test Connection & Force Sync
+                </Button>
             </div>
+            {syncStatus && (
+                <p className={`text-sm mt-3 p-2 rounded-md ${syncStatus.includes('success') ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                    {syncStatus}
+                </p>
+            )}
             <input
                 type="file"
                 ref={fileInputRef}

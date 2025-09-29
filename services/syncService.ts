@@ -60,6 +60,52 @@ export const gatherDirtyData = async (): Promise<SyncPayload | null> => {
     return hasDirtyData ? payload : null;
 };
 
+/**
+ * Gathers all records from the local database, regardless of sync status.
+ * This is used for a manual "force sync".
+ * @returns A SyncPayload object containing all records, or null if there's nothing to sync.
+ */
+export const gatherAllData = async (): Promise<SyncPayload | null> => {
+    const payload: SyncPayload = {
+        savedTests: [],
+        lessonPlans: [],
+        presentations: [],
+        slides: [],
+        imagePlaceholders: [],
+        savedHomework: [],
+        savedExams: [],
+        savedParsedExams: [],
+        savedManualExams: [],
+        trainingData: []
+    };
+
+    let hasData = false;
+
+    // Use a single transaction to read all data from the local DB.
+    await db.transaction('r', db.tables, async () => {
+        payload.savedTests = await db.savedTests.toArray();
+        payload.lessonPlans = await db.lessonPlans.toArray();
+        payload.presentations = await db.presentations.toArray();
+        payload.slides = await db.slides.toArray();
+        payload.imagePlaceholders = await db.imagePlaceholders.toArray();
+        payload.savedHomework = await db.savedHomework.toArray();
+        payload.savedExams = await db.savedExams.toArray();
+        payload.savedParsedExams = await db.savedParsedExams.toArray();
+        payload.savedManualExams = await db.savedManualExams.toArray();
+        payload.trainingData = await db.trainingData.toArray();
+    });
+
+    // Check if any of the arrays have data.
+    for (const key in payload) {
+        if (payload[key as keyof SyncPayload].length > 0) {
+            hasData = true;
+            break;
+        }
+    }
+
+    return hasData ? payload : null;
+};
+
 // The time between sync attempts, in milliseconds. 5 minutes.
 const SYNC_INTERVAL = 5 * 60 * 1000;
 
@@ -111,6 +157,43 @@ const performSync = async () => {
 
     } catch (error) {
         console.error("Sync Service: Failed to send data to the server.", error);
+    }
+};
+
+/**
+ * Performs a manual sync. It gathers all data and sends it to the server.
+ * This is intended to be triggered by a user action.
+ */
+export const performManualSync = async () => {
+    console.log("Manual Sync: Checking for all data to sync with the server...");
+    const allData = await gatherAllData();
+
+    if (!allData) {
+        console.log("Manual Sync: No data to sync.");
+        return { success: true, message: 'No data to sync.' };
+    }
+
+    console.log("Manual Sync: Found data. Preparing to send to server...", allData);
+
+    try {
+        const response = await fetch('/api/sync', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(allData)
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({ message: 'Could not parse error response.' }));
+            throw new Error(`Server responded with status: ${response.status}. ${errorData.message}`);
+        }
+
+        await markDataAsSynced(allData);
+        console.log("Manual Sync: Data successfully sent to the server and local records updated.");
+        return { success: true, message: 'Data successfully synced with the server.' };
+
+    } catch (error) {
+        console.error("Manual Sync: Failed to send data to the server.", error);
+        return { success: false, message: `Failed to sync data: ${error instanceof Error ? error.message : 'Unknown error'}` };
     }
 };
 
