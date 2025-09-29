@@ -28,6 +28,21 @@ app.get('/', (req, res) => {
   res.send('Server is running!');
 });
 
+import pool from './db';
+
+// Health check endpoint
+app.get('/api/health', async (req, res) => {
+  try {
+    const client = await pool.connect();
+    await client.query('SELECT NOW()'); // A simple query to check the connection
+    client.release();
+    res.status(200).send({ status: 'ok', message: 'Server is running and database is connected.' });
+  } catch (error) {
+    console.error('Health check failed:', error);
+    res.status(500).send({ status: 'error', message: 'Could not connect to the database.' });
+  }
+});
+
 // API Routes
 app.use('/api/tests', testsRouter);
 app.use('/api/presentations', presentationsRouter);
