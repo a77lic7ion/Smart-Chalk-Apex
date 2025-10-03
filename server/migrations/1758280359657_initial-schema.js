@@ -14,7 +14,7 @@ exports.up = pgm => {
   // Training Data table
   pgm.createTable('training_data', {
     id: 'id',
-    source_id: { type: 'varchar(255)' },
+    source_id: { type: 'varchar(255)', unique: true },
     user_id: { type: 'integer', references: '"users" (id)', onDelete: 'CASCADE' },
     curriculum: { type: 'text' },
     standard: { type: 'text' },

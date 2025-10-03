@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import pool from '../db';
+import { authMiddleware, AuthenticatedRequest } from '../middleware/auth';
 
 // Define SyncPayload interface locally since it's not in the shared types
 interface SyncPayload {
@@ -16,6 +17,8 @@ interface SyncPayload {
 }
 
 const router = Router();
+
+const ADMIN_EMAIL = 'Admin@smartchalk.co.za';
 
 // Helper function to get or create user ID from email
 const getUserId = async (client: any, email: string): Promise<number> => {
@@ -88,91 +91,114 @@ const upsert = async (client: any, tableName: string, data: any[], columns: stri
 };
 
 
-router.post('/', async (req, res) => {
+router.post('/', authMiddleware, async (req: AuthenticatedRequest, res) => {
     const payload: SyncPayload = req.body;
+    const authenticatedUserId = req.user!.id;
+    const authenticatedUserEmail = req.user!.email;
+
+    // Validate payload structure
+    if (!payload || typeof payload !== 'object') {
+        return res.status(400).send({ message: 'Invalid payload structure' });
+    }
+    
+    // Ensure all required arrays exist, even if empty
+    const safePayload = {
+        savedTests: payload.savedTests || [],
+        lessonPlans: payload.lessonPlans || [],
+        presentations: payload.presentations || [],
+        slides: payload.slides || [],
+        imagePlaceholders: payload.imagePlaceholders || [],
+        savedHomework: payload.savedHomework || [],
+        savedExams: payload.savedExams || [],
+        savedParsedExams: payload.savedParsedExams || [],
+        savedManualExams: payload.savedManualExams || [],
+        trainingData: payload.trainingData || []
+    };
+    
     const client = await pool.connect();
 
     try {
         await client.query('BEGIN');
 
+        const is_admin = authenticatedUserEmail === ADMIN_EMAIL;
+
         // Process each data type with proper user ID conversion
-        for (const test of payload.savedTests) {
-            if (test.userId) {
+        for (const test of safePayload.savedTests) {
+            if (is_admin && test.userId) {
                 test.user_id = await getUserId(client, test.userId);
+            } else {
+                test.user_id = authenticatedUserId;
             }
         }
-        await upsert(client, 'saved_tests', payload.savedTests, ['id', 'user_id', 'name', 'content', 'created_at']);
+        await upsert(client, 'saved_tests', safePayload.savedTests, ['id', 'user_id', 'name', 'content', 'created_at']);
 
-        for (const plan of payload.lessonPlans) {
-            if (plan.userId) {
+        for (const plan of safePayload.lessonPlans) {
+            if (is_admin && plan.userId) {
                 plan.user_id = await getUserId(client, plan.userId);
+            } else {
+                plan.user_id = authenticatedUserId;
             }
         }
-        await upsert(client, 'lesson_plans', payload.lessonPlans, ['id', 'user_id', 'name', 'content', 'created_at']);
+        await upsert(client, 'lesson_plans', safePayload.lessonPlans, ['id', 'user_id', 'name', 'content', 'created_at']);
 
-        for (const presentation of payload.presentations) {
-            if (presentation.userId) {
+        for (const presentation of safePayload.presentations) {
+            if (is_admin && presentation.userId) {
                 presentation.user_id = await getUserId(client, presentation.userId);
+            } else {
+                presentation.user_id = authenticatedUserId;
             }
         }
-        await upsert(client, 'presentations', payload.presentations, ['id', 'user_id', 'name', 'created_at']);
+        await upsert(client, 'presentations', safePayload.presentations, ['id', 'user_id', 'name', 'created_at']);
 
-        await upsert(client, 'slides', payload.slides, ['id', 'presentation_id', 'content']);
-        await upsert(client, 'image_placeholders', payload.imagePlaceholders, ['id', 'presentation_id', 'query']);
+        await upsert(client, 'slides', safePayload.slides, ['id', 'presentation_id', 'content']);
+        await upsert(client, 'image_placeholders', safePayload.imagePlaceholders, ['id', 'presentation_id', 'query']);
 
         // Handle the generic 'saved_content' table
         const savedContent = [
-            ...payload.savedHomework.map(item => ({ ...item, type: 'homework' })),
-            ...payload.savedExams.map(item => ({ ...item, type: 'exam' })),
-            ...payload.savedParsedExams.map(item => ({ ...item, type: 'parsed_exam' })),
-            ...payload.savedManualExams.map(item => ({ ...item, type: 'manual_exam' })),
+            ...safePayload.savedHomework.map(item => ({ ...item, type: 'homework' })),
+            ...safePayload.savedExams.map(item => ({ ...item, type: 'exam' })),
+            ...safePayload.savedParsedExams.map(item => ({ ...item, type: 'parsed_exam' })),
+            ...safePayload.savedManualExams.map(item => ({ ...item, type: 'manual_exam' })),
         ];
         
         for (const content of savedContent) {
-            if (content.userId) {
+            if (is_admin && content.userId) {
                 content.user_id = await getUserId(client, content.userId);
+            } else {
+                content.user_id = authenticatedUserId;
             }
         }
         await upsert(client, 'saved_content', savedContent, ['id', 'user_id', 'name', 'type', 'content', 'created_at']);
 
-        // Handle training_data separately with proper field mapping
-        for (const record of payload.trainingData) {
-            let userId = null;
-            if (record.userId) {
-                userId = await getUserId(client, record.userId);
-            }
-            
-            // Map frontend fields to database fields
-            const { sourceId, content, curriculum, standard, grade, subject } = record;
-            
-            // Handle content field - ensure it's properly formatted for JSONB
-            let contentValue;
-            if (typeof content === 'string') {
-                // If content is already a string, wrap it in a JSON object
-                contentValue = JSON.stringify({ text: content });
-            } else if (typeof content === 'object' && content !== null) {
-                // If content is an object, stringify it
-                contentValue = JSON.stringify(content);
+        // Handle training_data with proper field mapping for the actual table structure
+        for (const record of safePayload.trainingData) {
+            if (is_admin && record.userId) {
+                record.user_id = await getUserId(client, record.userId);
             } else {
-                // For other types, convert to string and wrap in object
-                contentValue = JSON.stringify({ text: String(content || '') });
+                record.user_id = authenticatedUserId;
             }
-            
-            await client.query(
-                `INSERT INTO training_data (source_id, user_id, curriculum, standard, grade, subject, content) 
-                 VALUES ($1, $2, $3, $4, $5, $6, $7)
-                 ON CONFLICT (source_id) DO UPDATE SET 
-                    user_id = $2, curriculum = $3, standard = $4, grade = $5, subject = $6, content = $7`,
-                [sourceId, userId, curriculum, standard, grade, subject, contentValue]
-            );
         }
+        await upsert(client, 'training_data', safePayload.trainingData, ['id', 'source_id', 'user_id', 'curriculum', 'standard', 'grade', 'subject', 'content', 'created_at']);
 
         await client.query('COMMIT');
         res.status(200).send({ message: 'Sync successful' });
     } catch (error) {
         await client.query('ROLLBACK');
-        console.error('Error during sync:', error);
-        res.status(500).send({ message: 'Sync failed', error });
+        console.error('Sync error:', error);
+        
+        // Type guard for error handling
+        const errorObj = error as any;
+        console.error('Error message:', errorObj?.message);
+        console.error('Error stack:', errorObj?.stack);
+        
+        res.status(500).json({
+            message: 'Sync failed',
+            error: {
+                message: errorObj?.message || 'Unknown error',
+                stack: errorObj?.stack || 'No stack trace',
+                details: errorObj?.detail || errorObj?.hint || 'No additional details'
+            }
+        });
     } finally {
         client.release();
     }

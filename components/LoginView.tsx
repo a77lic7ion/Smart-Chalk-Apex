@@ -192,3 +192,13 @@ export const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess }) => {
         </div>
     );
 };
+
+
+    const handleLogin = async (response: any) => {
+        console.log('Login successful:', response);
+        const token = response.credential;
+        console.log('Google Token:', token);
+        localStorage.setItem('google_token', token);
+
+        // Fetch user profile
+    };

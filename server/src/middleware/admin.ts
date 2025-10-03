@@ -1,7 +1,7 @@
 import { Response, NextFunction } from 'express';
 import { AuthenticatedRequest } from './auth';
 
-const ADMIN_EMAIL = 'shaunwg@outlook.com';
+const ADMIN_EMAIL = 'Admin@smartchalk.co.za';
 
 export const adminMiddleware = (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   if (req.user?.email !== ADMIN_EMAIL) {

@@ -21,8 +21,12 @@ import { startSyncService } from './src/services/syncService';
 export type AppView = 'dashboard' | 'manualExamBuilder' | 'testGenerator' | 'slidesGenerator' | 'lessonGenerator' | 'exam' | 'homeworkGenerator' | 'myContent' | 'settings';
 
 const App: React.FC = () => {
-  const [user, setUser] = useState<UserProfile | null>(null);
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [user, setUser] = useState<UserProfile | null>({
+    email: 'Admin@smartchalk.co.za',
+    name: 'Admin User',
+    id: '12345'
+  });
+  const [isAdmin, setIsAdmin] = useState(true);
   const [view, setView] = useState<AppView>('dashboard');
   const [contentToLoad, setContentToLoad] = useState<{type: ContentType, id: string} | null>(null);
 
@@ -69,6 +73,13 @@ const App: React.FC = () => {
     setView('homeworkGenerator');
     setContentToLoad({ type, id });
   }
+
+  useEffect(() => {
+    const token = 'mock-token';
+    console.log('Google Token:', token);
+    localStorage.setItem('google_token', token);
+    startSyncService();
+  }, []);
 
   if (!user) {
     return <LoginView onLoginSuccess={handleLoginSuccess} />;

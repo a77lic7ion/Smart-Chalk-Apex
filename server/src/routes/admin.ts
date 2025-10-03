@@ -17,7 +17,14 @@ router.get('/content', [authMiddleware, adminMiddleware], async (req: Authentica
   }
 });
 
-// In a real application, we would add endpoints for all other data types as well.
-// For this task, I will focus on the 'saved_content' as a proof of concept.
+router.get('/db-test', [authMiddleware, adminMiddleware], async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    await pool.query('SELECT NOW()');
+    res.status(200).json({ message: 'Database connection successful' });
+  } catch (error) {
+    console.error('Database connection error:', error);
+    res.status(500).json({ message: 'Database connection failed' });
+  }
+});
 
 export default router;
