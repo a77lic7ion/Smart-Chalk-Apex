@@ -1,8 +1,13 @@
 // server/src/services/dataGenerationService.ts
 
 import { Pool } from 'pg';
-import { generateContentWithOpenAI } from '../../../services/openai';
 import crypto from 'crypto';
+
+// Use a dynamic import for the ES Module
+const getOpenAIService = async () => {
+  const { generateContentWithOpenAI } = await import('../../../services/openai');
+  return generateContentWithOpenAI;
+};
 
 // This function assumes the pool is created and managed elsewhere (e.g., in server/src/db.ts)
 // and passed to the functions that need it.
@@ -20,6 +25,7 @@ export async function discoverTopics(grade: string, subject: string, curriculum:
   const userPrompt = `Please provide a list of the key topics for the subject "${subject}" at the "${grade}" level for the "${curriculum}" curriculum for the current academic year. The response should be a JSON object with a single key "topics" which is an array of strings. For example: {"topics": ["Algebraic Expressions", "Geometry of Straight Lines", "Probability"]}.`;
 
   try {
+    const generateContentWithOpenAI = await getOpenAIService();
     const rawJson = await generateContentWithOpenAI(systemInstruction, userPrompt, apiKey, 0.3);
     const parsed = JSON.parse(rawJson);
     if (!parsed.topics || !Array.isArray(parsed.topics)) {
@@ -120,6 +126,7 @@ export async function generateQuestionBatch(
   `;
 
   try {
+    const generateContentWithOpenAI = await getOpenAIService();
     const rawJson = await generateContentWithOpenAI(systemInstruction, userPrompt, apiKey, 0.7);
     const parsed = JSON.parse(rawJson);
     if (!parsed.generated_questions || !Array.isArray(parsed.generated_questions)) {

@@ -6,7 +6,7 @@
   "scripts": {
     "build": "tsc",
     "start": "npm run migrate:up && node dist/index.js",
-    "dev": "nodemon src/index.ts",
+    "dev": "nodemon",
     "test": "echo \"Error: no test specified\" && exit 1",
     "migrate": "node-pg-migrate",
     "migrate:up": "node-pg-migrate up",
