@@ -35,7 +35,7 @@ const ShortcutCard: React.FC<{
 export const DashboardView: React.FC<DashboardProps> = ({ user, setView, isAdmin }) => {
     // If the user is an admin, show the project blueprint view.
     if (isAdmin) {
-        return <ProjectBlueprintView />;
+        return <ProjectBlueprintView setView={setView} />;
     }
 
     // Otherwise, show the new modern dashboard for regular users.

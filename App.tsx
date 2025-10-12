@@ -16,9 +16,10 @@ import { HomeworkGenerator } from './components/HomeworkGenerator';
 import { Footer } from './components/Footer';
 import { ManualExamBuilderView } from './components/ManualExamBuilderView';
 import { startSyncService } from './src/services/syncService';
+import { AdminDataCurationView } from './components/AdminDataCurationView';
 
 
-export type AppView = 'dashboard' | 'manualExamBuilder' | 'testGenerator' | 'slidesGenerator' | 'lessonGenerator' | 'exam' | 'homeworkGenerator' | 'myContent' | 'settings';
+export type AppView = 'dashboard' | 'manualExamBuilder' | 'testGenerator' | 'slidesGenerator' | 'lessonGenerator' | 'exam' | 'homeworkGenerator' | 'myContent' | 'settings' | 'adminDataCuration';
 
 const App: React.FC = () => {
   const [user, setUser] = useState<UserProfile | null>({
@@ -89,6 +90,8 @@ const App: React.FC = () => {
     switch(view) {
         case 'dashboard':
             return <DashboardView user={user} setView={setView} isAdmin={isAdmin} />;
+        case 'adminDataCuration':
+            return isAdmin ? <AdminDataCurationView /> : null;
         case 'manualExamBuilder':
             return isAdmin ? <ManualExamBuilderView user={user} loadId={contentToLoad?.id ?? null} loadType={contentToLoad?.type ?? null} onDidLoad={() => setContentToLoad(null)} /> : null;
         case 'testGenerator':
