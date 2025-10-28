@@ -2,7 +2,7 @@
 // It's safe to expose this in the client-side code.
 
 // The Client ID for Google OAuth, provided by the user to enable sign-in.
-export const GOOGLE_CLIENT_ID = "655270567240-4q4v33n9qqs9r3q6v848j8nbam2ak8r8.apps.googleusercontent.com";
+export const GOOGLE_CLIENT_ID = "837793169445-o4tq3tvbci7q2outrp56rrpr6bn4oeiv.apps.googleusercontent.com";
 
 // List of admin user emails. Case is ignored during checks.
 export const ADMIN_EMAILS = [
