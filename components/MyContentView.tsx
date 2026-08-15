@@ -1,6 +1,6 @@
 
 import React, { useState, useRef, useEffect } from 'react';
-import Dexie from 'dexie';
+import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../db';
 import type { SavedTest, Presentation, LessonPlan, UserProfile, SavedExam, SavedHomework, ContentType, SavedParsedExam, ManualExam } from '../types';
 import { PresentationChartLineIcon, BookOpenIcon, FolderOpenIcon, TrashIcon, DocumentArrowDownIcon, ExamIcon, ClipboardDocumentCheckIcon, HomeworkIcon, DocumentMagnifyingGlassIcon, PencilSquareIcon } from './Icons';
@@ -220,52 +220,37 @@ interface MyContentViewProps {
 export const MyContentView: React.FC<MyContentViewProps> = ({ user, isAdmin, onContentLoad, onFormatExam, onCreateHomework }) => {
     const [exportingId, setExportingId] = useState<string | null>(null);
     const [exportError, setExportError] = useState<string | null>(null);
-    const [allContent, setAllContent] = useState<AllContent | undefined>(undefined);
+    const allContent = useLiveQuery<AllContent | undefined>(async () => {
+        if (!user?.sub) return undefined;
 
-    useEffect(() => {
-        if (!user || !user.sub) {
-            return;
-        }
-
-        const fetchContent = async () => {
-            const isAdminView = isAdmin && ADMIN_EMAILS.includes(user.email.toLowerCase());
-            
-            const fetchQuery = (table: Dexie.Table<any, any>) => {
-                return isAdminView 
-                    ? table.reverse().sortBy('createdAt') 
-                    : table.where({ userId: user.sub }).reverse().sortBy('createdAt');
-            };
-    
-            const [
-                tests, exams, presentations, lessons, homework, parsedExams, manualExams
-            ] = await db.transaction('r', db.tables, () => Promise.all([
-                fetchQuery(db.savedTests),
-                fetchQuery(db.savedExams),
-                fetchQuery(db.presentations),
-                fetchQuery(db.lessonPlans),
-                fetchQuery(db.savedHomework),
-                fetchQuery(db.savedParsedExams),
-                fetchQuery(db.savedManualExams),
-            ]));
-    
-            setAllContent({ 
-                savedTests: tests, 
-                savedExams: exams, 
-                savedPresentations: presentations, 
-                savedLessons: lessons, 
-                savedHomework: homework, 
-                savedParsedExams: parsedExams, 
-                savedManualExams: manualExams 
-            });
+        const isAdminView = isAdmin && ADMIN_EMAILS.includes(user.email.toLowerCase());
+        const fetchQuery = async (table: any) => {
+            const records = isAdminView
+                ? await table.toArray()
+                : await table.where('userId').equals(user.sub).toArray();
+            return records.sort((a: { createdAt: number }, b: { createdAt: number }) => b.createdAt - a.createdAt);
         };
 
-        Dexie.on('storagemutated', fetchContent);
-        fetchContent(); // Initial fetch
+        const [savedTests, savedExams, savedPresentations, savedLessons, savedHomework, savedParsedExams, savedManualExams] = await Promise.all([
+            fetchQuery(db.savedTests),
+            fetchQuery(db.savedExams),
+            fetchQuery(db.presentations),
+            fetchQuery(db.lessonPlans),
+            fetchQuery(db.savedHomework),
+            fetchQuery(db.savedParsedExams),
+            fetchQuery(db.savedManualExams),
+        ]);
 
-        return () => {
-            Dexie.on('storagemutated').unsubscribe(fetchContent);
+        return {
+            savedTests,
+            savedExams,
+            savedPresentations,
+            savedLessons,
+            savedHomework,
+            savedParsedExams,
+            savedManualExams,
         };
-    }, [user.sub, isAdmin]);
+    }, [user?.sub, user?.email, isAdmin]);
 
     const isLoading = allContent === undefined;
     
