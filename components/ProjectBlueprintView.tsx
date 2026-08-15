@@ -41,15 +41,12 @@ export const ProjectBlueprintView: React.FC<{ setView: (view: AppView) => void }
                     <p className="text-lg text-slate-600 mt-2 max-w-3xl mx-auto">An overview of the project's architecture, features, and technology stack.</p>
                 </div>
 
-                <Section title="Admin Tools">
+                <Section title="Static Mode">
                     <div className="bg-white p-6 rounded-lg border border-slate-200 shadow-sm">
-                        <h3 className="text-xl font-semibold text-brand-navy mb-3">Data Curation</h3>
-                        <p className="text-slate-600 mb-4">
-                            Use the data curation tool to generate new fine-tuning data, review it, and save it to the database.
+                        <h3 className="text-xl font-semibold text-brand-navy mb-3">Browser-local workspace</h3>
+                        <p className="text-slate-600">
+                            This standalone version keeps saved content in your browser and does not require a server database. Export your local workspace from Settings to create a portable backup.
                         </p>
-                        <Button onClick={() => setView('adminDataCuration')} variant="primary">
-                            Go to Data Curation Tool &rarr;
-                        </Button>
                     </div>
                 </Section>
 

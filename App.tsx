@@ -1,5 +1,5 @@
 
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState } from 'react';
 import { db } from './db';
 import { Header } from './components/Header';
 import { TestGenerator } from './components/TestGenerator';
@@ -15,11 +15,9 @@ import { ADMIN_EMAILS } from './config';
 import { HomeworkGenerator } from './components/HomeworkGenerator';
 import { Footer } from './components/Footer';
 import { ManualExamBuilderView } from './components/ManualExamBuilderView';
-import { startSyncService } from './src/services/syncService';
-import { AdminDataCurationView } from './components/AdminDataCurationView';
 
 
-export type AppView = 'dashboard' | 'manualExamBuilder' | 'testGenerator' | 'slidesGenerator' | 'lessonGenerator' | 'exam' | 'homeworkGenerator' | 'myContent' | 'settings' | 'adminDataCuration';
+export type AppView = 'dashboard' | 'manualExamBuilder' | 'testGenerator' | 'slidesGenerator' | 'lessonGenerator' | 'exam' | 'homeworkGenerator' | 'myContent' | 'settings';
 
 const App: React.FC = () => {
   const [user, setUser] = useState<UserProfile | null>({
@@ -39,7 +37,7 @@ const App: React.FC = () => {
     setUser(profile);
     setIsAdmin(userIsAdmin);
     setView('dashboard');
-    startSyncService();
+
   };
   
   const handleLogout = () => {
@@ -75,12 +73,6 @@ const App: React.FC = () => {
     setContentToLoad({ type, id });
   }
 
-  useEffect(() => {
-    const token = 'mock-token';
-    console.log('Google Token:', token);
-    localStorage.setItem('google_token', token);
-    startSyncService();
-  }, []);
 
   if (!user) {
     return <LoginView onLoginSuccess={handleLoginSuccess} />;
@@ -90,8 +82,6 @@ const App: React.FC = () => {
     switch(view) {
         case 'dashboard':
             return <DashboardView user={user} setView={setView} isAdmin={isAdmin} />;
-        case 'adminDataCuration':
-            return isAdmin ? <AdminDataCurationView /> : null;
         case 'manualExamBuilder':
             return isAdmin ? <ManualExamBuilderView user={user} loadId={contentToLoad?.id ?? null} loadType={contentToLoad?.type ?? null} onDidLoad={() => setContentToLoad(null)} /> : null;
         case 'testGenerator':
