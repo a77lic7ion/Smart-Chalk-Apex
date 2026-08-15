@@ -143,7 +143,7 @@ const ContentSlide: React.FC<{ slide: Slide, onUpdate: (updatedSlide: Slide) => 
                 {/* Left Column (Image) */}
                  <div className="w-1/3 flex-shrink-0 flex flex-col gap-2">
                     <div 
-                        className="flex-grow bg-slate-50 rounded-lg border-2 border-dashed border-slate-300 flex items-center justify-center text-center p-4 relative cursor-pointer hover:border-brand-yellow transition-colors focus:outline-none focus:ring-2 focus:ring-brand-yellow"
+                        className="flex-grow rounded-xl border-2 border-dashed border-slate-300 bg-brand-paper p-4 relative flex items-center justify-center text-center cursor-pointer transition-colors hover:border-brand-yellow focus:outline-none focus:ring-2 focus:ring-brand-yellow"
                         onClick={() => !isProcessing && fileInputRef.current?.click()}
                         onPaste={handlePaste}
                         tabIndex={0}
@@ -160,7 +160,7 @@ const ContentSlide: React.FC<{ slide: Slide, onUpdate: (updatedSlide: Slide) => 
                             </div>
                         )}
                          <input type="file" ref={fileInputRef} onChange={handleImageFileChange} className="hidden" accept="image/*" />
-                         {imageError && <p className="absolute bottom-2 left-2 right-2 text-xs text-red-600 bg-red-100 p-1 rounded">{imageError}</p>}
+                         {imageError && <p role="alert" className="absolute bottom-2 left-2 right-2 rounded-lg border border-slate-300 bg-white p-2 text-xs font-semibold text-brand-black">{imageError}</p>}
                     </div>
                      <div className="flex flex-wrap gap-2">
                         <Button onClick={() => fileInputRef.current?.click()} variant="secondary" size="sm" disabled={isProcessing} >

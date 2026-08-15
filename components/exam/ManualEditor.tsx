@@ -32,7 +32,7 @@ const EditableSubQuestion: React.FC<{
     };
 
     return (
-        <div className="ml-6 pl-4 border-l-2 border-slate-200 py-2 space-y-2">
+        <div className="ml-6 space-y-2 border-l-2 border-slate-300 py-2 pl-4">
             <div className="flex items-start gap-2">
                 <input
                     type="text"
@@ -57,12 +57,12 @@ const EditableSubQuestion: React.FC<{
                     className="p-1 border-b-2 border-transparent focus:border-brand-yellow outline-none w-20 text-right text-sm"
                 />
                 <Button onClick={() => onDelete(question.id)} variant="ghost" size="sm" className="ml-auto flex-shrink-0">
-                    <TrashIcon className="h-4 w-4 text-slate-500 hover:text-red-600" />
+                    <TrashIcon className="h-4 w-4 text-brand-black" />
                 </Button>
             </div>
             {question.imageData && (
                 <div className="ml-8 pl-1">
-                     <img src={question.imageData} alt="Pasted content" className="max-w-xs max-h-48 rounded-md border p-1 bg-slate-50" />
+                     <img src={question.imageData} alt="Pasted content" className="max-h-48 max-w-xs rounded-lg border border-slate-300 bg-white p-1" />
                 </div>
             )}
         </div>
@@ -78,8 +78,8 @@ const EditableQuestionGroup: React.FC<{
     onSubQuestionDelete: (id: string) => void;
 }> = ({ group, onUpdate, onDelete, onSubQuestionUpdate, onSubQuestionAdd, onSubQuestionDelete }) => {
     return (
-        <div className="p-3 bg-white rounded-lg border border-slate-300 shadow-sm">
-            <div className="flex items-center gap-2 mb-2 p-2 bg-slate-100 rounded-t-md">
+        <div className="rounded-xl border border-slate-300 bg-white p-3 shadow-sm">
+            <div className="flex items-center gap-2 mb-2 rounded-lg border border-slate-200 bg-white p-2">
                 <input
                     type="text"
                     value={group.questionNumber}
@@ -88,7 +88,7 @@ const EditableQuestionGroup: React.FC<{
                     className="text-md font-bold text-brand-black bg-transparent outline-none focus:border-b-2 focus:border-brand-yellow flex-grow"
                 />
                 <Button onClick={() => onDelete(group.id)} variant="ghost" size="sm" className="ml-auto">
-                    <TrashIcon className="h-4 w-4 text-red-500"/>
+                    <TrashIcon className="h-4 w-4 text-brand-black"/>
                 </Button>
             </div>
             <div className="space-y-3 p-2">
@@ -96,14 +96,14 @@ const EditableQuestionGroup: React.FC<{
                     value={group.mainQuestionText}
                     onChange={(e) => onUpdate(group.id, { mainQuestionText: e.target.value })}
                     placeholder="Enter main question text or instructions here..."
-                    className="w-full p-2 border border-slate-200 rounded-lg text-sm"
+                    className="w-full rounded-xl border border-slate-300 bg-white p-3 text-sm text-brand-charcoal shadow-none outline-none focus:border-brand-yellow focus:ring-2 focus:ring-brand-yellow/40"
                     rows={2}
                 />
                 <textarea
                     value={group.notes}
                     onChange={(e) => onUpdate(group.id, { notes: e.target.value })}
                     placeholder="Private notes (will not be exported)..."
-                    className="w-full p-2 border border-slate-200 rounded-lg text-xs italic"
+                    className="w-full rounded-xl border border-slate-300 bg-white p-3 text-xs italic text-brand-charcoal shadow-none outline-none focus:border-brand-yellow focus:ring-2 focus:ring-brand-yellow/40"
                     rows={1}
                 />
                 <div className="space-y-2">
@@ -116,7 +116,7 @@ const EditableQuestionGroup: React.FC<{
                         />
                     ))}
                 </div>
-                 <Button onClick={onSubQuestionAdd} variant="ghost" size="sm" className="mt-2 text-slate-600 border border-dashed">
+                 <Button onClick={onSubQuestionAdd} variant="ghost" size="sm" className="mt-2 border border-dashed border-slate-300 text-brand-black">
                     <PlusIcon className="h-4 w-4 mr-2" />
                     Add Sub-question
                 </Button>
@@ -241,13 +241,13 @@ export const ManualEditor: React.FC<{ user: UserProfile, initialData?: ManualExa
     };
 
     return (
-        <div className="bg-white border border-slate-300 rounded-xl h-[85vh] flex flex-col">
-            <div className="p-4 border-b border-slate-200 flex-shrink-0 flex justify-between items-center">
+        <div className="bg-white border border-slate-200 rounded-2xl h-[85vh] flex flex-col shadow-sm">
+            <div className="p-4 border-b border-slate-200 flex-shrink-0 flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center">
                 <input
                     type="text"
                     value={exam.name}
                     onChange={(e) => updateExamName(e.target.value)}
-                    className="text-lg font-semibold text-brand-black outline-none focus:border-b-2 focus:border-brand-yellow"
+                    className="min-w-0 flex-1 rounded-lg border border-transparent bg-transparent px-2 py-1 text-lg font-semibold text-brand-black outline-none focus:border-brand-yellow focus:ring-2 focus:ring-brand-yellow/40"
                 />
                 <div className="flex gap-2">
                     <Button onClick={handleExport} variant="secondary">Export PDF</Button>
@@ -258,7 +258,7 @@ export const ManualEditor: React.FC<{ user: UserProfile, initialData?: ManualExa
             <div className="flex-grow overflow-y-auto p-4 space-y-4">
                 <TipBox />
                 {exam.sections.map(section => (
-                    <div key={section.id} className="p-4 bg-slate-50/80 rounded-lg border border-slate-200">
+                    <div key={section.id} className="rounded-xl border border-slate-200 bg-brand-paper p-4">
                         <div className="flex items-center gap-2 mb-2">
                              <input
                                 type="text"
@@ -267,7 +267,7 @@ export const ManualEditor: React.FC<{ user: UserProfile, initialData?: ManualExa
                                 className="text-md font-bold text-brand-black bg-transparent outline-none focus:border-b-2 focus:border-brand-yellow flex-grow"
                             />
                             <Button onClick={() => deleteSection(section.id)} variant="ghost" size="sm" className="ml-auto">
-                                <TrashIcon className="h-4 w-4 text-red-500"/>
+                                <TrashIcon className="h-4 w-4 text-brand-black"/>
                             </Button>
                         </div>
                         <div className="space-y-4">
@@ -290,7 +290,7 @@ export const ManualEditor: React.FC<{ user: UserProfile, initialData?: ManualExa
                     </div>
                 ))}
 
-                <Button onClick={addSection} variant="ghost" className="w-full border-2 border-dashed border-slate-300 text-slate-600">
+                <Button onClick={addSection} variant="ghost" className="w-full border-2 border-dashed border-slate-300 text-brand-black">
                     <PlusIcon className="h-5 w-5 mr-2" />
                     Add Section
                 </Button>

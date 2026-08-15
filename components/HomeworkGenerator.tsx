@@ -107,7 +107,7 @@ const AddCustomQuestionModal: React.FC<{
                     <h2 className="text-lg font-semibold text-brand-black">Add Custom Question</h2>
                  </div>
                  <div className="p-6 space-y-4 overflow-y-auto">
-                     {error && <p className="text-sm text-red-600">{error}</p>}
+                     {error && <p role="alert" className="rounded-lg border border-slate-300 bg-brand-paper p-3 text-sm font-semibold text-brand-black">{error}</p>}
                      <TextArea label="Question" value={question} onChange={(e) => setQuestion(e.target.value)} rows={3} />
                      <TextArea label="Answer / Memo" value={answer} onChange={(e) => setAnswer(e.target.value)} rows={4} />
                      <div>
@@ -394,30 +394,33 @@ export const HomeworkGenerator: React.FC<{ user: UserProfile, loadId: string | n
     } : null;
 
     return (
-        <main className="p-4 md:p-8 max-w-4xl mx-auto">
-            <div className="bg-white p-6 rounded-xl shadow-md border border-slate-200">
-                {error && (
-                    <div className="mb-4 bg-red-50 border-l-4 border-red-400 p-4 rounded-r-lg shadow-md">
-                        <p className="text-sm text-red-700">{error}</p>
-                    </div>
-                )}
-                 {successMessage && !isSaving && (
-                    <div className="mb-4 bg-emerald-50 border-l-4 border-emerald-400 p-4 rounded-r-lg shadow-md">
-                        <p className="text-sm text-emerald-700">{successMessage}</p>
-                    </div>
-                )}
-                
-                {stagedQuestions === null ? (
-                    <form onSubmit={handleFormSubmit} className="space-y-6">
-                        <div>
-                            <h2 className="text-xl font-bold text-brand-black mb-2">Homework Generator</h2>
-                            <p className="text-slate-600">Generate a new homework sheet from scratch or based on existing content.</p>
+        <main className="min-h-full bg-brand-paper">
+            <div className="mx-auto w-full max-w-5xl px-5 py-8 sm:px-8 lg:px-12 lg:py-12">
+                <section className="mb-8 border-b border-slate-200 pb-8">
+                    <p className="mb-3 text-xs font-bold uppercase tracking-[0.18em] text-brand-yellow">SmartChalk generator</p>
+                    <h1 className="text-3xl font-black tracking-tight text-brand-black sm:text-4xl">Homework Generator</h1>
+                    <p className="mt-3 max-w-2xl text-base text-slate-600">Generate a new homework sheet from scratch or based on existing content.</p>
+                </section>
+
+                <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+                    {error && (
+                        <div role="alert" className="mb-6 rounded-xl border border-slate-300 bg-brand-paper p-4">
+                            <p className="text-sm font-semibold text-brand-black">{error}</p>
                         </div>
+                    )}
+                    {successMessage && !isSaving && (
+                        <div role="status" className="mb-6 rounded-xl border border-brand-yellow bg-brand-paper p-4">
+                            <p className="text-sm font-semibold text-brand-black">{successMessage}</p>
+                        </div>
+                    )}
+                    
+                    {stagedQuestions === null ? (
+                    <form onSubmit={handleFormSubmit} className="space-y-6">
                         
                         {sourceContent && (
-                             <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
-                                <h3 className="font-semibold text-blue-800 mb-1">Source Content Loaded</h3>
-                                <p className="text-sm text-blue-700">Generating homework based on the {sourceContent.type}: <strong>{sourceContent.name}</strong></p>
+                             <div className="rounded-xl border border-brand-yellow bg-brand-paper p-4">
+                                <h3 className="mb-1 font-semibold text-brand-black">Source content loaded</h3>
+                                <p className="text-sm text-brand-black">Generating homework based on the {sourceContent.type}: <strong>{sourceContent.name}</strong></p>
                             </div>
                         )}
 
@@ -460,6 +463,7 @@ export const HomeworkGenerator: React.FC<{ user: UserProfile, loadId: string | n
                     />
                     </>
                 )}
+                </div>
             </div>
         </main>
     );

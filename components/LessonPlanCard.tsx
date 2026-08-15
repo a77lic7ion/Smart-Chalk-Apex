@@ -40,16 +40,16 @@ export const LessonPlanCard: React.FC<LessonPlanCardProps> = ({ lessonPlan, plac
 
 
     return (
-        <div className="bg-white border border-slate-200 rounded-lg p-6 prose prose-slate max-w-none">
+        <div className="bg-white border border-slate-200 rounded-2xl p-6 prose prose-slate max-w-none shadow-sm">
             {contentWithPlaceholders}
              {lessonPlan.questions.length > 0 && (
-                <div className="mt-8 pt-6 border-t">
+                <div className="mt-8 border-t border-slate-200 pt-6">
                     <h2 className="text-lg font-semibold text-slate-800">Assessment Questions</h2>
                     <ul className="list-decimal pl-5 mt-4 space-y-4">
                         {lessonPlan.questions.map(q => (
                             <li key={q.id}>
                                 <p className="font-semibold text-slate-700 mb-1">{q.question}</p>
-                                <p className="text-sm text-emerald-700 bg-emerald-50 p-2 rounded-lg"><strong>Answer:</strong> {q.answer}</p>
+                                <p className="rounded-lg border border-brand-yellow bg-brand-paper p-3 text-sm text-brand-black"><strong>Answer:</strong> {q.answer}</p>
                             </li>
                         ))}
                     </ul>

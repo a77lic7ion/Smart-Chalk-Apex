@@ -257,26 +257,29 @@ export const LessonGenerator: React.FC<LessonGeneratorProps> = ({ user, loadId, 
     const translatedBloomsOptions = BLOOMS_LEVEL_OPTIONS.map(opt => ({...opt, label: opt.label}));
 
     return (
-        <main className="p-4 md:p-8 max-w-7xl mx-auto">
-            <div className="bg-white p-6 rounded-xl shadow-md border border-slate-200">
-                {error && (
-                    <div className="mb-4 bg-red-50 border-l-4 border-red-400 p-4 rounded-r-lg shadow-md">
-                        <p className="text-sm text-red-700">{error}</p>
-                    </div>
-                )}
-                {successMessage && !error && (
-                     <div className="mb-4 bg-emerald-50 border-l-4 border-emerald-400 p-4 rounded-r-lg shadow-md">
-                        <p className="text-sm text-emerald-700">{successMessage}</p>
-                    </div>
-                )}
+        <main className="min-h-full bg-brand-paper">
+            <div className="mx-auto w-full max-w-5xl px-5 py-8 sm:px-8 lg:px-12 lg:py-12">
+                <section className="mb-8 border-b border-slate-200 pb-8">
+                    <p className="mb-3 text-xs font-bold uppercase tracking-[0.18em] text-brand-yellow">SmartChalk generator</p>
+                    <h1 className="text-3xl font-black tracking-tight text-brand-black sm:text-4xl">Lesson Plan Generator</h1>
+                    <p className="mt-3 max-w-2xl text-base text-slate-600">Design comprehensive lesson plans complete with objectives, activities, and image placeholders.</p>
+                </section>
+
+                <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+                    {error && (
+                        <div role="alert" className="mb-6 rounded-xl border border-slate-300 bg-brand-paper p-4">
+                            <p className="text-sm font-semibold text-brand-black">{error}</p>
+                        </div>
+                    )}
+                    {successMessage && !error && (
+                        <div role="status" className="mb-6 rounded-xl border border-brand-yellow bg-brand-paper p-4">
+                            <p className="text-sm font-semibold text-brand-black">{successMessage}</p>
+                        </div>
+                    )}
 
                 {!generatedData ? (
                     <>
-                    <form onSubmit={(e) => { e.preventDefault(); handleGenerate() }} className="space-y-6 max-w-4xl mx-auto">
-                        <div>
-                            <h2 className="text-xl font-bold text-brand-black mb-2">Lesson Plan Generator</h2>
-                            <p className="text-slate-600">Design comprehensive lesson plans complete with objectives, activities, and image placeholders.</p>
-                        </div>
+                    <form onSubmit={(e) => { e.preventDefault(); handleGenerate() }} className="space-y-6">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <Select label="Curriculum" name="curriculum" value={params.curriculum} onChange={handleInputChange} options={CURRICULUM_OPTS_FOR_SELECT} required />
                             <Select label="Grade" name="grade" value={params.grade} onChange={handleInputChange} options={GRADES_OPTIONS} required />
@@ -297,7 +300,7 @@ export const LessonGenerator: React.FC<LessonGeneratorProps> = ({ user, loadId, 
                             <Select label="Bloom's Taxonomy Level Focus" name="bloomsLevel" value={params.bloomsLevel} onChange={handleInputChange} options={translatedBloomsOptions} required />
                         </div>
                         
-                        <div className="pt-4 border-t flex flex-wrap items-center justify-start gap-4">
+                        <div className="pt-4 border-t border-slate-200 flex flex-wrap items-center justify-start gap-4">
                             <Button type="submit" isLoading={isLoading} disabled={isLoading} size="lg">
                                 {isLoading ? 'Generating Lesson...' : 'Generate Lesson Plan'}
                             </Button>
@@ -309,14 +312,14 @@ export const LessonGenerator: React.FC<LessonGeneratorProps> = ({ user, loadId, 
                              <h3 className="text-lg font-semibold text-brand-black mb-3">My Saved Lesson Plans</h3>
                              <div className="space-y-3">
                                 {savedLessons.map(p => (
-                                    <div key={p.id} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg border border-slate-200">
+                                    <div key={p.id} className="flex items-center justify-between gap-4 rounded-xl border border-slate-200 bg-brand-paper p-4">
                                         <div>
                                             <p className="font-semibold text-brand-charcoal">{p.name}</p>
                                             <p className="text-xs text-slate-500">Created: {new Date(p.createdAt).toLocaleString()}</p>
                                         </div>
                                         <div className="flex items-center gap-2">
-                                            <button onClick={() => handleLoadLesson(p.id)} title="Load Lesson Plan" className="p-1.5 text-slate-500 hover:text-brand-yellow hover:bg-yellow-50 rounded-lg transition-colors"><FolderOpenIcon className="h-5 w-5"/></button>
-                                            <button onClick={() => handleDeleteLesson(p.id)} title="Delete Lesson Plan" className="p-1.5 text-slate-500 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"><TrashIcon className="h-5 w-5"/></button>
+                                            <button onClick={() => handleLoadLesson(p.id)} title="Load Lesson Plan" aria-label="Load Lesson Plan" className="rounded-lg border border-slate-300 p-2 text-brand-black transition-colors hover:border-brand-yellow hover:bg-brand-yellow hover:text-brand-black focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-yellow"><FolderOpenIcon className="h-5 w-5"/></button>
+                                            <button onClick={() => handleDeleteLesson(p.id)} title="Delete Lesson Plan" aria-label="Delete Lesson Plan" className="rounded-lg border border-slate-300 p-2 text-brand-black transition-colors hover:border-brand-black hover:bg-brand-black hover:text-brand-yellow focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-yellow"><TrashIcon className="h-5 w-5"/></button>
                                         </div>
                                     </div>
                                 ))}
@@ -332,6 +335,7 @@ export const LessonGenerator: React.FC<LessonGeneratorProps> = ({ user, loadId, 
                         onDiscard={handleDiscard}
                     />
                 )}
+                </div>
             </div>
         </main>
     );

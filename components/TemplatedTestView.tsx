@@ -107,7 +107,7 @@ const AddCustomQuestionModal: React.FC<{
                     <h2 className="text-lg font-semibold text-slate-900">Add Custom Question</h2>
                  </div>
                  <div className="p-6 space-y-4 overflow-y-auto">
-                     {error && <p className="text-sm text-red-600">{error}</p>}
+                     {error && <p role="alert" className="rounded-lg border border-slate-300 bg-brand-paper p-3 text-sm font-semibold text-brand-black">{error}</p>}
                      <TextArea label="Question" value={question} onChange={(e) => setQuestion(e.target.value)} rows={3} />
                      <TextArea label="Answer / Memo" value={answer} onChange={(e) => setAnswer(e.target.value)} rows={4} />
                      <div>
@@ -462,28 +462,31 @@ export const TemplatedTestView: React.FC<{ user: UserProfile, loadId: string | n
     }, [stagedQuestions, params, user.sub]);
 
     return (
-        <main className="p-4 md:p-8 max-w-4xl mx-auto">
-            <div className="bg-white p-6 rounded-xl shadow-md border border-slate-200">
-                {error && (
-                    <div className="mb-4 bg-red-50 border-l-4 border-red-400 p-4 rounded-r-lg shadow-md">
-                        <p className="text-sm text-red-700">{error}</p>
-                    </div>
-                )}
-                 {successMessage && !isSaving && (
-                    <div className="mb-4 bg-emerald-50 border-l-4 border-emerald-400 p-4 rounded-r-lg shadow-md">
-                        <p className="text-sm text-emerald-700">{successMessage}</p>
-                    </div>
-                )}
-                
-                {stagedQuestions === null ? (
-                    <form onSubmit={handleFormSubmit} className="space-y-6">
-                        <div>
-                            <h2 className="text-xl font-bold text-chalk-black mb-2 font-poppins">Exam Generator</h2>
-                            <p className="text-stone-600">Generate a print-ready exam with a professional cover page and layout.</p>
+        <main className="min-h-full bg-brand-paper">
+            <div className="mx-auto w-full max-w-5xl px-5 py-8 sm:px-8 lg:px-12 lg:py-12">
+                <section className="mb-8 border-b border-slate-200 pb-8">
+                    <p className="mb-3 text-xs font-bold uppercase tracking-[0.18em] text-brand-yellow">SmartChalk generator</p>
+                    <h1 className="text-3xl font-black tracking-tight text-brand-black sm:text-4xl">Exam Generator</h1>
+                    <p className="mt-3 max-w-2xl text-base text-slate-600">Generate a print-ready exam with a professional cover page and layout.</p>
+                </section>
+
+                <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+                    {error && (
+                        <div role="alert" className="mb-6 rounded-xl border border-slate-300 bg-brand-paper p-4">
+                            <p className="text-sm font-semibold text-brand-black">{error}</p>
                         </div>
+                    )}
+                    {successMessage && !isSaving && (
+                        <div role="status" className="mb-6 rounded-xl border border-brand-yellow bg-brand-paper p-4">
+                            <p className="text-sm font-semibold text-brand-black">{successMessage}</p>
+                        </div>
+                    )}
+                
+                    {stagedQuestions === null ? (
+                    <form onSubmit={handleFormSubmit} className="space-y-6">
                         
-                        <div className="p-4 bg-slate-50 rounded-lg border border-slate-200">
-                            <h3 className="font-semibold text-slate-800 mb-3">Cover Page Details</h3>
+                        <div className="rounded-xl border border-slate-200 bg-brand-paper p-4">
+                            <h3 className="mb-3 font-semibold text-brand-black">Cover Page Details</h3>
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                                 <Input label="Test Type" name="testType" value={params.testType} onChange={handleInputChange} placeholder="e.g., Baseline Test" required />
                                 <Input label="Total Marks" name="totalMarks" value={params.totalMarks} onChange={handleInputChange} placeholder="e.g., 50" required />
@@ -527,6 +530,7 @@ export const TemplatedTestView: React.FC<{ user: UserProfile, loadId: string | n
                     />
                     </>
                 )}
+                </div>
             </div>
         </main>
     );
