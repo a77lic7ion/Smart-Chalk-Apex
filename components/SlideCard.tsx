@@ -98,10 +98,11 @@ const ContentSlide: React.FC<{ slide: Slide, onUpdate: (updatedSlide: Slide) => 
 
             const base64 = await readFileAsBase64(squareFile);
             if (response.ok) {
-                const result = await response.json();
-                const imageUrl = result.data?.url;
-                if (imageUrl) onUpdate({ ...slide, imageData: imageUrl });
-                else onUpdate({ ...slide, imageData: base64 });
+                await response.json();
+                // Keep the durable local copy on the slide itself. The remote URL is optional;
+                // local base64 prevents saved presentations from losing images when cloud storage
+                // is unavailable, expired, or inaccessible from the browser.
+                onUpdate({ ...slide, imageData: base64 });
             } else {
                 // Keep the slide usable in the static-first/local workspace even when cloud upload is unavailable.
                 onUpdate({ ...slide, imageData: base64 });

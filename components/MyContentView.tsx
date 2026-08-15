@@ -222,6 +222,7 @@ interface MyContentViewProps {
 export const MyContentView: React.FC<MyContentViewProps> = ({ user, isAdmin, onContentLoad, onFormatExam, onCreateHomework }) => {
     const [exportingId, setExportingId] = useState<string | null>(null);
     const [exportError, setExportError] = useState<string | null>(null);
+    const [isClearingWorkspace, setIsClearingWorkspace] = useState(false);
     const allContent = useLiveQuery<AllContent | undefined>(async () => {
         if (!user?.sub) return undefined;
 
@@ -265,6 +266,33 @@ export const MyContentView: React.FC<MyContentViewProps> = ({ user, isAdmin, onC
         savedParsedExams, 
         savedManualExams 
     } = allContent || {};
+
+    const handleClearWorkspace = async () => {
+        if (!isAdmin || !ADMIN_EMAILS.includes(user.email.toLowerCase())) return;
+        if (!window.confirm('Clear all locally saved SmartChalk content for this browser workspace? This cannot be undone.')) return;
+        setIsClearingWorkspace(true);
+        try {
+            await db.transaction('rw', db.tables, async () => {
+                await Promise.all([
+                    db.trainingData.clear(),
+                    db.savedTests.clear(),
+                    db.presentations.clear(),
+                    db.slides.clear(),
+                    db.imagePlaceholders.clear(),
+                    db.lessonPlans.clear(),
+                    db.savedExams.clear(),
+                    db.savedHomework.clear(),
+                    db.savedParsedExams.clear(),
+                    db.savedManualExams.clear(),
+                ]);
+            });
+        } catch (e) {
+            console.error('Failed to clear local workspace:', e);
+            alert('Could not clear the local workspace. Please try again.');
+        } finally {
+            setIsClearingWorkspace(false);
+        }
+    };
 
     const handleDelete = async (type: ContentType, id: string) => {
         try {
@@ -365,7 +393,20 @@ export const MyContentView: React.FC<MyContentViewProps> = ({ user, isAdmin, onC
                  <section className="border-b border-slate-200 pb-8">
                     <p className="mb-3 text-xs font-bold uppercase tracking-[0.18em] text-brand-yellow">SmartChalk library</p>
                     <h1 className="text-3xl font-black tracking-tight text-brand-black md:text-4xl">My Content</h1>
-                    <p className="mt-3 max-w-2xl text-base text-slate-600">A central place for all your generated and parsed content.</p>
+                    <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+                        <p className="max-w-2xl text-base text-slate-600">A central place for all your generated and parsed content.</p>
+                        {isAdmin && ADMIN_EMAILS.includes(user.email.toLowerCase()) && (
+                            <button
+                                type="button"
+                                onClick={handleClearWorkspace}
+                                disabled={isClearingWorkspace}
+                                className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-bold text-brand-black hover:border-brand-yellow hover:bg-brand-yellow disabled:cursor-not-allowed disabled:opacity-60"
+                            >
+                                <TrashIcon className="h-4 w-4" />
+                                {isClearingWorkspace ? 'Clearing…' : 'Clear local workspace'}
+                            </button>
+                        )}
+                    </div>
                 </section>
                 
                 {exportError && (

@@ -338,7 +338,7 @@ export const exportTestAsDocx = async (test: SavedTest, type: 'questions' | 'mem
     const buffer = await DocxPacker.toBlob(doc);
     saveAs(buffer, `${test.name.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_${type}.docx`);
 }// --- PPTX Export Function ---
-export const exportPresentationAsPptx = async (presentation: Presentation): Promise<void> => {
+export const exportPresentationAsPptx = async (presentation: Presentation, slidesOverride?: Slide[]): Promise<void> => {
     const pptx = new PptxGenJS();
     pptx.layout = 'LAYOUT_WIDE';
     pptx.author = 'SmartChalk';
@@ -347,7 +347,7 @@ export const exportPresentationAsPptx = async (presentation: Presentation): Prom
     pptx.title = presentation.name;
     pptx.lang = 'en-ZA';
 
-    const slides = (await db.slides.where({ presentationId: presentation.id }).sortBy('slideNumber')).filter(slide => !slide.isIntro);
+    const slides = (slidesOverride ?? await db.slides.where({ presentationId: presentation.id }).sortBy('slideNumber')).filter(slide => !slide.isIntro);
     const headerLogoBase64 = arrayBufferToBase64(await getHeaderLogoBuffer());
     const logoDimensions = await getImageDimensions(headerLogoBase64);
     const logoW = 1.15;

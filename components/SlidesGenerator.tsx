@@ -118,7 +118,7 @@ export const SlidesGenerator: React.FC<SlidesGeneratorProps> = ({ user, loadId, 
         if (!generatedData) return;
         setIsExporting(true);
         try {
-            await exportPresentationAsPptx(generatedData.presentation);
+            await exportPresentationAsPptx(generatedData.presentation, generatedData.slides);
         } catch(e) {
             setError(e instanceof Error ? e.message : 'Failed to export presentation.');
         } finally {
