@@ -347,7 +347,15 @@ export const exportPresentationAsPptx = async (presentation: Presentation, slide
     pptx.title = presentation.name;
     pptx.lang = 'en-ZA';
 
-    const slides = (slidesOverride ?? await db.slides.where({ presentationId: presentation.id }).sortBy('slideNumber')).filter(slide => !slide.isIntro);
+    const sourceSlides = slidesOverride ?? await db.slides.where({ presentationId: presentation.id }).sortBy('slideNumber');
+    const libraryImages = await db.imageLibrary.toArray();
+    const slides = sourceSlides
+        .map(slide => {
+            if (slide.imageData) return slide;
+            const libraryImage = libraryImages.find(image => image.slideId === slide.id && image.imageData);
+            return libraryImage ? { ...slide, imageData: libraryImage.imageData } : slide;
+        })
+        .filter(slide => !slide.isIntro);
     const headerLogoBase64 = arrayBufferToBase64(await getHeaderLogoBuffer());
     const logoDimensions = await getImageDimensions(headerLogoBase64);
     const logoW = 1.15;
