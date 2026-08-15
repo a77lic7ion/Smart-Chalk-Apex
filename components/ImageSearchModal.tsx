@@ -28,8 +28,9 @@ export const ImageSearchModal: React.FC<ImageSearchModalProps> = ({ isOpen, onCl
     const modalRef = useRef<HTMLDivElement>(null);
     const [downloadingId, setDownloadingId] = useState<number | null>(null);
 
-    const handleSearch = async () => {
-        if (!searchQuery.trim()) {
+    const handleSearch = async (queryOverride?: string) => {
+        const query = (queryOverride ?? searchQuery).trim();
+        if (!query) {
             setError("Please enter a search term.");
             return;
         }
@@ -38,7 +39,7 @@ export const ImageSearchModal: React.FC<ImageSearchModalProps> = ({ isOpen, onCl
         setError(null);
         setImages([]);
         try {
-            const result = await searchPexelsImages(searchQuery);
+            const result = await searchPexelsImages(query);
             if (result.length === 0) {
                 setError("No images found for your search query.");
             }
@@ -68,7 +69,7 @@ export const ImageSearchModal: React.FC<ImageSearchModalProps> = ({ isOpen, onCl
         if (isOpen) {
             setSearchQuery(initialSearchQuery);
             if (initialSearchQuery) {
-                handleSearch();
+                handleSearch(initialSearchQuery);
             }
         } else {
             setImages([]);

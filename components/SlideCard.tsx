@@ -18,6 +18,31 @@ const readFileAsBase64 = (file: File): Promise<string> => {
     });
 };
 
+const cropImageToSquare = async (source: Blob): Promise<File> => {
+    const objectUrl = URL.createObjectURL(source);
+    try {
+        const image = await new Promise<HTMLImageElement>((resolve, reject) => {
+            const element = new Image();
+            element.onload = () => resolve(element);
+            element.onerror = () => reject(new Error('The selected image could not be read.'));
+            element.src = objectUrl;
+        });
+        const size = Math.min(image.naturalWidth, image.naturalHeight);
+        const canvas = document.createElement('canvas');
+        canvas.width = size;
+        canvas.height = size;
+        const context = canvas.getContext('2d');
+        if (!context) throw new Error('Could not prepare the square image crop.');
+        context.drawImage(image, (image.naturalWidth - size) / 2, (image.naturalHeight - size) / 2, size, size, 0, 0, size, size);
+        const blob = await new Promise<Blob>((resolve, reject) => {
+            canvas.toBlob(result => result ? resolve(result) : reject(new Error('Could not create the square image.')), 'image/jpeg', 0.92);
+        });
+        return new File([blob], 'smartchalk-square-image.jpg', { type: 'image/jpeg' });
+    } finally {
+        URL.revokeObjectURL(objectUrl);
+    }
+};
+
 const IntroSlide: React.FC<{ slide: Slide }> = ({ slide }) => (
     <div className="bg-white border-2 border-brand-yellow rounded-xl p-8 transition-shadow hover:shadow-lg h-full flex flex-col justify-center items-center text-center">
         <SmartChalkLogoMark className="h-24 w-auto mb-6" />
@@ -58,9 +83,10 @@ const ContentSlide: React.FC<{ slide: Slide, onUpdate: (updatedSlide: Slide) => 
         setIsProcessing(true);
         setImageError(null);
         try {
+            const squareFile = await cropImageToSquare(file);
             // Upload to Vercel Blob storage
             const formData = new FormData();
-            formData.append('image', file);
+            formData.append('image', squareFile);
             formData.append('folder', 'slides');
             
             const token = localStorage.getItem('google_token') || localStorage.getItem('googleToken');
@@ -70,7 +96,7 @@ const ContentSlide: React.FC<{ slide: Slide, onUpdate: (updatedSlide: Slide) => 
                 headers: token ? { 'Authorization': `Bearer ${token}` } : undefined
             });
 
-            const base64 = await readFileAsBase64(file as File);
+            const base64 = await readFileAsBase64(squareFile);
             if (response.ok) {
                 const result = await response.json();
                 const imageUrl = result.data?.url;
@@ -85,7 +111,8 @@ const ContentSlide: React.FC<{ slide: Slide, onUpdate: (updatedSlide: Slide) => 
             await saveImageToLibrary(base64);
         } catch (e) {
             try {
-                const base64 = await readFileAsBase64(file as File);
+                const squareFile = await cropImageToSquare(file);
+                const base64 = await readFileAsBase64(squareFile);
                 onUpdate({ ...slide, imageData: base64 });
                 await saveImageToLibrary(base64);
                 setImageError(null);

@@ -222,3 +222,16 @@ export const DuckDuckGoIcon: React.FC<IconProps> = (props) => (
       <path d="M12 8a3 3 0 0 0-3 3c0 1.66 1.34 3 3 3s3-1.34 3-3c0-1.66-1.34-3-3-3z" />
     </svg>
 );
+
+
+export const ChevronDoubleLeftIcon: React.FC<IconProps> = (props) => (
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" {...props}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6.75L7.25 12l6.25 5.25M18.5 6.75L12.25 12l6.25 5.25" />
+  </svg>
+);
+
+export const ChevronDoubleRightIcon: React.FC<IconProps> = (props) => (
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" {...props}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 6.75L16.75 12l-6.25 5.25M5.5 6.75L11.75 12 5.5 17.25" />
+  </svg>
+);

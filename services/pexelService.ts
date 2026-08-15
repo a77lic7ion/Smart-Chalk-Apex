@@ -31,7 +31,7 @@ export const searchPexelsImages = async (query: string): Promise<PexelsImage[]> 
         throw new Error("Pexels API key is not configured.");
     }
 
-    const response = await fetch(`https://api.pexels.com/v1/search?query=${encodeURIComponent(query)}&per_page=20`, {
+    const response = await fetch(`https://api.pexels.com/v1/search?query=${encodeURIComponent(query)}&orientation=square&per_page=40`, {
         headers: {
             'Authorization': PEXELS_API_KEY,
         }
@@ -49,7 +49,8 @@ export const searchPexelsImages = async (query: string): Promise<PexelsImage[]> 
     }
     
     const data: PexelsSearchResponse = await response.json();
-    return data.photos;
+    // Keep the picker strictly 1:1 even if the provider returns mixed orientations.
+    return data.photos.filter(photo => photo.width > 0 && photo.height > 0 && Math.abs(photo.width / photo.height - 1) <= 0.08);
 };
 
 

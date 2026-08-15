@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import type { UserProfile } from '../types';
-import { SmartChalkLogo } from './Icons';
+import { SmartChalkLogo, ChevronDoubleLeftIcon, ChevronDoubleRightIcon } from './Icons';
 import type { AppView, ThemeMode } from '../App';
 
 interface HeaderProps {
@@ -14,6 +14,18 @@ interface HeaderProps {
   isSidebarCollapsed: boolean;
   onSidebarToggle: () => void;
 }
+
+const getCompactNavLabel = (view: AppView): string => ({
+  dashboard: 'DB',
+  manualExamBuilder: 'EX',
+  testGenerator: 'TG',
+  exam: 'EG',
+  homeworkGenerator: 'HW',
+  lessonGenerator: 'LS',
+  slidesGenerator: 'SL',
+  myContent: 'MC',
+  settings: 'ST',
+}[view] || 'SC');
 
 const getNavItems = (isAdmin: boolean): { view: AppView; label: string }[] => {
   const baseItems: { view: AppView; label: string }[] = [
@@ -121,9 +133,9 @@ export const Header: React.FC<HeaderProps> = ({ currentView, setView, user, onLo
             onClick={onSidebarToggle}
             aria-label={isSidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
             title={isSidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-            className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-brand-yellow bg-brand-black text-lg font-black text-brand-yellow transition-colors hover:bg-brand-yellow hover:text-brand-black focus:outline-none focus:ring-2 focus:ring-brand-yellow"
+            className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-brand-yellow bg-brand-black text-brand-yellow transition-colors hover:bg-brand-yellow hover:text-brand-black focus:outline-none focus:ring-2 focus:ring-brand-yellow"
           >
-            {isSidebarCollapsed ? '☰' : '×'}
+            {isSidebarCollapsed ? <ChevronDoubleRightIcon className="h-5 w-5" /> : <ChevronDoubleLeftIcon className="h-5 w-5" />}
           </button>
         </div>
 
@@ -138,13 +150,13 @@ export const Header: React.FC<HeaderProps> = ({ currentView, setView, user, onLo
                     onClick={() => handleViewChange(item.view)}
                     aria-label={item.label}
                     title={isSidebarCollapsed ? item.label : undefined}
-                    className={`w-full rounded-xl px-3 py-3 text-xs font-bold uppercase tracking-wide transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-brand-yellow ${isSidebarCollapsed ? 'text-center' : 'text-left'} ${
+                    className={`w-full rounded-xl px-2 py-2.5 text-xs font-bold uppercase tracking-wide transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-brand-yellow ${isSidebarCollapsed ? 'mx-auto flex h-11 w-14 items-center justify-center rounded-lg border border-slate-300 bg-white text-center shadow-sm hover:border-brand-yellow hover:bg-brand-paper' : 'text-left'} ${
                       isActive
                         ? 'bg-brand-yellow text-brand-black shadow-sm'
                         : 'text-slate-500 hover:bg-slate-100 hover:text-brand-charcoal'
                     }`}
                   >
-                    {isSidebarCollapsed ? item.label.charAt(0) : item.label}
+                    {isSidebarCollapsed ? getCompactNavLabel(item.view) : item.label}
                   </button>
                 </li>
               );

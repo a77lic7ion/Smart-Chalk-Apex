@@ -3,6 +3,7 @@ import { generateContentWithGemini } from './gemini';
 import { generateContentWithOpenAI } from './openai';
 import { generateContentWithOllama } from './ollama';
 import { generateContentWithOpenRouter } from './openRouter';
+import { generateContentWithNous } from './nous';
 import { db } from '../db';
 
 // --- System Instruction Generators ---
@@ -267,6 +268,13 @@ const dispatchAndValidate = async (
                 const endpoint = settings.providerEndpoints?.openRouter ?? 'https://openrouter.ai/api/v1';
                 const model = settings.selectedModels?.openRouter ?? '';
                 rawJson = await generateContentWithOpenRouter(systemInstruction, userPrompt, apiKey, endpoint, model, temperature);
+                break;
+            }
+            case 'nous': {
+                const apiKey = settings.providerApiKeys?.nous ?? '';
+                const endpoint = settings.providerEndpoints?.nous ?? 'https://inference-api.nousresearch.com/v1';
+                const model = settings.selectedModels?.nous ?? '';
+                rawJson = await generateContentWithNous(systemInstruction, userPrompt, apiKey, endpoint, model, temperature);
                 break;
             }
             default:
