@@ -53,7 +53,7 @@ const IntroSlide: React.FC<{ slide: Slide }> = ({ slide }) => (
     </div>
 );
 
-const ContentSlide: React.FC<{ slide: Slide, onUpdate: (updatedSlide: Slide) => void, subject: string; topic: string; }> = ({ slide, onUpdate, subject, topic }) => {
+const ContentSlide: React.FC<{ slide: Slide, onUpdate: (updatedSlide: Slide) => void, subject: string; topic: string; onProcessingChange?: (isProcessing: boolean) => void; }> = ({ slide, onUpdate, subject, topic, onProcessingChange }) => {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [imageError, setImageError] = useState<string | null>(null);
     const [isProcessing, setIsProcessing] = useState(false);
@@ -66,7 +66,10 @@ const ContentSlide: React.FC<{ slide: Slide, onUpdate: (updatedSlide: Slide) => 
             imageData,
             subject,
             topic,
-            createdAt: Date.now()
+            slideId: slide.id,
+            presentationId: slide.presentationId,
+            createdAt: Date.now(),
+            syncStatus: 'dirty'
         };
         try {
             await db.imageLibrary.add(newRecord);
@@ -81,6 +84,7 @@ const ContentSlide: React.FC<{ slide: Slide, onUpdate: (updatedSlide: Slide) => 
             return;
         }
         setIsProcessing(true);
+        onProcessingChange?.(true);
         setImageError(null);
         try {
             const squareFile = await cropImageToSquare(file);
@@ -122,6 +126,7 @@ const ContentSlide: React.FC<{ slide: Slide, onUpdate: (updatedSlide: Slide) => 
             }
         } finally {
             setIsProcessing(false);
+            onProcessingChange?.(false);
         }
     };
 
@@ -242,12 +247,13 @@ interface SlideCardProps {
     onUpdate: (updatedSlide: Slide) => void;
     subject: string;
     topic: string;
+    onProcessingChange?: (isProcessing: boolean) => void;
 }
 
-export const SlideCard: React.FC<SlideCardProps> = ({ slide, onUpdate, subject, topic }) => {
+export const SlideCard: React.FC<SlideCardProps> = ({ slide, onUpdate, subject, topic, onProcessingChange }) => {
     if (slide.isIntro) {
         return <IntroSlide slide={slide} />;
     }
     
-    return <ContentSlide slide={slide} onUpdate={onUpdate} subject={subject} topic={topic} />;
+    return <ContentSlide slide={slide} onUpdate={onUpdate} subject={subject} topic={topic} onProcessingChange={onProcessingChange} />;
 };

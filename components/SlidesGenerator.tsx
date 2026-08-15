@@ -43,6 +43,7 @@ export const SlidesGenerator: React.FC<SlidesGeneratorProps> = ({ user, loadId, 
     const [error, setError] = useState<string | null>(null);
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
     const [savedPresentations, setSavedPresentations] = useState<Presentation[] | undefined>();
+    const [isImageProcessing, setIsImageProcessing] = useState(false);
 
     useEffect(() => {
         const fetchPresentations = async () => {
@@ -132,7 +133,13 @@ export const SlidesGenerator: React.FC<SlidesGeneratorProps> = ({ user, loadId, 
         setSuccessMessage(null);
         try {
             const presentation = await db.presentations.get(presentationId);
-            const slides = await db.slides.where({ presentationId }).toArray();
+            const storedSlides = await db.slides.where({ presentationId }).toArray();
+            const libraryImages = await db.imageLibrary.toArray();
+            const slides = storedSlides.map(slide => {
+                if (slide.imageData) return slide;
+                const libraryImage = libraryImages.find(image => image.slideId === slide.id && image.imageData);
+                return libraryImage ? { ...slide, imageData: libraryImage.imageData } : slide;
+            });
 
             if (!presentation || presentation.userId !== user.sub) {
                 throw new Error("Could not find the presentation or access is denied.");
@@ -262,7 +269,7 @@ export const SlidesGenerator: React.FC<SlidesGeneratorProps> = ({ user, loadId, 
                              <div className="flex items-center gap-2">
                                 <Button onClick={handleDiscard} variant="ghost">Discard</Button>
                                 <Button onClick={handleExportPresentation} isLoading={isExporting} variant="secondary">Export PPTX</Button>
-                                <Button onClick={handleSavePresentation}>Save Presentation</Button>
+                                <Button onClick={handleSavePresentation} disabled={isImageProcessing}>{isImageProcessing ? 'Preparing image…' : 'Save Presentation'}</Button>
                              </div>
                         </div>
                         <div className="space-y-6">
@@ -273,6 +280,7 @@ export const SlidesGenerator: React.FC<SlidesGeneratorProps> = ({ user, loadId, 
                                     onUpdate={handleUpdateSlide}
                                     subject={generatedData.presentation.params.subject}
                                     topic={generatedData.presentation.params.topic}
+                                    onProcessingChange={setIsImageProcessing}
                                 />
                              ))}
                         </div>

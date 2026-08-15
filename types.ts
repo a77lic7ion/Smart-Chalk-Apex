@@ -251,6 +251,8 @@ export interface ImageLibraryRecord {
     imageData: string; // base64
     subject: string;
     topic: string;
+    slideId?: string;
+    presentationId?: string;
     createdAt: number;
     syncStatus: SyncStatus;
 }
