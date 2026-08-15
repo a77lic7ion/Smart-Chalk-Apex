@@ -2,6 +2,7 @@ import type { TestGenerationParams, AISettings, TrainingQuestion, Presentation, 
 import { generateContentWithGemini } from './gemini';
 import { generateContentWithOpenAI } from './openai';
 import { generateContentWithOllama } from './ollama';
+import { generateContentWithOpenRouter } from './openRouter';
 import { db } from '../db';
 
 // --- System Instruction Generators ---
@@ -261,6 +262,13 @@ const dispatchAndValidate = async (
                 if (!settings.ollamaUrl || !settings.ollamaModel) throw new Error("Ollama URL or model is not configured.");
                 rawJson = await generateContentWithOllama(systemInstruction, userPrompt, settings.ollamaUrl, settings.ollamaModel, temperature);
                 break;
+            case 'openRouter': {
+                const apiKey = settings.providerApiKeys?.openRouter ?? '';
+                const endpoint = settings.providerEndpoints?.openRouter ?? 'https://openrouter.ai/api/v1';
+                const model = settings.selectedModels?.openRouter ?? '';
+                rawJson = await generateContentWithOpenRouter(systemInstruction, userPrompt, apiKey, endpoint, model, temperature);
+                break;
+            }
             default:
                 throw new Error(`Unsupported AI provider: ${settings.provider}`);
         }
