@@ -254,7 +254,11 @@ export const TemplatedTestView: React.FC<{ user: UserProfile, loadId: string | n
         try {
             if (type === 'test') {
                 const testToLoad = await db.savedTests.get(id);
-                if (!testToLoad || testToLoad.userId !== user.sub) throw new Error("Could not find the specified test or access is denied.");
+                if (!testToLoad || (testToLoad.userId && testToLoad.userId !== user.sub)) throw new Error("Could not find the specified test or access is denied.");
+                if (!testToLoad.userId) {
+                    testToLoad.userId = user.sub;
+                    await db.savedTests.put(testToLoad);
+                }
                 
                 setParams({
                     ...testToLoad.params,
@@ -266,7 +270,11 @@ export const TemplatedTestView: React.FC<{ user: UserProfile, loadId: string | n
 
             } else if (type === 'lesson') {
                 const lessonToLoad = await db.lessonPlans.get(id);
-                if (!lessonToLoad || lessonToLoad.userId !== user.sub) throw new Error("Could not find the specified lesson plan or access is denied.");
+                if (!lessonToLoad || (lessonToLoad.userId && lessonToLoad.userId !== user.sub)) throw new Error("Could not find the specified lesson plan or access is denied.");
+                if (!lessonToLoad.userId) {
+                    lessonToLoad.userId = user.sub;
+                    await db.lessonPlans.put(lessonToLoad);
+                }
                 
                 setParams({
                     ...lessonToLoad.params,
@@ -278,7 +286,11 @@ export const TemplatedTestView: React.FC<{ user: UserProfile, loadId: string | n
 
             } else if (type === 'presentation') {
                 const presentationToLoad = await db.presentations.get(id);
-                if (!presentationToLoad || presentationToLoad.userId !== user.sub) throw new Error("Could not find the specified presentation or access is denied.");
+                if (!presentationToLoad || (presentationToLoad.userId && presentationToLoad.userId !== user.sub)) throw new Error("Could not find the specified presentation or access is denied.");
+                if (!presentationToLoad.userId) {
+                    presentationToLoad.userId = user.sub;
+                    await db.presentations.put(presentationToLoad);
+                }
                 
                 setParams({
                     ...presentationToLoad.params,
@@ -291,7 +303,11 @@ export const TemplatedTestView: React.FC<{ user: UserProfile, loadId: string | n
 
             } else if (type === 'exam') {
                 const examToLoad = await db.savedExams.get(id);
-                if (!examToLoad || examToLoad.userId !== user.sub) throw new Error("Could not find the specified exam or access is denied.");
+                if (!examToLoad || (examToLoad.userId && examToLoad.userId !== user.sub)) throw new Error("Could not find the specified exam or access is denied.");
+                if (!examToLoad.userId) {
+                    examToLoad.userId = user.sub;
+                    await db.savedExams.put(examToLoad);
+                }
                 setParams(examToLoad.params);
                 setStagedQuestions(examToLoad.questions);
             

@@ -239,17 +239,29 @@ export const HomeworkGenerator: React.FC<{ user: UserProfile, loadId: string | n
 
             if (type === 'test') {
                 const item = await db.savedTests.get(id);
-                if (!item || item.userId !== user.sub) throw new Error("Could not find the specified test or access is denied.");
+                if (!item || (item.userId && item.userId !== user.sub)) throw new Error("Could not find the specified test or access is denied.");
+                if (!item.userId) {
+                    item.userId = user.sub;
+                    await db.savedTests.put(item);
+                }
                 loadedParams = item.params;
                 source = { type: 'Test', name: item.name, content: item.questions };
             } else if (type === 'lesson') {
                 const item = await db.lessonPlans.get(id);
-                if (!item || item.userId !== user.sub) throw new Error("Could not find the specified lesson plan or access is denied.");
+                if (!item || (item.userId && item.userId !== user.sub)) throw new Error("Could not find the specified lesson plan or access is denied.");
+                if (!item.userId) {
+                    item.userId = user.sub;
+                    await db.lessonPlans.put(item);
+                }
                 loadedParams = item.params;
                 source = { type: 'Lesson Plan', name: item.name, content: item.content };
             } else if (type === 'presentation') {
                 const item = await db.presentations.get(id);
-                if (!item || item.userId !== user.sub) throw new Error("Could not find the specified presentation or access is denied.");
+                if (!item || (item.userId && item.userId !== user.sub)) throw new Error("Could not find the specified presentation or access is denied.");
+                if (!item.userId) {
+                    item.userId = user.sub;
+                    await db.presentations.put(item);
+                }
                 loadedParams = item.params;
                 const slides = await db.slides.where({ presentationId: id }).toArray();
                 source = { type: 'Presentation', name: item.name, content: slides.map(s => `Slide ${s.slideNumber}: ${s.title}\n${s.content}`).join('\n\n')};
