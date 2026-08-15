@@ -37,7 +37,7 @@ export const ProjectBlueprintView: React.FC<{ setView: (view: AppView) => void }
         <main className="container mx-auto px-4 py-8">
             <div className="max-w-5xl mx-auto">
                 <div className="text-center mb-12">
-                    <h1 className="text-4xl md:text-5xl font-bold text-brand-navy">Apex Academic Centre Technical Blueprint</h1>
+                    <h1 className="text-4xl md:text-5xl font-bold text-brand-navy">SmartChalk Technical Blueprint</h1>
                     <p className="text-lg text-slate-600 mt-2 max-w-3xl mx-auto">An overview of the project's architecture, features, and technology stack.</p>
                 </div>
 
@@ -55,7 +55,7 @@ export const ProjectBlueprintView: React.FC<{ setView: (view: AppView) => void }
 
                 <Section title="Introduction">
                     <p>
-                        Apex Academic Centre is a web-based platform designed to transform traditional educational materials, such as tests and mock exams, into structured, reusable datasets. Powered by modern AI APIs, including the Google Gemini API, it empowers educators to digitize, analyze, and generate curriculum-aligned content with ease. The application serves as a comprehensive tool for data extraction, test creation, and presentation generation, all within a responsive and user-friendly interface.
+                        SmartChalk is a web-based platform designed to transform traditional educational materials, such as tests and mock exams, into structured, reusable datasets. Powered by modern AI APIs, including the Google Gemini API, it empowers educators to digitize, analyze, and generate curriculum-aligned content with ease. The application serves as a comprehensive tool for data extraction, test creation, and presentation generation, all within a responsive and user-friendly interface.
                     </p>
                 </Section>
 
@@ -186,7 +186,7 @@ export const ProjectBlueprintView: React.FC<{ setView: (view: AppView) => void }
 
                 <Section title="Conclusion">
                     <p>
-                        The Apex Academic Centre platform is a powerful proof-of-concept demonstrating how modern AI capabilities can be harnessed in a client-side web application to create sophisticated, domain-specific tools for educators. Its modular architecture, multi-provider support, and focus on a practical workflow make it a valuable asset for digitizing and generating educational content.
+                        The SmartChalk platform is a powerful proof-of-concept demonstrating how modern AI capabilities can be harnessed in a client-side web application to create sophisticated, domain-specific tools for educators. Its modular architecture, multi-provider support, and focus on a practical workflow make it a valuable asset for digitizing and generating educational content.
                     </p>
                 </Section>
             </div>

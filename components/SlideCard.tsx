@@ -1,6 +1,6 @@
 import React, { useState, useRef, ChangeEvent } from 'react';
 import type { Slide } from '../types';
-import { UploadIcon, ApexLogo, ApexLogoFull, GlobeAltIcon, DatabaseIcon } from './Icons';
+import { UploadIcon, SmartChalkLogoMark, GlobeAltIcon, DatabaseIcon } from './Icons';
 import { Button } from './Button';
 import { Input, TextArea } from './Input';
 import { Loader } from './Loader';
@@ -20,7 +20,7 @@ const readFileAsBase64 = (file: File): Promise<string> => {
 
 const IntroSlide: React.FC<{ slide: Slide }> = ({ slide }) => (
     <div className="bg-white border-2 border-brand-green rounded-xl p-8 transition-shadow hover:shadow-lg h-full flex flex-col justify-center items-center text-center">
-        <ApexLogoFull className="h-24 w-auto mb-6" />
+        <SmartChalkLogoMark className="h-24 w-auto mb-6" />
         <h1 className="text-4xl font-bold text-brand-navy">{slide.title}</h1>
         <div className="text-lg text-slate-600 mt-2">
             <FormattedText text={slide.content} />

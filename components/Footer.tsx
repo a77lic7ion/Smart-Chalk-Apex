@@ -1,5 +1,5 @@
 import React from 'react';
-import { FacebookIcon, InstagramIcon, TwitterIcon, YouTubeIcon, TikTokIcon, WhatsAppIcon, LinkedInIcon } from './Icons';
+import { FacebookIcon, InstagramIcon, TwitterIcon, YouTubeIcon, TikTokIcon, WhatsAppIcon, LinkedInIcon, SmartChalkLogo } from './Icons';
 
 const socialLinks = [
     { name: 'Facebook', icon: FacebookIcon, href: 'https://www.facebook.com/' },
@@ -16,8 +16,8 @@ export const Footer: React.FC = () => {
         <footer className="bg-brand-dark-grey text-brand-light-grey mt-auto">
             <div className="container mx-auto px-4 py-6">
                 <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
-                    <div className="flex-shrink-0">
-                        <img src="/Footer.png" alt="Apex Academic Centre Logo" className="h-10 w-auto" />
+                    <div className="flex-shrink-0 rounded-md bg-white px-3 py-1.5">
+                        <SmartChalkLogo className="h-12 w-auto" />
                     </div>
                     <div className="flex flex-wrap justify-center gap-5">
                         {socialLinks.map((link) => (
@@ -35,7 +35,7 @@ export const Footer: React.FC = () => {
                     </div>
                 </div>
                 <div className="mt-6 pt-4 border-t border-gray-700 text-center text-xs text-gray-400">
-                    &copy; {new Date().getFullYear()} Apex Academic Centre. All Rights Reserved.
+                    &copy; {new Date().getFullYear()} SmartChalk. All Rights Reserved.
                 </div>
             </div>
         </footer>

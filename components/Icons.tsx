@@ -1,4 +1,6 @@
 import React from 'react';
+import smartChalkFullLogo from '@/SmartChalk-logo-full.png';
+import smartChalkLogoMark from '@/SmartChalk-logo-mark.png';
 
 interface IconProps {
     className?: string;
@@ -6,12 +8,12 @@ interface IconProps {
 }
 
 // --- Logos ---
-export const ApexLogo: React.FC<IconProps> = (props) => (
-    <img src="/Header2.png" alt="Apex Academic Centre Logo" {...props} />
+export const SmartChalkLogo: React.FC<IconProps> = (props) => (
+    <img src={smartChalkFullLogo} alt="SmartChalk logo" {...props} />
 );
 
-export const ApexLogoFull: React.FC<IconProps> = (props) => (
-    <img src="/Header2.png" alt="Apex Academic Centre Logo" {...props} />
+export const SmartChalkLogoMark: React.FC<IconProps> = (props) => (
+    <img src={smartChalkLogoMark} alt="SmartChalk logo mark" {...props} />
 );
 
 // --- Standard UI Icons ---

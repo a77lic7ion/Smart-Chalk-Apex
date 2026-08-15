@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'https://smart-chalk-apex.vercel.app/api',
+  baseURL: 'http://localhost:3001',
 });
 
 api.interceptors.request.use(config => {

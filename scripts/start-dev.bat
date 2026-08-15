@@ -1,5 +1,5 @@
 @echo off
-echo Starting Smart Chalk Apex Development Environment...
+echo Starting SmartChalk Development Environment...
 echo.
 
 REM Check if .env.local exists

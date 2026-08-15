@@ -17,7 +17,7 @@ const AdminSettings: React.FC<{ user: UserProfile }> = ({ user }) => {
     
     // Check if user is admin@smartchalk.co.za and set default URL accordingly
     const isSmartChalkAdmin = user.email.toLowerCase() === 'admin@smartchalk.co.za';
-    const defaultSyncUrl = isSmartChalkAdmin ? 'http://localhost:3001' : 'https://smart-chalk-apex.vercel.app/api';
+    const defaultSyncUrl = isSmartChalkAdmin ? 'http://localhost:3001' : 'http://localhost:3001';
     const defaultDbConnection = isSmartChalkAdmin ? 'postgresql://postgres:password@localhost:5432/smart_chalk_db' : '';
     
     const [syncServerUrl, setSyncServerUrl] = React.useState(defaultSyncUrl);
@@ -34,7 +34,7 @@ const AdminSettings: React.FC<{ user: UserProfile }> = ({ user }) => {
             }
             const jsonString = JSON.stringify(allData, null, 2);
             const blob = new Blob([jsonString], { type: 'application/json' });
-            saveAs(blob, `apex_academic_centre_db_export_${new Date().toISOString().split('T')[0]}.json`);
+            saveAs(blob, `smartchalk_db_export_${new Date().toISOString().split('T')[0]}.json`);
         } catch (error) {
             console.error("Database export failed:", error);
             alert("Could not export the database. Check the console for more details.");
@@ -130,7 +130,7 @@ const AdminSettings: React.FC<{ user: UserProfile }> = ({ user }) => {
                         <input
                             id="sync-server-url"
                             type="text"
-                            placeholder="https://smart-chalk-apex.vercel.app/api"
+                            placeholder="http://localhost:3001"
                             value={syncServerUrl}
                             onChange={(e) => setSyncServerUrl(e.target.value)}
                             className="w-full p-2 border border-slate-300 rounded-lg focus:ring-1 focus:ring-brand-green focus:border-brand-green transition-shadow duration-200 text-sm"

@@ -23,7 +23,7 @@ const getBaseURL = (): string => {
     if (userEmail && userEmail.toLowerCase() === 'admin@smartchalk.co.za') {
         return 'http://localhost:3001/api';
     }
-    return 'https://smart-chalk-apex.vercel.app/api';
+    return 'http://localhost:3001';
 };
 
 // Create API instance with dynamic URL
@@ -226,7 +226,7 @@ export const performManualSync = async (serverUrl?: string) => {
             if (userEmail && userEmail.toLowerCase() === 'admin@smartchalk.co.za') {
                 targetUrl = 'http://localhost:3001';
             } else {
-                targetUrl = 'https://smart-chalk-apex.vercel.app/api';
+                targetUrl = 'http://localhost:3001';
             }
         }
         

@@ -1,6 +1,6 @@
-# Smart Chalk Apex - Docker Setup Guide
+# SmartChalk - Docker Setup Guide
 
-This guide will help you set up Smart Chalk Apex using Docker for local development and easy VPS deployment.
+This guide will help you set up SmartChalk using Docker for local development and easy VPS deployment.
 
 ## Prerequisites
 
@@ -148,7 +148,7 @@ docker-compose exec frontend sh
 ```bash
 # On your VPS
 git clone <your-repo-url>
-cd Smart-Chalk-Apex
+cd SmartChalk
 
 # Set up environment
 cp .env.example .env.local
@@ -208,7 +208,7 @@ docker-compose exec database pg_isready -U smart_chalk_user
 ## File Structure
 
 ```
-Smart-Chalk-Apex/
+SmartChalk/
 ├── docker-compose.yml          # Production setup
 ├── docker-compose.dev.yml      # Development setup
 ├── Dockerfile                  # Frontend container

@@ -3,7 +3,7 @@ import { Loader } from './Loader';
 import { GoogleLogin } from '@react-oauth/google';
 import { jwtDecode } from 'jwt-decode';
 import type { UserProfile } from '../types';
-import { ApexLogo, EmailIcon, LockIcon } from './Icons';
+import { SmartChalkLogo, EmailIcon, LockIcon } from './Icons';
 
 
 interface LoginViewProps {
@@ -90,7 +90,7 @@ export const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess }) => {
              <div className="w-full max-w-md">
                 <div className="bg-white p-8 rounded-2xl shadow-2xl border border-slate-200/50">
                     <div className="text-center mb-8">
-                        <ApexLogo className="h-20 w-auto mx-auto" />
+                        <SmartChalkLogo className="h-28 w-auto mx-auto" />
                         <h1 className="text-3xl font-bold text-brand-navy mt-6">
                             {isSignUp ? 'Create an Account' : 'Welcome Back'}
                         </h1>

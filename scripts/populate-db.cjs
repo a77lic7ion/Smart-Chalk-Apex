@@ -1,4 +1,5 @@
 const fs = require('fs');
+const path = require('path');
 const { Pool } = require('pg');
 
 const pool = new Pool({
@@ -9,7 +10,7 @@ const pool = new Pool({
   port: 5432,
 });
 
-const jsonData = JSON.parse(fs.readFileSync('c:\\Users\\Shaun\\OneDrive\\Desktop\\Apex\\Smart-Chalk-Apex\\DBexample.json', 'utf-8'));
+const jsonData = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'DBexample.json'), 'utf-8'));
 
 async function populateDatabase() {
   for (const item of jsonData.trainingData) {

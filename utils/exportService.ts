@@ -4,8 +4,7 @@ import PptxGenJS from 'pptxgenjs';
 import { db } from '../db';
 import type { SavedTest, Presentation, Slide, ImagePlaceholder, LessonPlan, FormalTestParams, TrainingQuestion, SavedHomework, ManualExam, ParsedExamData, ExamQuestion, Curriculum } from '../types';
 import { Document, Paragraph, TextRun, ImageRun, Packer as DocxPacker, HeadingLevel, AlignmentType, convertInchesToTwip, Header, Footer, PageNumber, PageBorderDisplay, PageBorders, PageBorderOffsetFrom, BorderStyle, ISectionOptions, HeightRule } from 'docx';
-import headerLogo from '@/Header2.png';
-import footerLogo from '@/logo1.png';
+import templateLogoMark from '@/SmartChalk-logo-mark.png';
 
 const base64ToArrayBuffer = (base64: string): ArrayBuffer => {
     const dataPart = base64.split(',')[1];
@@ -53,7 +52,7 @@ const arrayBufferToBase64 = (buffer: ArrayBuffer): string => {
 
 const getHeaderLogoBuffer = async (): Promise<ArrayBuffer> => {
     try {
-        return await getLogoAsArrayBuffer(headerLogo);
+        return await getLogoAsArrayBuffer(templateLogoMark);
     } catch (error) {
         console.error("Failed to fetch header logo for DOCX:", error);
         throw error;
@@ -62,7 +61,7 @@ const getHeaderLogoBuffer = async (): Promise<ArrayBuffer> => {
 
 const getFooterLogoBuffer = async (): Promise<ArrayBuffer> => {
     try {
-        return await getLogoAsArrayBuffer(footerLogo);
+        return await getLogoAsArrayBuffer(templateLogoMark);
     } catch (error) {
         console.error("Failed to fetch footer logo for DOCX:", error);
         throw error;
@@ -79,7 +78,7 @@ const createFooter = (logoBuffer: ArrayBuffer) => {
                 children: [
                     new ImageRun({
                         data: logoBuffer,
-                        transformation: { height: 30, width: 120 },
+                        transformation: { height: 28, width: 31 },
                         type: 'png',
                     }),
                     new TextRun({
@@ -107,7 +106,7 @@ const createCoverPage = async (
 
     const logoBase64 = arrayBufferToBase64(logoBuffer);
     const dimensions = await getImageDimensions(logoBase64);
-    const targetWidth = 300;
+    const targetWidth = 150;
     const aspectRatio = dimensions.height / dimensions.width;
     const targetHeight = Math.round(targetWidth * aspectRatio);
     
@@ -347,7 +346,7 @@ export const exportPresentationAsPptx = async (presentation: Presentation): Prom
     const headerLogoBase64 = arrayBufferToBase64(headerLogoBuffer);
     const logoDimensions = await getImageDimensions(headerLogoBase64);
     
-    const logoW = 3.0;
+    const logoW = 1.45;
     const logoH = (logoW * logoDimensions.height) / logoDimensions.width;
 
     const titleSlide = pptx.addSlide();

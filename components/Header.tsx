@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, useLayoutEffect, useMemo } from 'react';
 import type { UserProfile } from '../types';
-import { ApexLogo } from './Icons';
+import { SmartChalkLogo } from './Icons';
 import type { AppView } from '../App';
 
 interface HeaderProps {
@@ -89,7 +89,7 @@ export const Header: React.FC<HeaderProps> = ({ currentView, setView, user, onLo
     return (
         <header className="bg-brand-light-grey sticky top-0 z-40 shadow-sm">
             <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-2 flex justify-between items-center">
-                <ApexLogo className="h-10 w-auto" />
+                <SmartChalkLogo className="h-12 w-auto" />
 
                 <div className="flex-grow flex justify-center">
                     <nav className="animated-tab-bar" ref={navRef}>
