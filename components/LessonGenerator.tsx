@@ -274,7 +274,7 @@ export const LessonGenerator: React.FC<LessonGeneratorProps> = ({ user, loadId, 
                     <>
                     <form onSubmit={(e) => { e.preventDefault(); handleGenerate() }} className="space-y-6 max-w-4xl mx-auto">
                         <div>
-                            <h2 className="text-xl font-bold text-brand-navy mb-2">Lesson Plan Generator</h2>
+                            <h2 className="text-xl font-bold text-brand-black mb-2">Lesson Plan Generator</h2>
                             <p className="text-slate-600">Design comprehensive lesson plans complete with objectives, activities, and image placeholders.</p>
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -306,16 +306,16 @@ export const LessonGenerator: React.FC<LessonGeneratorProps> = ({ user, loadId, 
 
                      {savedLessons && savedLessons.length > 0 && (
                         <div className="mt-12 pt-8 border-t border-slate-200">
-                             <h3 className="text-lg font-semibold text-brand-navy mb-3">My Saved Lesson Plans</h3>
+                             <h3 className="text-lg font-semibold text-brand-black mb-3">My Saved Lesson Plans</h3>
                              <div className="space-y-3">
                                 {savedLessons.map(p => (
                                     <div key={p.id} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg border border-slate-200">
                                         <div>
-                                            <p className="font-semibold text-brand-dark-grey">{p.name}</p>
+                                            <p className="font-semibold text-brand-charcoal">{p.name}</p>
                                             <p className="text-xs text-slate-500">Created: {new Date(p.createdAt).toLocaleString()}</p>
                                         </div>
                                         <div className="flex items-center gap-2">
-                                            <button onClick={() => handleLoadLesson(p.id)} title="Load Lesson Plan" className="p-1.5 text-slate-500 hover:text-brand-green hover:bg-green-50 rounded-lg transition-colors"><FolderOpenIcon className="h-5 w-5"/></button>
+                                            <button onClick={() => handleLoadLesson(p.id)} title="Load Lesson Plan" className="p-1.5 text-slate-500 hover:text-brand-yellow hover:bg-yellow-50 rounded-lg transition-colors"><FolderOpenIcon className="h-5 w-5"/></button>
                                             <button onClick={() => handleDeleteLesson(p.id)} title="Delete Lesson Plan" className="p-1.5 text-slate-500 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"><TrashIcon className="h-5 w-5"/></button>
                                         </div>
                                     </div>

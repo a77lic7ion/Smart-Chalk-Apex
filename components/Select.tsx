@@ -16,10 +16,10 @@ export const Select: React.FC<SelectProps> = ({ label, options, helperText, clas
   const id = useId();
   return (
     <div className={wrapperClassName}>
-      <label htmlFor={id} className="block text-sm font-medium text-brand-dark-grey mb-1">{label}</label>
+      <label htmlFor={id} className="block text-sm font-medium text-brand-charcoal mb-1">{label}</label>
       <select
         id={id}
-        className={`w-full p-2 border border-stone-300 rounded-lg shadow-sm focus:ring-1 focus:ring-brand-green focus:border-brand-green transition-shadow ${className}`}
+        className={`w-full p-2 border border-stone-300 rounded-lg shadow-sm focus:ring-1 focus:ring-brand-yellow focus:border-brand-yellow transition-shadow ${className}`}
         {...props}
       >
         {options.map(option => (

@@ -19,10 +19,10 @@ const ShortcutCard: React.FC<{
 }> = ({ icon: Icon, title, description, onClick }) => (
     <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 flex flex-col">
         <div className="flex items-center gap-4 mb-3">
-            <div className="bg-green-100 text-brand-green p-3 rounded-lg">
+            <div className="bg-yellow-100 text-brand-yellow p-3 rounded-lg">
                 <Icon className="h-7 w-7" />
             </div>
-            <h3 className="text-xl font-semibold text-brand-navy">{title}</h3>
+            <h3 className="text-xl font-semibold text-brand-black">{title}</h3>
         </div>
         <p className="text-slate-600 text-sm mb-4 flex-grow">{description}</p>
         <Button onClick={onClick} variant="secondary" className="mt-auto self-start">
@@ -47,7 +47,7 @@ export const DashboardView: React.FC<DashboardProps> = ({ user, setView, isAdmin
                 <div className="max-w-5xl mx-auto space-y-16">
                     {/* Hero Section */}
                     <div className="text-center">
-                        <h1 className="text-4xl md:text-5xl font-bold text-brand-navy">
+                        <h1 className="text-4xl md:text-5xl font-bold text-brand-black">
                             Welcome back, {firstName}!
                         </h1>
                         <p className="text-lg text-slate-600 mt-3 max-w-2xl mx-auto">
@@ -57,7 +57,7 @@ export const DashboardView: React.FC<DashboardProps> = ({ user, setView, isAdmin
 
                     {/* Quick Start Shortcuts */}
                     <div>
-                        <h2 className="text-2xl font-bold text-brand-navy mb-6 text-center">Get Started Quickly</h2>
+                        <h2 className="text-2xl font-bold text-brand-black mb-6 text-center">Get Started Quickly</h2>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8">
                             <ShortcutCard
                                 icon={NotepadPencilIconSimple}
@@ -88,14 +88,14 @@ export const DashboardView: React.FC<DashboardProps> = ({ user, setView, isAdmin
                     
                     {/* Value Proposition Section */}
                     <div className="bg-white p-8 rounded-2xl shadow-lg border border-slate-200">
-                         <h2 className="text-2xl font-bold text-brand-navy mb-4 text-center">Designed for South African Educators</h2>
+                         <h2 className="text-2xl font-bold text-brand-black mb-4 text-center">Designed for South African Educators</h2>
                          <div className="flex flex-col md:flex-row gap-8 items-center text-center md:text-left">
-                            <div className="text-brand-green p-4 bg-green-50 rounded-full">
+                            <div className="text-brand-yellow p-4 bg-yellow-50 rounded-full">
                                 <GlobeAltIcon className="h-20 w-20" />
                             </div>
                             <div className="space-y-4">
                                 <p className="text-slate-700">
-                                    Our platform understands the unique needs of teachers in South Africa. We support multiple curricula including <strong className="text-brand-green">CAPS, IEB, and Cambridge</strong>, ensuring the content you generate is always relevant and compliant.
+                                    Our platform understands the unique needs of teachers in South Africa. We support multiple curricula including <strong className="text-brand-yellow">CAPS, IEB, and Cambridge</strong>, ensuring the content you generate is always relevant and compliant.
                                 </p>
                                  <p className="text-slate-700">
                                     From generating a Grade 5 Life Skills test to a Grade 12 Physical Sciences lesson plan, our AI is trained to assist you. Save hours of prep time and focus on what matters most: teaching.

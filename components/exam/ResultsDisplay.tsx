@@ -93,18 +93,18 @@ const EditableParsedQuestion: React.FC<{
             <div className="p-4 flex justify-between items-start gap-4">
                 <div className="flex-grow">
                     <div className="flex justify-between items-baseline">
-                        <p className="font-semibold text-brand-navy">{question.questionNumber}</p>
+                        <p className="font-semibold text-brand-black">{question.questionNumber}</p>
                         {question.marks && <p className="text-sm font-medium text-slate-500">{question.marks}</p>}
                     </div>
                     {isEditing ? (
                         <textarea
                             value={editedText}
                             onChange={(e) => setEditedText(e.target.value)}
-                            className="w-full text-sm p-2 mt-2 border border-slate-300 rounded-lg focus:ring-1 focus:ring-brand-green focus:border-brand-green resize-y"
+                            className="w-full text-sm p-2 mt-2 border border-slate-300 rounded-lg focus:ring-1 focus:ring-brand-yellow focus:border-brand-yellow resize-y"
                             rows={4}
                         />
                     ) : (
-                         <div className="prose prose-sm max-w-none mt-1 text-brand-dark-grey">
+                         <div className="prose prose-sm max-w-none mt-1 text-brand-charcoal">
                             <FormattedText text={question.text} />
                          </div>
                     )}
@@ -146,18 +146,18 @@ const EditableParsedQuestion: React.FC<{
             )}
             
             {question.annexure && (
-                <div className="mt-2 p-4 bg-green-50 border-t border-green-200">
-                    <h4 className="font-bold text-green-800">Linked Annexure {question.annexure.annexureId} (Answer)</h4>
-                    <div className="text-sm text-green-900 mt-2">
+                <div className="mt-2 p-4 bg-yellow-50 border-t border-yellow-200">
+                    <h4 className="font-bold text-brand-black">Linked Annexure {question.annexure.annexureId} (Answer)</h4>
+                    <div className="text-sm text-brand-black mt-2">
                         <FormattedText text={question.annexure.text} />
                     </div>
                     {question.annexure.images.length > 0 && (
                          <div className="mt-3">
-                            <h5 className="text-xs font-bold uppercase text-green-600 mb-2">Images in Annexure</h5>
+                            <h5 className="text-xs font-bold uppercase text-brand-yellow mb-2">Images in Annexure</h5>
                             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                                 {question.annexure.images.map((imgUrl, index) => (
                                     <a key={index} href={imgUrl} target="_blank" rel="noopener noreferrer">
-                                        <img src={imgUrl} alt={`Image for annexure ${question.annexure?.annexureId}`} className="rounded border border-green-300 hover:shadow-lg transition-shadow" />
+                                        <img src={imgUrl} alt={`Image for annexure ${question.annexure?.annexureId}`} className="rounded border border-yellow-300 hover:shadow-lg transition-shadow" />
                                     </a>
                                 ))}
                             </div>
@@ -221,9 +221,9 @@ export const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ data, onBack, on
     
     if (successMessage) {
         return (
-            <div className="p-8 bg-green-50 rounded-xl shadow-md border border-green-200 text-center">
-                <h3 className="text-lg font-bold text-green-800">Success!</h3>
-                <p className="text-green-700 mt-2">{successMessage}</p>
+            <div className="p-8 bg-yellow-50 rounded-xl shadow-md border border-yellow-200 text-center">
+                <h3 className="text-lg font-bold text-brand-black">Success!</h3>
+                <p className="text-brand-charcoal mt-2">{successMessage}</p>
                 <Button onClick={onBack} variant="primary" className="mt-4">
                     Parse Another Document
                 </Button>
@@ -248,7 +248,7 @@ export const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ data, onBack, on
             <div className="bg-white p-6 rounded-xl shadow-md border border-slate-200 flex-shrink-0">
                  <div className="flex justify-between items-center mb-6 border-b border-slate-200 pb-4">
                     <div>
-                        <h1 className="text-xl font-bold text-brand-navy">Staging Area</h1>
+                        <h1 className="text-xl font-bold text-brand-black">Staging Area</h1>
                         <p className="text-slate-600 text-sm">Review, edit, and finalize the extracted questions.</p>
                     </div>
                     <Button onClick={onBack} variant="ghost" disabled={isBusy}>
@@ -258,7 +258,7 @@ export const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ data, onBack, on
                 </div>
                 
                 <div className="p-4 bg-slate-50 border border-slate-200 rounded-lg">
-                    <h3 className="font-semibold text-brand-navy mb-3 text-sm">Database Commit Settings</h3>
+                    <h3 className="font-semibold text-brand-black mb-3 text-sm">Database Commit Settings</h3>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <Select label="Curriculum" name="curriculum" value={metadata.curriculum} onChange={handleMetadataChange} options={CURRICULUM_OPTS_FOR_SELECT} />
                         <Select label="Grade" name="grade" value={metadata.grade} onChange={handleMetadataChange} options={GRADES_OPTIONS.map(opt => ({value: opt.value, label: opt.label}))} />
@@ -271,7 +271,7 @@ export const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ data, onBack, on
                 {Object.keys(questionsBySection).length > 0 ? (
                     Object.entries(questionsBySection).map(([section, questions]) => (
                         <div key={section}>
-                            <h2 className="text-lg font-semibold text-brand-navy border-b-2 border-brand-green pb-2 mb-4">{section}</h2>
+                            <h2 className="text-lg font-semibold text-brand-black border-b-2 border-brand-yellow pb-2 mb-4">{section}</h2>
                             <div className="space-y-4">
                                 {questions.map(q => <EditableParsedQuestion key={q.id} question={q} onUpdate={onUpdateQuestion} />)}
                             </div>

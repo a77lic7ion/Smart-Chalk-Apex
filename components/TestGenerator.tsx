@@ -106,14 +106,14 @@ const AddCustomQuestionModal: React.FC<{
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
             <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl flex flex-col">
                  <div className="p-6 border-b border-slate-200">
-                    <h2 className="text-lg font-semibold text-brand-navy">Add Custom Question</h2>
+                    <h2 className="text-lg font-semibold text-brand-black">Add Custom Question</h2>
                  </div>
                  <div className="p-6 space-y-4 overflow-y-auto">
                      {error && <p className="text-sm text-red-600">{error}</p>}
                      <TextArea label="Question" value={question} onChange={(e) => setQuestion(e.target.value)} rows={3} />
                      <TextArea label="Answer / Memo" value={answer} onChange={(e) => setAnswer(e.target.value)} rows={4} />
                      <div>
-                        <label className="block text-sm font-medium text-brand-dark-grey mb-1">Image (Optional)</label>
+                        <label className="block text-sm font-medium text-brand-charcoal mb-1">Image (Optional)</label>
                         <div className="flex items-center gap-4">
                             <Button onClick={() => fileInputRef.current?.click()} variant="secondary" size="sm" disabled={isProcessing}>
                                 <UploadIcon className="h-4 w-4 mr-2" />
@@ -148,7 +148,7 @@ const StagingArea: React.FC<{
         <div className="mt-6">
             <div className="flex justify-between items-center mb-4 border-b pb-4">
                 <div>
-                    <h2 className="text-lg font-semibold text-brand-navy">Review & Commit Questions</h2>
+                    <h2 className="text-lg font-semibold text-brand-black">Review & Commit Questions</h2>
                     <p className="text-sm text-slate-600">Edit generated questions or add your own before saving.</p>
                 </div>
                 <Button onClick={onAddCustomQuestion} variant="secondary" size="sm">
@@ -381,7 +381,7 @@ export const TestGenerator: React.FC<{ user: UserProfile, loadId: string | null;
                 {stagedQuestions === null ? (
                     <form onSubmit={handleFormSubmit} className="space-y-6">
                         <div>
-                            <h2 className="text-xl font-bold text-brand-navy mb-2">{t('feature.testGenerator', { fallback: "Test Generator"})}</h2>
+                            <h2 className="text-xl font-bold text-brand-black mb-2">{t('feature.testGenerator', { fallback: "Test Generator"})}</h2>
                             <p className="text-slate-600">{t('testGenerator.subtitle', { fallback: `Craft customized training data for your models.`})}</p>
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -395,14 +395,14 @@ export const TestGenerator: React.FC<{ user: UserProfile, loadId: string | null;
                                 {topicSuggestions.length > 0 && (
                                     <div className="mt-2 flex flex-wrap gap-2">
                                         {topicSuggestions.map(suggestion => (
-                                            <Button key={suggestion} type="button" variant="ghost" size="sm" onClick={() => handleTopicSuggestionClick(suggestion)} className={`border border-green-200 hover:bg-green-50 ${params.topic === suggestion ? 'bg-green-100 text-green-800' : 'text-slate-600'}`}>{suggestion}</Button>
+                                            <Button key={suggestion} type="button" variant="ghost" size="sm" onClick={() => handleTopicSuggestionClick(suggestion)} className={`border border-yellow-200 hover:bg-yellow-50 ${params.topic === suggestion ? 'bg-yellow-100 text-brand-black' : 'text-slate-600'}`}>{suggestion}</Button>
                                         ))}
                                     </div>
                                 )}
                             </div>
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-brand-dark-grey mb-1">{t('testGenerator.form.presetsLabel', { fallback: "Test Structure Presets (Optional)"})}</label>
+                            <label className="block text-sm font-medium text-brand-charcoal mb-1">{t('testGenerator.form.presetsLabel', { fallback: "Test Structure Presets (Optional)"})}</label>
                             <div className="flex flex-wrap gap-2 mb-2">
                                 {TEST_STRUCTURE_PRESETS.map(preset => (
                                     <Button key={preset.label} type="button" variant="secondary" size="sm" onClick={() => handlePresetSelect(preset.value)}>

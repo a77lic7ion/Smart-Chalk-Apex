@@ -7,14 +7,14 @@ const sizeClasses = {
 };
 
 const variantClasses = {
-  primary: 'bg-brand-green text-white hover:bg-green-700 disabled:bg-stone-300',
+  primary: 'bg-brand-yellow text-white hover:bg-yellow-500 disabled:bg-stone-300',
   secondary: 'bg-stone-200 text-stone-800 hover:bg-stone-300 disabled:bg-stone-100',
   ghost: 'bg-transparent text-stone-600 hover:bg-stone-100 disabled:text-stone-300',
   danger: 'bg-red-500 text-white hover:bg-red-600 disabled:bg-red-200',
 };
 
 const variantRingClasses = {
-  primary: 'focus:ring-brand-green',
+  primary: 'focus:ring-brand-yellow',
   secondary: 'focus:ring-stone-400',
   ghost: 'focus:ring-stone-400',
   danger: 'focus:ring-red-500',

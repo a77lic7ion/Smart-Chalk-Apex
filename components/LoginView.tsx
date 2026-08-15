@@ -91,7 +91,7 @@ export const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess }) => {
                 <div className="bg-white p-8 rounded-2xl shadow-2xl border border-slate-200/50">
                     <div className="text-center mb-8">
                         <SmartChalkLogo className="h-28 w-auto mx-auto" />
-                        <h1 className="text-3xl font-bold text-brand-navy mt-6">
+                        <h1 className="text-3xl font-bold text-brand-black mt-6">
                             {isSignUp ? 'Create an Account' : 'Welcome Back'}
                         </h1>
                         <p className="text-slate-500 mt-1">
@@ -101,7 +101,7 @@ export const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess }) => {
 
                     {isLoading ? (
                         <div className="flex flex-col items-center justify-center space-y-2 h-48">
-                           <Loader className="text-brand-green" />
+                           <Loader className="text-brand-yellow" />
                            <p className="text-sm font-medium text-slate-600">Signing In...</p>
                         </div>
                     ) : (
@@ -122,7 +122,7 @@ export const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess }) => {
                                         value={email}
                                         onChange={(e) => setEmail(e.target.value)}
                                         placeholder="email@example.com"
-                                        className="w-full pl-10 pr-3 py-2 border border-slate-300 rounded-lg focus:ring-1 focus:ring-brand-green focus:border-brand-green transition-shadow"
+                                        className="w-full pl-10 pr-3 py-2 border border-slate-300 rounded-lg focus:ring-1 focus:ring-brand-yellow focus:border-brand-yellow transition-shadow"
                                         required
                                     />
                                 </div>
@@ -139,14 +139,14 @@ export const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess }) => {
                                         value={password}
                                         onChange={(e) => setPassword(e.target.value)}
                                         placeholder="Password"
-                                        className="w-full pl-10 pr-3 py-2 border border-slate-300 rounded-lg focus:ring-1 focus:ring-brand-green focus:border-brand-green transition-shadow"
+                                        className="w-full pl-10 pr-3 py-2 border border-slate-300 rounded-lg focus:ring-1 focus:ring-brand-yellow focus:border-brand-yellow transition-shadow"
                                         required
                                     />
                                 </div>
                             </div>
                             <button
                                 type="submit"
-                                className="w-full flex justify-center items-center bg-brand-green text-white font-semibold py-2.5 px-4 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-green transition-colors duration-200"
+                                className="w-full flex justify-center items-center bg-brand-yellow text-white font-semibold py-2.5 px-4 rounded-lg hover:bg-yellow-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-yellow transition-colors duration-200"
                             >
                                 {isSignUp ? 'Sign Up' : 'Sign In'}
                             </button>
@@ -177,7 +177,7 @@ export const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess }) => {
                                     setIsSignUp(!isSignUp);
                                     setError(null);
                                 }}
-                                className="font-semibold text-brand-green hover:text-green-700 focus:outline-none"
+                                className="font-semibold text-brand-yellow hover:text-brand-charcoal focus:outline-none"
                             >
                                 {isSignUp ? "Sign In" : "Sign Up"}
                             </button>

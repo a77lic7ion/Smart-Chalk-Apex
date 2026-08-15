@@ -19,9 +19,9 @@ const readFileAsBase64 = (file: File): Promise<string> => {
 };
 
 const IntroSlide: React.FC<{ slide: Slide }> = ({ slide }) => (
-    <div className="bg-white border-2 border-brand-green rounded-xl p-8 transition-shadow hover:shadow-lg h-full flex flex-col justify-center items-center text-center">
+    <div className="bg-white border-2 border-brand-yellow rounded-xl p-8 transition-shadow hover:shadow-lg h-full flex flex-col justify-center items-center text-center">
         <SmartChalkLogoMark className="h-24 w-auto mb-6" />
-        <h1 className="text-4xl font-bold text-brand-navy">{slide.title}</h1>
+        <h1 className="text-4xl font-bold text-brand-black">{slide.title}</h1>
         <div className="text-lg text-slate-600 mt-2">
             <FormattedText text={slide.content} />
         </div>
@@ -139,18 +139,18 @@ const ContentSlide: React.FC<{ slide: Slide, onUpdate: (updatedSlide: Slide) => 
                 onClose={() => setIsLibraryModalOpen(false)}
                 onImageSelect={handleLibraryImageSelect}
             />
-            <div className="bg-white border-2 border-brand-green rounded-xl p-4 transition-shadow hover:shadow-lg h-full flex gap-4">
+            <div className="bg-white border-2 border-brand-yellow rounded-xl p-4 transition-shadow hover:shadow-lg h-full flex gap-4">
                 {/* Left Column (Image) */}
                  <div className="w-1/3 flex-shrink-0 flex flex-col gap-2">
                     <div 
-                        className="flex-grow bg-slate-50 rounded-lg border-2 border-dashed border-slate-300 flex items-center justify-center text-center p-4 relative cursor-pointer hover:border-brand-green transition-colors focus:outline-none focus:ring-2 focus:ring-brand-green"
+                        className="flex-grow bg-slate-50 rounded-lg border-2 border-dashed border-slate-300 flex items-center justify-center text-center p-4 relative cursor-pointer hover:border-brand-yellow transition-colors focus:outline-none focus:ring-2 focus:ring-brand-yellow"
                         onClick={() => !isProcessing && fileInputRef.current?.click()}
                         onPaste={handlePaste}
                         tabIndex={0}
                         aria-label="Image upload area. Click to upload, or focus and paste an image."
                     >
                         {isProcessing ? (
-                            <Loader className="h-8 w-8 text-brand-green" />
+                            <Loader className="h-8 w-8 text-brand-yellow" />
                         ) : slide.imageData ? (
                             <img src={slide.imageData} alt="Slide visual" className="max-h-full max-w-full object-contain rounded" />
                         ) : (

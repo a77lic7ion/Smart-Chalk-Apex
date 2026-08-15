@@ -120,7 +120,7 @@ export const ImagePlaceholderCard: React.FC<ImagePlaceholderCardProps> = ({ plac
 
     const getStatusColor = () => {
         switch(placeholder.status) {
-            case 'uploaded': return 'border-green-400 bg-green-50';
+            case 'uploaded': return 'border-yellow-400 bg-yellow-50';
             case 'generating': return 'border-blue-400 bg-blue-50';
             case 'pending':
             default: return 'border-slate-300 bg-white';
@@ -141,15 +141,15 @@ export const ImagePlaceholderCard: React.FC<ImagePlaceholderCardProps> = ({ plac
                 onImageSelect={handleLibraryImageSelect}
             />
             <div className={`p-4 rounded-xl shadow-sm border ${getStatusColor()} transition-colors`}>
-                <p className="font-semibold text-brand-navy text-sm mb-2">{placeholder.description}</p>
+                <p className="font-semibold text-brand-black text-sm mb-2">{placeholder.description}</p>
                  <div
-                    className="relative w-full h-32 bg-slate-100 rounded-lg border-2 border-dashed border-slate-300 flex items-center justify-center text-center p-2 cursor-pointer hover:border-brand-green transition-colors focus:outline-none focus:ring-2 focus:ring-brand-green mb-2"
+                    className="relative w-full h-32 bg-slate-100 rounded-lg border-2 border-dashed border-slate-300 flex items-center justify-center text-center p-2 cursor-pointer hover:border-brand-yellow transition-colors focus:outline-none focus:ring-2 focus:ring-brand-yellow mb-2"
                     onClick={() => !isBusy && fileInputRef.current?.click()}
                     onPaste={handlePaste}
                     tabIndex={0}
                     aria-label="Image upload area. Click to upload, or focus and paste an image."
                 >
-                    {isBusy && <Loader className="h-6 w-6 text-brand-green" />}
+                    {isBusy && <Loader className="h-6 w-6 text-brand-yellow" />}
                     
                     {!isBusy && placeholder.status === 'uploaded' && placeholder.imageData && (
                         <img src={placeholder.imageData} alt={placeholder.description} className="max-h-full max-w-full object-contain rounded" />
@@ -180,7 +180,7 @@ export const ImagePlaceholderCard: React.FC<ImagePlaceholderCardProps> = ({ plac
                 </div>
 
                 {placeholder.status === 'uploaded' && (
-                    <div className="flex items-center gap-2 mt-3 text-xs font-semibold text-green-700">
+                    <div className="flex items-center gap-2 mt-3 text-xs font-semibold text-brand-charcoal">
                         <CheckIcon className="h-4 w-4" />
                         <span>Image Ready</span>
                     </div>

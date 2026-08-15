@@ -104,7 +104,7 @@ const App: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-brand-light-grey font-sans text-brand-dark-grey flex flex-col">
+    <div className="min-h-screen bg-brand-paper font-sans text-brand-charcoal flex flex-col">
       <Header 
         currentView={view} 
         setView={setView}

@@ -125,8 +125,8 @@ const ContentCard: React.FC<ContentCardProps> = ({ id, name, createdAt, type, on
                 )}
                  {onExport && (
                      <div className="relative" ref={exportMenuRef}>
-                        <button onClick={handleExportClick} title={getExportTitle()} disabled={isExporting} className="p-1.5 text-slate-500 hover:text-green-600 hover:bg-white rounded-lg transition-colors shadow-sm border border-slate-200 disabled:cursor-wait disabled:bg-slate-100">
-                            {isExporting ? <Loader className="h-5 w-5 text-brand-green" /> : <DocumentArrowDownIcon className="h-5 w-5" />}
+                        <button onClick={handleExportClick} title={getExportTitle()} disabled={isExporting} className="p-1.5 text-slate-500 hover:text-brand-yellow hover:bg-white rounded-lg transition-colors shadow-sm border border-slate-200 disabled:cursor-wait disabled:bg-slate-100">
+                            {isExporting ? <Loader className="h-5 w-5 text-brand-yellow" /> : <DocumentArrowDownIcon className="h-5 w-5" />}
                         </button>
                         {isExportMenuOpen && (type === 'test' || type === 'parsedExam') && (
                             <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-xl border border-slate-200 z-10 p-2">
@@ -146,7 +146,7 @@ const ContentCard: React.FC<ContentCardProps> = ({ id, name, createdAt, type, on
                         )}
                     </div>
                  )}
-                <button onClick={handleLoad} title="Load Content" disabled={isExporting} className="p-1.5 text-slate-500 hover:text-brand-green hover:bg-white rounded-lg transition-colors shadow-sm border border-slate-200 disabled:opacity-50">
+                <button onClick={handleLoad} title="Load Content" disabled={isExporting} className="p-1.5 text-slate-500 hover:text-brand-yellow hover:bg-white rounded-lg transition-colors shadow-sm border border-slate-200 disabled:opacity-50">
                     <FolderOpenIcon className="h-5 w-5" />
                 </button>
                 <button onClick={handleDelete} title="Delete Content" disabled={isExporting} className="p-1.5 text-slate-500 hover:text-red-600 hover:bg-white rounded-lg transition-colors shadow-sm border border-slate-200 disabled:opacity-50">
@@ -171,7 +171,7 @@ interface ContentSectionProps {
 
 const ContentSection: React.FC<ContentSectionProps> = ({ title, items, type, exportingId, onLoad, onDelete, onExport, onFormatExam, onCreateHomework }) => (
     <section>
-        <h2 className="text-xl md:text-2xl font-bold text-brand-navy mb-4 border-b-2 border-green-300 pb-2">{title}</h2>
+        <h2 className="text-xl md:text-2xl font-bold text-brand-black mb-4 border-b-2 border-yellow-300 pb-2">{title}</h2>
         {items && items.length > 0 ? (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 {items.map((item) => (
@@ -359,7 +359,7 @@ export const MyContentView: React.FC<MyContentViewProps> = ({ user, isAdmin, onC
         return (
             <main className="container mx-auto px-4 py-8 flex justify-center items-center h-full">
                 <div className="flex flex-col items-center">
-                    <Loader className="h-12 w-12 text-brand-green" />
+                    <Loader className="h-12 w-12 text-brand-yellow" />
                     <p className="mt-4 text-slate-600 font-semibold">Loading your content...</p>
                 </div>
             </main>
@@ -376,7 +376,7 @@ export const MyContentView: React.FC<MyContentViewProps> = ({ user, isAdmin, onC
         <main className="container mx-auto px-4 py-8">
             <div className="max-w-6xl mx-auto space-y-12">
                  <div className="text-left">
-                    <h1 className="text-3xl md:text-4xl font-bold text-brand-navy">My Content</h1>
+                    <h1 className="text-3xl md:text-4xl font-bold text-brand-black">My Content</h1>
                     <p className="text-lg text-slate-600 mt-1">A central place for all your generated and parsed content.</p>
                 </div>
                 
@@ -387,7 +387,7 @@ export const MyContentView: React.FC<MyContentViewProps> = ({ user, isAdmin, onC
                 )}
                 
                 <section>
-                    <h2 className="text-xl md:text-2xl font-bold text-brand-navy mb-4 border-b-2 border-green-300 pb-2">Parsed & Manual Exams</h2>
+                    <h2 className="text-xl md:text-2xl font-bold text-brand-black mb-4 border-b-2 border-yellow-300 pb-2">Parsed & Manual Exams</h2>
                     {combinedExams && combinedExams.length > 0 ? (
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                             {combinedExams.map((item) => (

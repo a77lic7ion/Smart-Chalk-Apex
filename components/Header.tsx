@@ -87,7 +87,7 @@ export const Header: React.FC<HeaderProps> = ({ currentView, setView, user, onLo
     }, []);
 
     return (
-        <header className="bg-brand-light-grey sticky top-0 z-40 shadow-sm">
+        <header className="bg-brand-paper sticky top-0 z-40 shadow-sm">
             <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-2 flex justify-between items-center">
                 <SmartChalkLogo className="h-12 w-auto" />
 
@@ -124,7 +124,7 @@ export const Header: React.FC<HeaderProps> = ({ currentView, setView, user, onLo
                     {isProfileOpen && (
                         <div ref={profileRef} className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-xl border border-slate-200 z-50 p-2">
                             <div className="px-3 py-2 border-b border-slate-200">
-                                <p className="text-sm font-semibold text-brand-navy truncate">{user.name || 'User'}</p>
+                                <p className="text-sm font-semibold text-brand-black truncate">{user.name || 'User'}</p>
                                 <p className="text-xs text-slate-500 truncate">{user.email}</p>
                             </div>
                             <div className="py-1">

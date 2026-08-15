@@ -82,7 +82,7 @@ export const AdminDataCurationView: React.FC = () => {
   return (
     <main className="p-4 md:p-8 max-w-6xl mx-auto">
       <div className="bg-white p-6 rounded-xl shadow-md border border-slate-200">
-        <h1 className="text-2xl font-bold text-brand-navy">Admin Data Curation</h1>
+        <h1 className="text-2xl font-bold text-brand-black">Admin Data Curation</h1>
         <p className="mt-1 text-slate-600 mb-6">
           Generate, review, and curate fine-tuning data for the AI models.
         </p>
@@ -132,7 +132,7 @@ export const AdminDataCurationView: React.FC = () => {
         <div className="mt-8">
           <div className="flex justify-between items-center mb-4">
             <div>
-              <h2 className="text-2xl font-bold text-brand-navy">Review & Curate ({generatedQuestions.length})</h2>
+              <h2 className="text-2xl font-bold text-brand-black">Review & Curate ({generatedQuestions.length})</h2>
               <p className="text-slate-600">Edit, delete, or add new questions before saving them to the database.</p>
             </div>
             <Button onClick={() => setIsAddModalOpen(true)} variant="secondary">
@@ -162,7 +162,7 @@ export const AdminDataCurationView: React.FC = () => {
             >
                 Save and Commit to DB
             </Button>
-            {saveSuccessMessage && <p className="text-green-600 mt-2">{saveSuccessMessage}</p>}
+            {saveSuccessMessage && <p className="text-brand-yellow mt-2">{saveSuccessMessage}</p>}
         </div>
       )}
 
@@ -220,7 +220,7 @@ const AddCustomQuestionModal: React.FC<{
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
       <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl flex flex-col">
         <div className="p-6 border-b border-slate-200">
-          <h2 className="text-lg font-semibold text-brand-navy">Add Custom Question</h2>
+          <h2 className="text-lg font-semibold text-brand-black">Add Custom Question</h2>
         </div>
         <div className="p-6 space-y-4 overflow-y-auto">
           {error && <p className="text-sm text-red-600">{error}</p>}

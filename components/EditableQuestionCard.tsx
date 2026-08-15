@@ -14,20 +14,20 @@ const DisplayCard: React.FC<{ questionData: TrainingQuestion }> = ({ questionDat
             </div>
         )}
         <div className="mb-3 prose prose-sm max-w-none">
-            <div className="font-semibold mb-1 text-brand-navy">
-                <span className="text-brand-green font-bold mr-2">Q:</span>
+            <div className="font-semibold mb-1 text-brand-black">
+                <span className="text-brand-yellow font-bold mr-2">Q:</span>
                 <FormattedText text={questionData.question} as="div" className="inline" />
             </div>
-            <div className="text-brand-dark-grey">
+            <div className="text-brand-charcoal">
                 <span className="text-slate-500 font-bold mr-2">A:</span>
                  <FormattedText text={questionData.answer} as="div" className="inline" />
             </div>
         </div>
         <div className="border-t border-slate-200 pt-3 text-sm text-slate-600 space-y-2">
             <div className="flex flex-wrap items-center gap-2">
-                <span className="font-semibold text-green-800 py-0.5 px-2 rounded-full bg-green-100 text-xs">{questionData.curriculum}</span>
-                <span className="font-semibold text-green-800 py-0.5 px-2 rounded-full bg-green-100 text-xs">{questionData.grade}</span>
-                <span className="font-semibold text-green-800 py-0.5 px-2 rounded-full bg-green-100 text-xs">{questionData.subject}</span>
+                <span className="font-semibold text-brand-black py-0.5 px-2 rounded-full bg-yellow-100 text-xs">{questionData.curriculum}</span>
+                <span className="font-semibold text-brand-black py-0.5 px-2 rounded-full bg-yellow-100 text-xs">{questionData.grade}</span>
+                <span className="font-semibold text-brand-black py-0.5 px-2 rounded-full bg-yellow-100 text-xs">{questionData.subject}</span>
             </div>
             <p className="text-xs text-slate-500 pt-1">{questionData.standard}</p>
         </div>
@@ -54,7 +54,7 @@ const TextAreaInput: React.FC<{ value: string; onChange: (e: React.ChangeEvent<H
         value={value}
         onChange={onChange}
         rows={rows}
-        className="w-full text-sm p-2 border border-slate-300 rounded-lg focus:ring-1 focus:ring-brand-green focus:border-brand-green resize-y transition-shadow"
+        className="w-full text-sm p-2 border border-slate-300 rounded-lg focus:ring-1 focus:ring-brand-yellow focus:border-brand-yellow resize-y transition-shadow"
     />
 );
 
@@ -63,7 +63,7 @@ const SelectInput: React.FC<{ value: string; onChange: (e: React.ChangeEvent<HTM
         name={name}
         value={value}
         onChange={onChange}
-        className="w-full text-sm p-2 border border-slate-300 rounded-lg focus:ring-1 focus:ring-brand-green focus:border-brand-green transition-shadow"
+        className="w-full text-sm p-2 border border-slate-300 rounded-lg focus:ring-1 focus:ring-brand-yellow focus:border-brand-yellow transition-shadow"
     >
         {options.map(opt => <option key={opt} value={opt}>{opt}</option>)}
     </select>
@@ -75,7 +75,7 @@ const TextInput: React.FC<{ value: string; onChange: (e: React.ChangeEvent<HTMLI
         name={name}
         value={value}
         onChange={onChange}
-        className="w-full text-sm p-2 border border-slate-300 rounded-lg focus:ring-1 focus:ring-brand-green focus:border-brand-green transition-shadow"
+        className="w-full text-sm p-2 border border-slate-300 rounded-lg focus:ring-1 focus:ring-brand-yellow focus:border-brand-yellow transition-shadow"
     />
 );
 
@@ -156,7 +156,7 @@ export const EditableQuestionCard: React.FC<EditableQuestionCardProps> = ({ ques
             <div className="relative group">
                 <DisplayCard questionData={questionData} />
                 <div className="absolute top-3 right-3 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    <button onClick={handleEditToggle} className="p-1.5 bg-white/80 backdrop-blur-sm rounded-lg text-slate-600 hover:text-brand-green hover:bg-white shadow-md border border-slate-200">
+                    <button onClick={handleEditToggle} className="p-1.5 bg-white/80 backdrop-blur-sm rounded-lg text-slate-600 hover:text-brand-yellow hover:bg-white shadow-md border border-slate-200">
                         <PencilSquareIcon className="h-4 w-4" />
                     </button>
                     <button onClick={() => onDelete(questionData.id)} className="p-1.5 bg-white/80 backdrop-blur-sm rounded-lg text-slate-600 hover:text-red-600 hover:bg-white shadow-md border border-slate-200">
@@ -168,7 +168,7 @@ export const EditableQuestionCard: React.FC<EditableQuestionCardProps> = ({ ques
     }
     
     return (
-        <div className="border-2 border-brand-green rounded-xl p-4 bg-white shadow-2xl relative">
+        <div className="border-2 border-brand-yellow rounded-xl p-4 bg-white shadow-2xl relative">
             <div className="space-y-4">
                 <FormField label="Question">
                     <TextAreaInput name="question" value={editedData.question} onChange={handleChange} />

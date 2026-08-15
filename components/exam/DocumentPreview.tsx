@@ -101,13 +101,13 @@ export const DocumentPreview: React.FC<DocumentPreviewProps> = ({ file }) => {
 
     return (
         <div className="bg-slate-50 border border-slate-300 rounded-xl h-[85vh] flex flex-col">
-            <h2 className="text-lg font-semibold text-brand-navy p-4 border-b border-slate-200 flex-shrink-0">
+            <h2 className="text-lg font-semibold text-brand-black p-4 border-b border-slate-200 flex-shrink-0">
                 Document Preview
             </h2>
             <div className="flex-grow overflow-y-auto p-4">
                 {isLoading && (
                     <div className="flex flex-col items-center justify-center h-full text-slate-500">
-                        <Loader className="h-10 w-10 text-brand-green"/>
+                        <Loader className="h-10 w-10 text-brand-yellow"/>
                         <p className="mt-3">Rendering preview...</p>
                     </div>
                 )}

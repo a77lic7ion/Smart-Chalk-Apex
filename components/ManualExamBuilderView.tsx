@@ -48,7 +48,7 @@ export const ManualExamBuilderView: React.FC<ManualExamBuilderViewProps> = ({ us
     const Uploader: React.FC = () => (
          <div className="bg-white p-6 md:p-8 rounded-xl shadow-md border border-slate-200 max-w-2xl mx-auto">
             <div className="text-center mb-6">
-                <h1 className="text-2xl font-bold text-brand-navy">Make your own exam from a reference.</h1>
+                <h1 className="text-2xl font-bold text-brand-black">Make your own exam from a reference.</h1>
                 <p className="text-slate-600 mt-1">Upload a DOCX or PDF file to use as a reference in a side-by-side editor.</p>
             </div>
             <input
@@ -58,8 +58,8 @@ export const ManualExamBuilderView: React.FC<ManualExamBuilderViewProps> = ({ us
                     file:mr-4 file:py-2 file:px-4
                     file:rounded-full file:border-0
                     file:text-sm file:font-semibold
-                    file:bg-green-50 file:text-brand-green
-                    hover:file:bg-green-100"
+                    file:bg-yellow-50 file:text-brand-yellow
+                    hover:file:bg-yellow-100"
                 accept=".pdf,.docx"
                 onChange={(e) => handleFileSelect(e.target.files?.[0] || null)}
             />

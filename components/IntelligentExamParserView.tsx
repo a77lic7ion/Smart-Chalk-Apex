@@ -185,8 +185,8 @@ export const IntelligentExamParserView: React.FC<IntelligentExamParserViewProps>
         if (isLoading) {
             return (
                 <div className="max-w-xl mx-auto flex flex-col items-center justify-center text-center p-8 bg-white rounded-xl shadow-md border border-slate-200">
-                    <Loader className="h-12 w-12 text-brand-green" />
-                    <p className="mt-4 font-semibold text-brand-navy">Processing Document...</p>
+                    <Loader className="h-12 w-12 text-brand-yellow" />
+                    <p className="mt-4 font-semibold text-brand-black">Processing Document...</p>
                     <p className="text-sm text-slate-600">This may take a moment.</p>
                 </div>
             );
@@ -207,7 +207,7 @@ export const IntelligentExamParserView: React.FC<IntelligentExamParserViewProps>
         if (parsedData && parsedData.questions.length === 0) {
              return (
                 <div className="max-w-xl mx-auto p-8 bg-white rounded-xl shadow-md border border-slate-200 text-center">
-                    <h3 className="text-lg font-bold text-brand-navy">Parsing Complete</h3>
+                    <h3 className="text-lg font-bold text-brand-black">Parsing Complete</h3>
                     <p className="text-slate-600 mt-2">No questions could be automatically extracted from the provided document.</p>
                     <p className="text-sm text-slate-500 mt-1">You can go back and try the manual builder, or try a different file.</p>
                     <Button onClick={onBack} variant="secondary" className="mt-4">Go Back</Button>

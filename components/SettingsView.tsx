@@ -71,11 +71,11 @@ const AdminSettings: React.FC<{ user: UserProfile }> = ({ user }) => {
     
     return (
         <div className="bg-white p-6 rounded-xl shadow-md border border-slate-200 mt-8">
-            <h3 className="text-xl font-bold text-brand-navy mb-1">Admin Tools</h3>
+            <h3 className="text-xl font-bold text-brand-black mb-1">Admin Tools</h3>
             <p className="text-sm text-slate-500 mb-4">Manage your browser-local SmartChalk workspace. No server database is required in this standalone version.</p>
             
             <div className="mb-6 p-4 bg-slate-50 rounded-lg border border-slate-200">
-                <h4 className="text-lg font-semibold text-brand-navy mb-2">Browser-local storage</h4>
+                <h4 className="text-lg font-semibold text-brand-black mb-2">Browser-local storage</h4>
                 <p className="text-sm text-slate-600">Your saved content remains in this browser. Export a JSON backup before clearing browser data or moving to another device.</p>
             </div>
 
@@ -114,7 +114,7 @@ const SettingsContent: React.FC<{ user: UserProfile; isAdmin: boolean }> = ({ us
   return (
     <div className="w-full max-w-2xl mx-auto space-y-8">
         <div className="bg-white p-6 rounded-xl shadow-md border border-slate-200">
-            <h3 className="text-xl font-bold text-brand-navy mb-1">Text Generation</h3>
+            <h3 className="text-xl font-bold text-brand-black mb-1">Text Generation</h3>
             <p className="text-sm text-slate-500 mb-4">Select and configure your primary AI provider for text-based tasks.</p>
             <div className="grid grid-cols-3 gap-2 rounded-lg bg-slate-100 p-1 mb-4">
                 {(['gemini', 'openai', 'ollama'] as AIProvider[]).map((provider) => (
@@ -123,7 +123,7 @@ const SettingsContent: React.FC<{ user: UserProfile; isAdmin: boolean }> = ({ us
                         onClick={() => handleSettingsChange({ provider })}
                         className={`px-3 py-1.5 text-sm font-semibold rounded-md transition-colors ${
                             settings.provider === provider
-                            ? 'bg-white text-green-700 shadow-sm'
+                            ? 'bg-white text-brand-charcoal shadow-sm'
                             : 'bg-transparent text-slate-600 hover:bg-white/60'
                         }`}
                     >
@@ -141,7 +141,7 @@ const SettingsContent: React.FC<{ user: UserProfile; isAdmin: boolean }> = ({ us
                         placeholder="Enter your Gemini API key"
                         value={settings.geminiApiKey}
                         onChange={(e) => handleSettingsChange({ geminiApiKey: e.target.value })}
-                        className="w-full p-2 border border-slate-300 rounded-lg focus:ring-1 focus:ring-brand-green focus:border-brand-green transition-shadow duration-200 text-sm"
+                        className="w-full p-2 border border-slate-300 rounded-lg focus:ring-1 focus:ring-brand-yellow focus:border-brand-yellow transition-shadow duration-200 text-sm"
                     />
                 </div>
             )}
@@ -155,7 +155,7 @@ const SettingsContent: React.FC<{ user: UserProfile; isAdmin: boolean }> = ({ us
                         placeholder="sk-..."
                         value={settings.openAIKey}
                         onChange={(e) => handleSettingsChange({ openAIKey: e.target.value })}
-                        className="w-full p-2 border border-slate-300 rounded-lg focus:ring-1 focus:ring-brand-green focus:border-brand-green transition-shadow duration-200 text-sm"
+                        className="w-full p-2 border border-slate-300 rounded-lg focus:ring-1 focus:ring-brand-yellow focus:border-brand-yellow transition-shadow duration-200 text-sm"
                     />
                 </div>
             )}
@@ -170,7 +170,7 @@ const SettingsContent: React.FC<{ user: UserProfile; isAdmin: boolean }> = ({ us
                             placeholder="http://localhost:11434"
                             value={settings.ollamaUrl}
                             onChange={(e) => handleSettingsChange({ ollamaUrl: e.target.value })}
-                            className="w-full p-2 border border-slate-300 rounded-lg focus:ring-1 focus:ring-brand-green focus:border-brand-green transition-shadow duration-200 text-sm"
+                            className="w-full p-2 border border-slate-300 rounded-lg focus:ring-1 focus:ring-brand-yellow focus:border-brand-yellow transition-shadow duration-200 text-sm"
                         />
                     </div>
                     <div>
@@ -181,7 +181,7 @@ const SettingsContent: React.FC<{ user: UserProfile; isAdmin: boolean }> = ({ us
                             placeholder="e.g., llama3, mistral"
                             value={settings.ollamaModel}
                             onChange={(e) => handleSettingsChange({ ollamaModel: e.target.value })}
-                            className="w-full p-2 border border-slate-300 rounded-lg focus:ring-1 focus:ring-brand-green focus:border-brand-green transition-shadow duration-200 text-sm"
+                            className="w-full p-2 border border-slate-300 rounded-lg focus:ring-1 focus:ring-brand-yellow focus:border-brand-yellow transition-shadow duration-200 text-sm"
                         />
                     </div>
                 </div>
@@ -203,7 +203,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ user, isAdmin }) => 
         <main className="container mx-auto px-4 py-8">
             <div className="max-w-4xl mx-auto">
                 <div className="text-left mb-8">
-                    <h1 className="text-3xl md:text-4xl font-bold text-brand-navy">Settings</h1>
+                    <h1 className="text-3xl md:text-4xl font-bold text-brand-black">Settings</h1>
                     <p className="text-lg text-slate-600 mt-1">Manage application and AI provider configurations.</p>
                 </div>
                 <SettingsContent user={user} isAdmin={isAdmin} />

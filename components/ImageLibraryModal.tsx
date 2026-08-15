@@ -59,7 +59,7 @@ export const ImageLibraryModal: React.FC<ImageLibraryModalProps> = ({ isOpen, on
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
             <div ref={modalRef} className="bg-white rounded-xl shadow-2xl w-full max-w-4xl h-[90vh] flex flex-col">
                 <div className="p-4 border-b border-slate-200">
-                    <h2 className="text-lg font-semibold text-brand-navy">Select from Your Image Library</h2>
+                    <h2 className="text-lg font-semibold text-brand-black">Select from Your Image Library</h2>
                     <Input
                         label=""
                         value={searchQuery}
@@ -73,7 +73,7 @@ export const ImageLibraryModal: React.FC<ImageLibraryModalProps> = ({ isOpen, on
                 <div className="flex-grow overflow-y-auto p-4">
                     {isLoading && (
                          <div className="flex items-center justify-center h-full">
-                            <Loader className="h-12 w-12 text-brand-green" />
+                            <Loader className="h-12 w-12 text-brand-yellow" />
                          </div>
                      )}
                     {error && (
@@ -89,7 +89,7 @@ export const ImageLibraryModal: React.FC<ImageLibraryModalProps> = ({ isOpen, on
                                 <button
                                     key={image.id}
                                     onClick={() => onImageSelect(image.imageData)}
-                                    className="aspect-square bg-slate-100 rounded-lg overflow-hidden focus:outline-none focus:ring-4 focus:ring-offset-2 focus:ring-brand-green group"
+                                    className="aspect-square bg-slate-100 rounded-lg overflow-hidden focus:outline-none focus:ring-4 focus:ring-offset-2 focus:ring-brand-yellow group"
                                 >
                                     <img 
                                         src={image.imageData} 

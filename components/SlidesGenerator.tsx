@@ -207,7 +207,7 @@ export const SlidesGenerator: React.FC<SlidesGeneratorProps> = ({ user, loadId, 
                     <>
                     <form onSubmit={(e) => {e.preventDefault(); handleGenerate()}} className="space-y-6 max-w-4xl mx-auto">
                         <div>
-                            <h2 className="text-xl font-bold text-brand-navy mb-2">{t('feature.presentationGenerator', { fallback: "Slides Generator"})}</h2>
+                            <h2 className="text-xl font-bold text-brand-black mb-2">{t('feature.presentationGenerator', { fallback: "Slides Generator"})}</h2>
                             <p className="text-slate-600">{t('presentationGenerator.subtitle')}</p>
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -219,7 +219,7 @@ export const SlidesGenerator: React.FC<SlidesGeneratorProps> = ({ user, loadId, 
                             <Input label={t('presentationGenerator.form.topicLabel')} name="topic" value={params.topic} onChange={handleInputChange} placeholder={t('presentationGenerator.form.topicPlaceholder')} required />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-brand-dark-grey">{t('presentationGenerator.form.presetsLabel')}</label>
+                            <label className="block text-sm font-medium text-brand-charcoal">{t('presentationGenerator.form.presetsLabel')}</label>
                             <div className="flex flex-wrap gap-2 mb-2">
                                 {TEST_STRUCTURE_PRESETS.map(preset => (
                                     <Button key={preset.label} type="button" variant="secondary" size="sm" onClick={() => handlePresetSelect(preset.value)}>
@@ -240,16 +240,16 @@ export const SlidesGenerator: React.FC<SlidesGeneratorProps> = ({ user, loadId, 
 
                     {savedPresentations && savedPresentations.length > 0 && (
                         <div className="mt-12 pt-8 border-t border-slate-200">
-                             <h3 className="text-lg font-semibold text-brand-navy mb-3">My Saved Presentations</h3>
+                             <h3 className="text-lg font-semibold text-brand-black mb-3">My Saved Presentations</h3>
                              <div className="space-y-3">
                                 {savedPresentations.map(p => (
                                     <div key={p.id} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg border border-slate-200">
                                         <div>
-                                            <p className="font-semibold text-brand-dark-grey">{p.name}</p>
+                                            <p className="font-semibold text-brand-charcoal">{p.name}</p>
                                             <p className="text-xs text-slate-500">Created: {new Date(p.createdAt).toLocaleString()}</p>
                                         </div>
                                         <div className="flex items-center gap-2">
-                                            <button onClick={() => handleLoadPresentation(p.id)} title="Load Presentation" className="p-1.5 text-slate-500 hover:text-brand-green hover:bg-green-50 rounded-lg transition-colors"><FolderOpenIcon className="h-5 w-5"/></button>
+                                            <button onClick={() => handleLoadPresentation(p.id)} title="Load Presentation" className="p-1.5 text-slate-500 hover:text-brand-yellow hover:bg-yellow-50 rounded-lg transition-colors"><FolderOpenIcon className="h-5 w-5"/></button>
                                             <button onClick={() => handleDeletePresentation(p.id)} title="Delete Presentation" className="p-1.5 text-slate-500 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"><TrashIcon className="h-5 w-5"/></button>
                                         </div>
                                     </div>
@@ -261,7 +261,7 @@ export const SlidesGenerator: React.FC<SlidesGeneratorProps> = ({ user, loadId, 
                 ) : (
                     <div className="mt-6">
                         <div className="flex justify-between items-center mb-4">
-                             <h2 className="text-xl font-bold text-brand-navy">{generatedData.presentation.name}</h2>
+                             <h2 className="text-xl font-bold text-brand-black">{generatedData.presentation.name}</h2>
                              <div className="flex items-center gap-2">
                                 <Button onClick={handleDiscard} variant="ghost">Discard</Button>
                                 <Button onClick={handleExportPresentation} isLoading={isExporting} variant="secondary">Export PPTX</Button>

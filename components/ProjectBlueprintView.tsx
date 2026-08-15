@@ -5,8 +5,8 @@ import { AppView } from '../App';
 
 const Section: React.FC<{ title: string; children: React.ReactNode }> = ({ title, children }) => (
     <section className="mb-12">
-        <h2 className="text-2xl md:text-3xl font-bold text-brand-navy mb-4 border-b-2 border-brand-green pb-2">{title}</h2>
-        <div className="text-brand-dark-grey text-base leading-relaxed space-y-4">
+        <h2 className="text-2xl md:text-3xl font-bold text-brand-black mb-4 border-b-2 border-brand-yellow pb-2">{title}</h2>
+        <div className="text-brand-charcoal text-base leading-relaxed space-y-4">
             {children}
         </div>
     </section>
@@ -15,12 +15,12 @@ const Section: React.FC<{ title: string; children: React.ReactNode }> = ({ title
 const FeatureCard: React.FC<{ icon: React.FC<any>, title: string, children: React.ReactNode }> = ({ icon: Icon, title, children }) => (
     <div className="bg-white rounded-lg p-6 border border-slate-200 shadow-sm hover:shadow-md transition-shadow flex flex-col">
         <div className="flex items-center gap-4 mb-3">
-            <div className="bg-green-100 text-green-600 p-3 rounded-lg">
+            <div className="bg-yellow-100 text-brand-yellow p-3 rounded-lg">
                 <Icon className="h-6 w-6" />
             </div>
-            <h3 className="text-xl font-semibold text-brand-navy">{title}</h3>
+            <h3 className="text-xl font-semibold text-brand-black">{title}</h3>
         </div>
-        <div className="text-slate-600 pl-4 border-l-4 border-green-100 flex-grow">
+        <div className="text-slate-600 pl-4 border-l-4 border-yellow-200 flex-grow">
             {children}
         </div>
     </div>
@@ -37,13 +37,13 @@ export const ProjectBlueprintView: React.FC<{ setView: (view: AppView) => void }
         <main className="container mx-auto px-4 py-8">
             <div className="max-w-5xl mx-auto">
                 <div className="text-center mb-12">
-                    <h1 className="text-4xl md:text-5xl font-bold text-brand-navy">SmartChalk Technical Blueprint</h1>
+                    <h1 className="text-4xl md:text-5xl font-bold text-brand-black">SmartChalk Technical Blueprint</h1>
                     <p className="text-lg text-slate-600 mt-2 max-w-3xl mx-auto">An overview of the project's architecture, features, and technology stack.</p>
                 </div>
 
                 <Section title="Static Mode">
                     <div className="bg-white p-6 rounded-lg border border-slate-200 shadow-sm">
-                        <h3 className="text-xl font-semibold text-brand-navy mb-3">Browser-local workspace</h3>
+                        <h3 className="text-xl font-semibold text-brand-black mb-3">Browser-local workspace</h3>
                         <p className="text-slate-600">
                             This standalone version keeps saved content in your browser and does not require a server database. Export your local workspace from Settings to create a portable backup.
                         </p>
@@ -127,10 +127,10 @@ export const ProjectBlueprintView: React.FC<{ setView: (view: AppView) => void }
                             <div className="self-center text-4xl font-light text-slate-400 mx-4 transform md:rotate-0 rotate-90">→</div>
 
                             {/* Service Layer */}
-                             <div className="p-4 bg-green-50 text-green-800 rounded-lg flex flex-col justify-center items-center border-2 border-green-200">
+                             <div className="p-4 bg-yellow-50 text-brand-black rounded-lg flex flex-col justify-center items-center border-2 border-yellow-200">
                                 <span className="text-lg">AI Service Layer</span>
                                 <div className="flex flex-wrap gap-2 justify-center mt-2">
-                                     <TechPill className="bg-green-200 text-green-900">Provider Agnostic</TechPill>
+                                     <TechPill className="bg-yellow-200 text-brand-black">Provider Agnostic</TechPill>
                                 </div>
                             </div>
                             
@@ -154,7 +154,7 @@ export const ProjectBlueprintView: React.FC<{ setView: (view: AppView) => void }
                 <Section title="Technology Stack">
                     <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
                         <div>
-                            <h3 className="font-semibold text-lg mb-2 text-brand-navy">Frontend</h3>
+                            <h3 className="font-semibold text-lg mb-2 text-brand-black">Frontend</h3>
                             <ul className="list-disc list-inside space-y-1">
                                 <li><TechPill>React & TypeScript</TechPill> for component architecture.</li>
                                 <li><TechPill>Tailwind CSS</TechPill> for utility-first styling.</li>
@@ -163,7 +163,7 @@ export const ProjectBlueprintView: React.FC<{ setView: (view: AppView) => void }
                             </ul>
                         </div>
                          <div>
-                            <h3 className="font-semibold text-lg mb-2 text-brand-navy">AI & Image Services</h3>
+                            <h3 className="font-semibold text-lg mb-2 text-brand-black">AI & Image Services</h3>
                             <ul className="list-disc list-inside space-y-1">
                                 <li><TechPill className="bg-emerald-100 text-emerald-800">@google/genai</TechPill> for Gemini.</li>
                                 <li><TechPill className="bg-slate-200">OpenAI REST API</TechPill> for GPT.</li>
@@ -172,7 +172,7 @@ export const ProjectBlueprintView: React.FC<{ setView: (view: AppView) => void }
                             </ul>
                         </div>
                         <div>
-                            <h3 className="font-semibold text-lg mb-2 text-brand-navy">Data Persistence</h3>
+                            <h3 className="font-semibold text-lg mb-2 text-brand-black">Data Persistence</h3>
                              <ul className="list-disc list-inside space-y-1">
                                 <li><TechPill className="bg-blue-100 text-blue-800">Dexie.js</TechPill> as an IndexedDB wrapper.</li>
                                 <li><TechPill className="bg-blue-100 text-blue-800">IndexedDB</TechPill> for robust client-side storage.</li>

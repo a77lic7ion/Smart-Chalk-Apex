@@ -39,14 +39,14 @@ const EditableSubQuestion: React.FC<{
                     value={question.questionNumber}
                     onChange={(e) => onUpdate(question.id, { questionNumber: e.target.value })}
                     placeholder="e.g., 1.1"
-                    className="font-semibold p-1 border-b-2 border-transparent focus:border-brand-green outline-none w-20"
+                    className="font-semibold p-1 border-b-2 border-transparent focus:border-brand-yellow outline-none w-20"
                 />
                  <textarea
                     value={question.text}
                     onChange={(e) => onUpdate(question.id, { text: e.target.value })}
                     onPaste={handlePaste}
                     placeholder="Paste sub-question text and images here..."
-                    className="flex-grow p-1 border-b-2 border-transparent focus:border-brand-green outline-none resize-y text-sm"
+                    className="flex-grow p-1 border-b-2 border-transparent focus:border-brand-yellow outline-none resize-y text-sm"
                     rows={2}
                 />
                  <input
@@ -54,7 +54,7 @@ const EditableSubQuestion: React.FC<{
                     value={question.marks}
                     onChange={(e) => onUpdate(question.id, { marks: e.target.value })}
                     placeholder="Marks"
-                    className="p-1 border-b-2 border-transparent focus:border-brand-green outline-none w-20 text-right text-sm"
+                    className="p-1 border-b-2 border-transparent focus:border-brand-yellow outline-none w-20 text-right text-sm"
                 />
                 <Button onClick={() => onDelete(question.id)} variant="ghost" size="sm" className="ml-auto flex-shrink-0">
                     <TrashIcon className="h-4 w-4 text-slate-500 hover:text-red-600" />
@@ -85,7 +85,7 @@ const EditableQuestionGroup: React.FC<{
                     value={group.questionNumber}
                     onChange={(e) => onUpdate(group.id, { questionNumber: e.target.value })}
                     placeholder="e.g., QUESTION 1"
-                    className="text-md font-bold text-brand-navy bg-transparent outline-none focus:border-b-2 focus:border-brand-green flex-grow"
+                    className="text-md font-bold text-brand-black bg-transparent outline-none focus:border-b-2 focus:border-brand-yellow flex-grow"
                 />
                 <Button onClick={() => onDelete(group.id)} variant="ghost" size="sm" className="ml-auto">
                     <TrashIcon className="h-4 w-4 text-red-500"/>
@@ -247,7 +247,7 @@ export const ManualEditor: React.FC<{ user: UserProfile, initialData?: ManualExa
                     type="text"
                     value={exam.name}
                     onChange={(e) => updateExamName(e.target.value)}
-                    className="text-lg font-semibold text-brand-navy outline-none focus:border-b-2 focus:border-brand-green"
+                    className="text-lg font-semibold text-brand-black outline-none focus:border-b-2 focus:border-brand-yellow"
                 />
                 <div className="flex gap-2">
                     <Button onClick={handleExport} variant="secondary">Export PDF</Button>
@@ -264,7 +264,7 @@ export const ManualEditor: React.FC<{ user: UserProfile, initialData?: ManualExa
                                 type="text"
                                 value={section.title}
                                 onChange={(e) => updateSection(section.id, { title: e.target.value })}
-                                className="text-md font-bold text-brand-navy bg-transparent outline-none focus:border-b-2 focus:border-brand-green flex-grow"
+                                className="text-md font-bold text-brand-black bg-transparent outline-none focus:border-b-2 focus:border-brand-yellow flex-grow"
                             />
                             <Button onClick={() => deleteSection(section.id)} variant="ghost" size="sm" className="ml-auto">
                                 <TrashIcon className="h-4 w-4 text-red-500"/>

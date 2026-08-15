@@ -99,14 +99,14 @@ export const ImageSearchModal: React.FC<ImageSearchModalProps> = ({ isOpen, onCl
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
             <div ref={modalRef} className="bg-white rounded-xl shadow-2xl w-full max-w-4xl h-[90vh] flex flex-col">
                 <div className="p-4 border-b border-slate-200">
-                    <h2 className="text-lg font-semibold text-brand-navy">Find an Image from Pexels</h2>
+                    <h2 className="text-lg font-semibold text-brand-black">Find an Image from Pexels</h2>
                     <form onSubmit={(e) => { e.preventDefault(); handleSearch(); }} className="mt-2 flex gap-2">
                         <input
                             type="text"
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                             placeholder="Search for high-quality images..."
-                            className="flex-grow p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-green focus:border-brand-green"
+                            className="flex-grow p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-yellow focus:border-brand-yellow"
                             autoFocus
                         />
                         <Button type="submit" isLoading={isLoading} disabled={isLoading}>
@@ -129,7 +129,7 @@ export const ImageSearchModal: React.FC<ImageSearchModalProps> = ({ isOpen, onCl
                                 <button
                                     key={image.id}
                                     onClick={() => handleImageClick(image)}
-                                    className="aspect-square bg-slate-100 rounded-lg overflow-hidden focus:outline-none focus:ring-4 focus:ring-offset-2 focus:ring-brand-green group relative"
+                                    className="aspect-square bg-slate-100 rounded-lg overflow-hidden focus:outline-none focus:ring-4 focus:ring-offset-2 focus:ring-brand-yellow group relative"
                                     disabled={downloadingId !== null}
                                 >
                                     <img 
@@ -150,7 +150,7 @@ export const ImageSearchModal: React.FC<ImageSearchModalProps> = ({ isOpen, onCl
                     )}
                      {isLoading && (
                          <div className="flex items-center justify-center h-full">
-                            <Loader className="h-12 w-12 text-brand-green" />
+                            <Loader className="h-12 w-12 text-brand-yellow" />
                          </div>
                      )}
                 </div>

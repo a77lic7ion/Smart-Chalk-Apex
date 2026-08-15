@@ -36,17 +36,17 @@ const FileInput: React.FC<{
         <div className="flex-1 flex flex-col gap-2">
             <label 
                 htmlFor={id} 
-                className={`flex flex-col items-center justify-center p-6 border-2 border-dashed rounded-xl cursor-pointer transition-colors ${file ? 'border-green-400 bg-green-50' : 'border-slate-300 hover:border-brand-green hover:bg-green-50'}`}
+                className={`flex flex-col items-center justify-center p-6 border-2 border-dashed rounded-xl cursor-pointer transition-colors ${file ? 'border-yellow-400 bg-yellow-50' : 'border-slate-300 hover:border-brand-yellow hover:bg-yellow-50'}`}
                 onDragOver={handleDragOver}
                 onDrop={handleDrop}
             >
                 <div className="flex flex-col items-center justify-center text-center">
-                    <div className={`p-3 rounded-full ${file ? 'bg-green-200 text-green-700' : 'bg-slate-100 text-slate-500'}`}>
+                    <div className={`p-3 rounded-full ${file ? 'bg-yellow-200 text-brand-charcoal' : 'bg-slate-100 text-slate-500'}`}>
                         <UploadIcon className="w-8 h-8" />
                     </div>
-                    <p className="mt-3 font-semibold text-brand-navy">{label}</p>
+                    <p className="mt-3 font-semibold text-brand-black">{label}</p>
                     <p className="text-sm text-slate-500">{description}</p>
-                    {file && <p className="mt-2 text-sm font-medium text-green-700 break-all">{file.name}</p>}
+                    {file && <p className="mt-2 text-sm font-medium text-brand-charcoal break-all">{file.name}</p>}
                 </div>
                 <input ref={inputRef} id={id} type="file" className="hidden" accept={accept} onChange={handleFileSelect} />
             </label>
@@ -66,8 +66,8 @@ export const FileUploader: React.FC<FileUploaderProps> = ({ onParse, questionFil
     return (
         <div className="bg-white p-6 md:p-8 rounded-xl shadow-md border border-slate-200">
             <div className="text-center mb-8">
-                <h1 className="text-2xl font-bold text-brand-navy">Intelligent Exam Parser</h1>
-                <p className="text-slate-600 mt-1 max-w-3xl mx-auto">Upload a question paper and its addendum to automatically structure and link them. <strong className="text-brand-green">DOCX files are recommended</strong> for best results.</p>
+                <h1 className="text-2xl font-bold text-brand-black">Intelligent Exam Parser</h1>
+                <p className="text-slate-600 mt-1 max-w-3xl mx-auto">Upload a question paper and its addendum to automatically structure and link them. <strong className="text-brand-yellow">DOCX files are recommended</strong> for best results.</p>
             </div>
             
             <div className="flex flex-col md:flex-row gap-6 mb-8">
