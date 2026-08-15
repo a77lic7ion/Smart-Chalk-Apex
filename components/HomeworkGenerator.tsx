@@ -101,12 +101,12 @@ const AddCustomQuestionModal: React.FC<{
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl flex flex-col">
-                 <div className="p-6 border-b border-slate-200">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-brand-black/80 p-4">
+            <div className="flex w-full max-w-2xl flex-col rounded-2xl border border-slate-200 bg-white shadow-2xl">
+                 <div className="border-b border-slate-200 p-5">
                     <h2 className="text-lg font-semibold text-brand-black">Add Custom Question</h2>
                  </div>
-                 <div className="p-6 space-y-4 overflow-y-auto">
+                 <div className="max-h-[70vh] space-y-4 overflow-y-auto bg-brand-paper p-5">
                      {error && <p role="alert" className="rounded-lg border border-slate-300 bg-brand-paper p-3 text-sm font-semibold text-brand-black">{error}</p>}
                      <TextArea label="Question" value={question} onChange={(e) => setQuestion(e.target.value)} rows={3} />
                      <TextArea label="Answer / Memo" value={answer} onChange={(e) => setAnswer(e.target.value)} rows={4} />
@@ -120,10 +120,10 @@ const AddCustomQuestionModal: React.FC<{
                             {imageName && <span className="text-sm text-slate-600">{imageName}</span>}
                         </div>
                         <input type="file" accept="image/*" ref={fileInputRef} onChange={handleFileChange} className="hidden" />
-                        {imageData && <img src={imageData} className="mt-4 rounded-md border p-2 max-h-48" alt="Preview" />}
+                        {imageData && <img src={imageData} className="mt-4 max-h-48 rounded-xl border border-slate-300 bg-white p-2" alt="Preview" />}
                      </div>
                  </div>
-                 <div className="p-4 border-t border-slate-200 flex justify-end gap-3">
+                 <div className="flex justify-end gap-3 border-t border-slate-200 p-5">
                     <Button onClick={handleClose} variant="ghost">Cancel</Button>
                     <Button onClick={handleSave} variant="primary">Save Question</Button>
                  </div>
@@ -160,7 +160,7 @@ const StagingArea: React.FC<{
 
     return (
         <div className="mt-6">
-            <div className="flex justify-between items-center mb-4 border-b pb-4">
+            <div className="mb-5 flex flex-col gap-4 border-b border-slate-200 pb-5 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                     <h2 className="text-lg font-semibold text-brand-black">Review Homework Questions</h2>
                     <p className="text-sm text-slate-500">Edit questions before saving or exporting the homework sheet.</p>
@@ -182,7 +182,7 @@ const StagingArea: React.FC<{
                         />
                     ))
                 ) : (
-                    <div className="text-center py-12 px-4 border-2 border-dashed border-slate-200 rounded-lg">
+                    <div className="rounded-xl border-2 border-dashed border-slate-300 bg-brand-paper px-4 py-12 text-center">
                         <p className="text-slate-500 font-medium">No questions were generated.</p>
                         <p className="text-sm text-slate-400 mt-1">You can add custom questions or discard and try again.</p>
                     </div>

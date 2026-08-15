@@ -120,8 +120,8 @@ export const ImagePlaceholderCard: React.FC<ImagePlaceholderCardProps> = ({ plac
 
     const getStatusColor = () => {
         switch(placeholder.status) {
-            case 'uploaded': return 'border-yellow-400 bg-yellow-50';
-            case 'generating': return 'border-blue-400 bg-blue-50';
+            case 'uploaded': return 'border-brand-yellow bg-brand-paper';
+            case 'generating': return 'border-brand-black bg-brand-paper';
             case 'pending':
             default: return 'border-slate-300 bg-white';
         }
@@ -140,10 +140,10 @@ export const ImagePlaceholderCard: React.FC<ImagePlaceholderCardProps> = ({ plac
                 onClose={() => setIsLibraryModalOpen(false)}
                 onImageSelect={handleLibraryImageSelect}
             />
-            <div className={`p-4 rounded-xl shadow-sm border ${getStatusColor()} transition-colors`}>
+            <div className={`rounded-2xl border p-4 shadow-sm transition-colors ${getStatusColor()}`}>
                 <p className="font-semibold text-brand-black text-sm mb-2">{placeholder.description}</p>
                  <div
-                    className="relative w-full h-32 bg-slate-100 rounded-lg border-2 border-dashed border-slate-300 flex items-center justify-center text-center p-2 cursor-pointer hover:border-brand-yellow transition-colors focus:outline-none focus:ring-2 focus:ring-brand-yellow mb-2"
+                    className="relative mb-2 flex h-32 w-full cursor-pointer items-center justify-center rounded-xl border-2 border-dashed border-slate-300 bg-brand-paper p-2 text-center transition-colors hover:border-brand-yellow focus:outline-none focus:ring-2 focus:ring-brand-yellow"
                     onClick={() => !isBusy && fileInputRef.current?.click()}
                     onPaste={handlePaste}
                     tabIndex={0}
@@ -156,7 +156,7 @@ export const ImagePlaceholderCard: React.FC<ImagePlaceholderCardProps> = ({ plac
                     )}
 
                     {!isBusy && placeholder.status === 'pending' && (
-                         <div className="text-slate-500">
+                         <div className="text-brand-black">
                             <UploadIcon className="h-6 w-6 mx-auto" />
                             <p className="text-xs mt-1 font-semibold">Upload or Paste</p>
                         </div>
@@ -165,7 +165,7 @@ export const ImagePlaceholderCard: React.FC<ImagePlaceholderCardProps> = ({ plac
                      <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept="image/*" disabled={isBusy} />
                 </div>
                 
-                {imageError && <p className="text-xs text-red-600 mb-2">{imageError}</p>}
+                {imageError && <p role="alert" className="mb-2 rounded-lg border border-slate-300 bg-white p-2 text-xs font-semibold text-brand-black">{imageError}</p>}
 
                  <div className="flex flex-wrap gap-2">
                     <Button onClick={() => fileInputRef.current?.click()} variant="secondary" size="sm" disabled={isBusy}>
@@ -180,7 +180,7 @@ export const ImagePlaceholderCard: React.FC<ImagePlaceholderCardProps> = ({ plac
                 </div>
 
                 {placeholder.status === 'uploaded' && (
-                    <div className="flex items-center gap-2 mt-3 text-xs font-semibold text-brand-charcoal">
+                    <div className="mt-3 flex items-center gap-2 text-xs font-semibold text-brand-black">
                         <CheckIcon className="h-4 w-4" />
                         <span>Image Ready</span>
                     </div>

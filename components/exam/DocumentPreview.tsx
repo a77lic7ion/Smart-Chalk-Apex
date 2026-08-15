@@ -100,21 +100,21 @@ export const DocumentPreview: React.FC<DocumentPreviewProps> = ({ file }) => {
     }, [file]);
 
     return (
-        <div className="bg-slate-50 border border-slate-300 rounded-xl h-[85vh] flex flex-col">
-            <h2 className="text-lg font-semibold text-brand-black p-4 border-b border-slate-200 flex-shrink-0">
+        <div className="flex h-[85vh] flex-col rounded-2xl border border-slate-200 bg-white shadow-sm">
+            <h2 className="flex-shrink-0 border-b border-slate-200 p-4 text-lg font-bold text-brand-black">
                 Document Preview
             </h2>
-            <div className="flex-grow overflow-y-auto p-4">
+            <div className="flex-grow overflow-y-auto bg-brand-paper p-4">
                 {isLoading && (
-                    <div className="flex flex-col items-center justify-center h-full text-slate-500">
+                    <div className="flex h-full flex-col items-center justify-center text-slate-500">
                         <Loader className="h-10 w-10 text-brand-yellow"/>
                         <p className="mt-3">Rendering preview...</p>
                     </div>
                 )}
-                {error && <div className="text-center text-red-600 p-4">{error}</div>}
+                {error && <div role="alert" className="rounded-xl border border-slate-300 bg-white p-4 text-center font-semibold text-brand-black">{error}</div>}
                 <div 
                     ref={previewRef} 
-                    className="prose prose-sm max-w-none bg-white p-4 rounded-md shadow-inner"
+                    className="prose prose-sm max-w-none rounded-xl border border-slate-200 bg-white p-5 shadow-sm"
                 ></div>
             </div>
         </div>

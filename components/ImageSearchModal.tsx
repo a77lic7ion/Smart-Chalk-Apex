@@ -96,9 +96,9 @@ export const ImageSearchModal: React.FC<ImageSearchModalProps> = ({ isOpen, onCl
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-            <div ref={modalRef} className="bg-white rounded-xl shadow-2xl w-full max-w-4xl h-[90vh] flex flex-col">
-                <div className="p-4 border-b border-slate-200">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-brand-black/80 p-4">
+            <div ref={modalRef} className="flex h-[90vh] w-full max-w-4xl flex-col rounded-2xl border border-slate-200 bg-white shadow-2xl">
+                <div className="border-b border-slate-200 p-5">
                     <h2 className="text-lg font-semibold text-brand-black">Find an Image from Pexels</h2>
                     <form onSubmit={(e) => { e.preventDefault(); handleSearch(); }} className="mt-2 flex gap-2">
                         <input
@@ -106,7 +106,7 @@ export const ImageSearchModal: React.FC<ImageSearchModalProps> = ({ isOpen, onCl
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                             placeholder="Search for high-quality images..."
-                            className="flex-grow p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-yellow focus:border-brand-yellow"
+                            className="min-h-11 flex-grow rounded-xl border border-slate-300 bg-white px-3 py-2 text-brand-charcoal outline-none focus:border-brand-yellow focus:ring-2 focus:ring-brand-yellow/40"
                             autoFocus
                         />
                         <Button type="submit" isLoading={isLoading} disabled={isLoading}>
@@ -115,11 +115,11 @@ export const ImageSearchModal: React.FC<ImageSearchModalProps> = ({ isOpen, onCl
                     </form>
                 </div>
                 
-                <div className="flex-grow overflow-y-auto p-4">
+                <div className="flex-grow overflow-y-auto bg-brand-paper p-5">
                     {error && (
-                         <div className="flex flex-col items-center justify-center h-full text-center text-slate-500">
-                             <ExclamationTriangleIcon className="h-12 w-12 text-yellow-500 mb-2"/>
-                             <p className="font-semibold text-slate-700">Search Failed</p>
+                         <div className="flex h-full flex-col items-center justify-center rounded-xl border border-slate-200 bg-white p-6 text-center text-slate-500">
+                             <ExclamationTriangleIcon className="mb-2 h-12 w-12 text-brand-yellow"/>
+                             <p className="font-semibold text-brand-black">Search Failed</p>
                              <p className="text-sm">{error}</p>
                          </div>
                     )}
@@ -129,7 +129,7 @@ export const ImageSearchModal: React.FC<ImageSearchModalProps> = ({ isOpen, onCl
                                 <button
                                     key={image.id}
                                     onClick={() => handleImageClick(image)}
-                                    className="aspect-square bg-slate-100 rounded-lg overflow-hidden focus:outline-none focus:ring-4 focus:ring-offset-2 focus:ring-brand-yellow group relative"
+                                    className="group relative aspect-square overflow-hidden rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-4 focus:ring-brand-yellow focus:ring-offset-2"
                                     disabled={downloadingId !== null}
                                 >
                                     <img 
@@ -155,7 +155,7 @@ export const ImageSearchModal: React.FC<ImageSearchModalProps> = ({ isOpen, onCl
                      )}
                 </div>
                 
-                <div className="p-4 border-t border-slate-200 flex justify-end">
+                <div className="flex justify-end border-t border-slate-200 p-5">
                     <Button onClick={onClose} variant="secondary">
                         Close
                     </Button>
