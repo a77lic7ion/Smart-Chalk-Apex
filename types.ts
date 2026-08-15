@@ -1,4 +1,4 @@
-export type AIProvider = 'gemini' | 'openai' | 'ollama';
+export type AIProvider = 'gemini' | 'mistral' | 'ollama' | 'cloudOllama' | 'lmStudio' | 'openRouter' | 'nous' | 'custom' | 'openai';
 export type ContentType = 'test' | 'presentation' | 'lesson' | 'exam' | 'homework' | 'parsedExam' | 'manualExam';
 
 export interface AISettings {
@@ -7,6 +7,12 @@ export interface AISettings {
   openAIKey: string;
   ollamaUrl: string;
   ollamaModel: string;
+  providerApiKeys: Partial<Record<AIProvider, string>>;
+  providerEndpoints: Partial<Record<AIProvider, string>>;
+  selectedModels: Partial<Record<AIProvider, string>>;
+  customProviderName: string;
+  customEndpoint: string;
+  customApiKey: string;
 }
 
 export type Curriculum = 'CAPS' | 'IEB' | 'Cambridge' | 'Other';

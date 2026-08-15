@@ -1,213 +1,183 @@
 import React from 'react';
-import { useAIProviderSettings } from '../context/AIProviderSettingsContext';
+import { useAIProviderSettings, PROVIDER_ENDPOINT_DEFAULTS, PROVIDER_LABELS } from '../context/AIProviderSettingsContext';
 import type { AIProvider, UserProfile, AISettings } from '../types';
 import { db } from '../db';
 import { saveAs } from 'file-saver';
 import { Button } from './Button';
 import { DocumentArrowDownIcon, UploadIcon } from './Icons';
-import { ADMIN_EMAILS } from '../config';
+import { discoverModels, type DiscoveredModel } from '../services/modelDiscovery';
 
+const PROVIDERS: AIProvider[] = ['gemini', 'mistral', 'ollama', 'cloudOllama', 'lmStudio', 'openRouter', 'nous', 'custom'];
 
 const AdminSettings: React.FC<{ user: UserProfile }> = ({ user }) => {
-    const [isExporting, setIsExporting] = React.useState(false);
-    const [isImporting, setIsImporting] = React.useState(false);
-    const fileInputRef = React.useRef<HTMLInputElement>(null);
-    
-    const handleExportDatabase = async () => {
-        setIsExporting(true);
-        try {
-            const allData: { [key: string]: any[] } = {};
-            for (const table of db.tables) {
-                const tableData = await table.toArray();
-                allData[table.name] = tableData;
-            }
-            const jsonString = JSON.stringify(allData, null, 2);
-            const blob = new Blob([jsonString], { type: 'application/json' });
-            saveAs(blob, `smartchalk_db_export_${new Date().toISOString().split('T')[0]}.json`);
-        } catch (error) {
-            console.error("Database export failed:", error);
-            alert("Could not export the database. Check the console for more details.");
-        } finally {
-            setIsExporting(false);
+  const [isExporting, setIsExporting] = React.useState(false);
+  const [isImporting, setIsImporting] = React.useState(false);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+
+  const handleExportDatabase = async () => {
+    setIsExporting(true);
+    try {
+      const allData: { [key: string]: any[] } = {};
+      for (const table of db.tables) allData[table.name] = await table.toArray();
+      const blob = new Blob([JSON.stringify(allData, null, 2)], { type: 'application/json' });
+      saveAs(blob, `smartchalk_db_export_${new Date().toISOString().split('T')[0]}.json`);
+    } catch (error) {
+      console.error('Database export failed:', error);
+      alert('Could not export the database. Check the console for more details.');
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  const handleImportDatabase = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    if (!window.confirm('Are you sure you want to import this file? This will completely overwrite all existing data in the local database. This action cannot be undone.')) return;
+    setIsImporting(true);
+    try {
+      const data = JSON.parse(await file.text());
+      await db.transaction('rw', db.tables, async () => {
+        for (const tableName in data) {
+          if (Object.prototype.hasOwnProperty.call(data, tableName)) {
+            const table = db.table(tableName);
+            await table.clear();
+            await table.bulkAdd(data[tableName]);
+          }
         }
-    };
-
-    const handleImportDatabase = async (event: React.ChangeEvent<HTMLInputElement>) => {
-        const file = event.target.files?.[0];
-        if (!file) return;
-
-        if (!window.confirm("Are you sure you want to import this file? This will completely overwrite all existing data in the local database. This action cannot be undone.")) {
-            return;
-        }
-
-        setIsImporting(true);
-        try {
-            const text = await file.text();
-            const data = JSON.parse(text);
-
-            await db.transaction('rw', db.tables, async () => {
-                for (const tableName in data) {
-                    if (Object.prototype.hasOwnProperty.call(data, tableName)) {
-                        const table = db.table(tableName);
-                        await table.clear();
-                        await table.bulkAdd(data[tableName]);
-                    }
-                }
-            });
-
-            alert("Database imported successfully! The page will now reload.");
-            window.location.reload();
-
-        } catch (error) {
-            console.error("Database import failed:", error);
-            alert(`Could not import the database. Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
-        } finally {
-            setIsImporting(false);
-            if (fileInputRef.current) {
-                fileInputRef.current.value = ''; // Reset file input
-            }
-        }
-    };
-    
-    return (
-        <div className="bg-white p-6 rounded-xl shadow-md border border-slate-200 mt-8">
-            <h3 className="text-xl font-bold text-brand-black mb-1">Admin Tools</h3>
-            <p className="text-sm text-slate-500 mb-4">Manage your browser-local SmartChalk workspace. No server database is required in this standalone version.</p>
-            
-            <div className="mb-6 p-4 bg-slate-50 rounded-lg border border-slate-200">
-                <h4 className="text-lg font-semibold text-brand-black mb-2">Browser-local storage</h4>
-                <p className="text-sm text-slate-600">Your saved content remains in this browser. Export a JSON backup before clearing browser data or moving to another device.</p>
-            </div>
-
-            {/* Admin Actions */}
-            <div className="flex flex-wrap gap-4">
-                <Button onClick={handleExportDatabase} isLoading={isExporting} variant="secondary">
-                    <DocumentArrowDownIcon className="h-5 w-5 mr-2" />
-                    Export Full Database (JSON)
-                </Button>
-                <Button onClick={() => fileInputRef.current?.click()} isLoading={isImporting} variant="secondary">
-                    <UploadIcon className="h-5 w-5 mr-2" />
-                    Import Database (JSON)
-                </Button>
-            </div>
-            <input
-                type="file"
-                ref={fileInputRef}
-                className="hidden"
-                accept=".json"
-                onChange={handleImportDatabase}
-            />
-            <p className="text-xs text-yellow-700 mt-3 bg-yellow-100 p-2 rounded-md">
-                <strong>Warning:</strong> Importing will overwrite all existing local data.
-            </p>
-        </div>
-    );
-};
-
-const SettingsContent: React.FC<{ user: UserProfile; isAdmin: boolean }> = ({ user, isAdmin }) => {
-  const { settings, setSettings } = useAIProviderSettings();
-  
-  const handleSettingsChange = (newSettings: Partial<AISettings>) => {
-    setSettings(newSettings);
+      });
+      alert('Database imported successfully! The page will now reload.');
+      window.location.reload();
+    } catch (error) {
+      console.error('Database import failed:', error);
+      alert(`Could not import the database. Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    } finally {
+      setIsImporting(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
   };
 
   return (
-    <div className="w-full max-w-2xl mx-auto space-y-8">
-        <div className="bg-white p-6 rounded-xl shadow-md border border-slate-200">
-            <h3 className="text-xl font-bold text-brand-black mb-1">Text Generation</h3>
-            <p className="text-sm text-slate-500 mb-4">Select and configure your primary AI provider for text-based tasks.</p>
-            <div className="grid grid-cols-3 gap-2 rounded-lg bg-slate-100 p-1 mb-4">
-                {(['gemini', 'openai', 'ollama'] as AIProvider[]).map((provider) => (
-                    <button
-                        key={provider}
-                        onClick={() => handleSettingsChange({ provider })}
-                        className={`provider-tab min-h-11 px-3 py-2 text-sm font-semibold rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-yellow focus-visible:ring-offset-2 ${
-                            settings.provider === provider
-                            ? 'provider-tab-active bg-brand-yellow text-brand-black shadow-sm'
-                            : 'bg-transparent text-brand-black hover:bg-brand-paper'
-                        }`}
-                    >
-                        {provider.charAt(0).toUpperCase() + provider.slice(1)}
-                    </button>
-                ))}
-            </div>
-            
-             {settings.provider === 'gemini' && (
-                <div>
-                    <label htmlFor="gemini-key" className="text-sm font-medium text-slate-700 block mb-1.5">Google Gemini API Key</label>
-                    <input
-                        id="gemini-key"
-                        type="password"
-                        placeholder="Enter your Gemini API key"
-                        value={settings.geminiApiKey}
-                        onChange={(e) => handleSettingsChange({ geminiApiKey: e.target.value })}
-                        className="w-full p-2 border border-slate-300 rounded-lg focus:ring-1 focus:ring-brand-yellow focus:border-brand-yellow transition-shadow duration-200 text-sm"
-                    />
-                </div>
-            )}
-
-            {settings.provider === 'openai' && (
-                <div>
-                    <label htmlFor="openai-key" className="text-sm font-medium text-slate-700 block mb-1.5">OpenAI API Key</label>
-                    <input
-                        id="openai-key"
-                        type="password"
-                        placeholder="sk-..."
-                        value={settings.openAIKey}
-                        onChange={(e) => handleSettingsChange({ openAIKey: e.target.value })}
-                        className="w-full p-2 border border-slate-300 rounded-lg focus:ring-1 focus:ring-brand-yellow focus:border-brand-yellow transition-shadow duration-200 text-sm"
-                    />
-                </div>
-            )}
-            
-            {settings.provider === 'ollama' && (
-                <div className="space-y-3">
-                    <div>
-                        <label htmlFor="ollama-url" className="text-sm font-medium text-slate-700 block mb-1.5">Ollama URL</label>
-                        <input
-                            id="ollama-url"
-                            type="text"
-                            placeholder="http://localhost:11434"
-                            value={settings.ollamaUrl}
-                            onChange={(e) => handleSettingsChange({ ollamaUrl: e.target.value })}
-                            className="w-full p-2 border border-slate-300 rounded-lg focus:ring-1 focus:ring-brand-yellow focus:border-brand-yellow transition-shadow duration-200 text-sm"
-                        />
-                    </div>
-                    <div>
-                        <label htmlFor="ollama-model" className="text-sm font-medium text-slate-700 block mb-1.5">Model Name</label>
-                        <input
-                            id="ollama-model"
-                            type="text"
-                            placeholder="e.g., llama3, mistral"
-                            value={settings.ollamaModel}
-                            onChange={(e) => handleSettingsChange({ ollamaModel: e.target.value })}
-                            className="w-full p-2 border border-slate-300 rounded-lg focus:ring-1 focus:ring-brand-yellow focus:border-brand-yellow transition-shadow duration-200 text-sm"
-                        />
-                    </div>
-                </div>
-            )}
-        </div>
-        {isAdmin && <AdminSettings user={user} />}
+    <div className="mt-8 rounded-xl border border-slate-200 bg-white p-6 shadow-md">
+      <h3 className="mb-1 text-xl font-bold text-brand-black">Browser-local workspace tools</h3>
+      <p className="mb-4 text-sm text-slate-500">Manage the standalone SmartChalk workspace. Saved content and provider settings remain in this browser.</p>
+      <div className="mb-6 rounded-lg border border-slate-200 bg-slate-50 p-4">
+        <h4 className="mb-2 text-lg font-semibold text-brand-black">Backup and restore</h4>
+        <p className="text-sm text-slate-600">Export a JSON backup before clearing browser data or moving to another device.</p>
+      </div>
+      <div className="flex flex-wrap gap-4">
+        <Button onClick={handleExportDatabase} isLoading={isExporting} variant="secondary"><DocumentArrowDownIcon className="mr-2 h-5 w-5" />Export Full Database (JSON)</Button>
+        <Button onClick={() => fileInputRef.current?.click()} isLoading={isImporting} variant="secondary"><UploadIcon className="mr-2 h-5 w-5" />Import Database (JSON)</Button>
+      </div>
+      <input type="file" ref={fileInputRef} className="hidden" accept=".json" onChange={handleImportDatabase} />
+      <p className="mt-3 rounded-md bg-yellow-100 p-2 text-xs text-yellow-900"><strong>Warning:</strong> Importing will overwrite all existing local data.</p>
     </div>
   );
 };
 
+const SettingsContent: React.FC<{ user: UserProfile; isAdmin: boolean }> = ({ user, isAdmin }) => {
+  const { settings, setSettings } = useAIProviderSettings();
+  const [models, setModels] = React.useState<DiscoveredModel[]>([]);
+  const [isLoadingModels, setIsLoadingModels] = React.useState(false);
+  const [modelStatus, setModelStatus] = React.useState<{ tone: 'idle' | 'success' | 'error'; text: string }>({ tone: 'idle', text: '' });
 
-interface SettingsViewProps {
-    user: UserProfile;
-    isAdmin: boolean;
-}
+  const provider = settings.provider;
+  const endpoint = provider === 'custom' ? settings.customEndpoint : (settings.providerEndpoints[provider] || PROVIDER_ENDPOINT_DEFAULTS[provider] || '');
+  const apiKey = provider === 'custom' ? settings.customApiKey : (settings.providerApiKeys[provider] || '');
+  const selectedModel = settings.selectedModels[provider] || (provider === 'ollama' ? settings.ollamaModel : '');
 
-export const SettingsView: React.FC<SettingsViewProps> = ({ user, isAdmin }) => {
-    return (
-        <main className="container mx-auto px-4 py-8">
-            <div className="max-w-4xl mx-auto">
-                <div className="text-left mb-8">
-                    <h1 className="text-3xl md:text-4xl font-bold text-brand-black">Settings</h1>
-                    <p className="text-lg text-slate-600 mt-1">Manage application and AI provider configurations.</p>
-                </div>
-                <SettingsContent user={user} isAdmin={isAdmin} />
+  const update = (patch: Partial<AISettings>) => setSettings(patch);
+  const updateProviderKey = (value: string) => update({ providerApiKeys: { ...settings.providerApiKeys, [provider]: value }, ...(provider === 'gemini' ? { geminiApiKey: value } : {}), ...(provider === 'openai' ? { openAIKey: value } : {}) });
+  const updateEndpoint = (value: string) => {
+    if (provider === 'custom') update({ customEndpoint: value });
+    else update({ providerEndpoints: { ...settings.providerEndpoints, [provider]: value }, ...(provider === 'ollama' ? { ollamaUrl: value } : {}) });
+  };
+  const updateModel = (value: string) => update({ selectedModels: { ...settings.selectedModels, [provider]: value }, ...(provider === 'ollama' ? { ollamaModel: value } : {}) });
+
+  const testAndFetchModels = async () => {
+    setIsLoadingModels(true);
+    setModelStatus({ tone: 'idle', text: 'Testing endpoint and fetching models…' });
+    try {
+      const discovered = await discoverModels({ provider, endpoint, apiKey, customEndpoint: settings.customEndpoint });
+      setModels(discovered);
+      if (discovered.length > 0 && !selectedModel) updateModel(discovered[0].id);
+      setModelStatus({ tone: 'success', text: `${discovered.length} model${discovered.length === 1 ? '' : 's'} available${provider === 'openRouter' ? ' after the “free” filter' : ''}.` });
+    } catch (error) {
+      setModels([]);
+      setModelStatus({ tone: 'error', text: error instanceof Error ? error.message : 'Model discovery failed.' });
+    } finally {
+      setIsLoadingModels(false);
+    }
+  };
+
+  return (
+    <div className="w-full max-w-4xl space-y-8 mx-auto">
+      <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-md">
+        <div className="mb-5 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <h3 className="text-xl font-bold text-brand-black">AI provider connections</h3>
+            <p className="text-sm text-slate-500">Endpoints are prefilled. Add your key, test the connection, fetch models, then choose the model to use.</p>
+          </div>
+          <span className="rounded-full bg-brand-paper px-3 py-1 text-xs font-bold uppercase tracking-wide text-brand-charcoal">Saved locally</span>
+        </div>
+
+        <div className="grid gap-2 sm:grid-cols-4">
+          {PROVIDERS.map((item) => (
+            <button
+              key={item}
+              type="button"
+              onClick={() => { update({ provider: item }); setModels([]); setModelStatus({ tone: 'idle', text: '' }); }}
+              className={`provider-tab min-h-11 rounded-lg px-3 py-2 text-sm font-semibold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-yellow focus-visible:ring-offset-2 ${provider === item ? 'provider-tab-active bg-brand-yellow text-brand-black shadow-sm' : 'bg-transparent text-brand-black hover:bg-brand-paper'}`}
+            >
+              {PROVIDER_LABELS[item]}
+            </button>
+          ))}
+        </div>
+
+        <div className="mt-6 space-y-4">
+          {provider === 'custom' && (
+            <div>
+              <label htmlFor="custom-provider-name" className="mb-1.5 block text-sm font-medium text-slate-700">Provider name</label>
+              <input id="custom-provider-name" type="text" value={settings.customProviderName} onChange={(event) => update({ customProviderName: event.target.value })} placeholder="My local or hosted provider" className="w-full rounded-lg border border-slate-300 p-3 text-sm text-brand-black focus:border-brand-yellow focus:ring-1 focus:ring-brand-yellow" />
             </div>
-        </main>
-    );
+          )}
+          <div>
+            <label htmlFor="provider-endpoint" className="mb-1.5 block text-sm font-medium text-slate-700">API endpoint</label>
+            <input id="provider-endpoint" type="url" value={endpoint} onChange={(event) => updateEndpoint(event.target.value)} placeholder="https://…" className="w-full rounded-lg border border-slate-300 p-3 text-sm text-brand-black focus:border-brand-yellow focus:ring-1 focus:ring-brand-yellow" />
+            <p className="mt-1 text-xs text-slate-500">{provider === 'openRouter' ? 'OpenRouter results are limited to model IDs or names containing “free”.' : 'You can replace the prefilled endpoint with a compatible server URL.'}</p>
+          </div>
+          <div>
+            <label htmlFor="provider-api-key" className="mb-1.5 block text-sm font-medium text-slate-700">API key {provider === 'ollama' || provider === 'lmStudio' ? <span className="font-normal text-slate-500">(optional for local servers)</span> : null}</label>
+            <input id="provider-api-key" type="password" value={apiKey} onChange={(event) => provider === 'custom' ? update({ customApiKey: event.target.value }) : updateProviderKey(event.target.value)} placeholder={provider === 'gemini' ? 'Paste your Gemini key' : 'Paste your API key'} className="w-full rounded-lg border border-slate-300 p-3 text-sm text-brand-black focus:border-brand-yellow focus:ring-1 focus:ring-brand-yellow" autoComplete="off" />
+          </div>
+          <div className="flex flex-wrap items-center gap-3">
+            <Button type="button" onClick={testAndFetchModels} isLoading={isLoadingModels}>Test & fetch models</Button>
+            {modelStatus.text && <p role="status" aria-live="polite" className={`text-sm ${modelStatus.tone === 'error' ? 'text-yellow-900' : modelStatus.tone === 'success' ? 'text-brand-charcoal' : 'text-slate-600'}`}>{modelStatus.text}</p>}
+          </div>
+          {models.length > 0 && (
+            <div>
+              <label htmlFor="provider-model" className="mb-1.5 block text-sm font-medium text-slate-700">Available model</label>
+              <select id="provider-model" value={selectedModel} onChange={(event) => updateModel(event.target.value)} className="w-full rounded-lg border border-slate-300 bg-white p-3 text-sm text-brand-black focus:border-brand-yellow focus:ring-1 focus:ring-brand-yellow">
+                {models.map((model) => <option key={model.id} value={model.id}>{model.label}{model.label !== model.id ? ` — ${model.id}` : ''}</option>)}
+              </select>
+            </div>
+          )}
+        </div>
+      </div>
+      {isAdmin && <AdminSettings user={user} />}
+    </div>
+  );
 };
+
+interface SettingsViewProps { user: UserProfile; isAdmin: boolean; }
+
+export const SettingsView: React.FC<SettingsViewProps> = ({ user, isAdmin }) => (
+  <main className="container mx-auto px-4 py-8">
+    <div className="mx-auto max-w-5xl">
+      <div className="mb-8 text-left">
+        <h1 className="text-3xl font-bold text-brand-black md:text-4xl">Settings</h1>
+        <p className="mt-1 text-lg text-slate-600">Manage application, AI provider, endpoint, and browser-local backup settings.</p>
+      </div>
+      <SettingsContent user={user} isAdmin={isAdmin} />
+    </div>
+  </main>
+);
