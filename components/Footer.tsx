@@ -13,7 +13,7 @@ const socialLinks = [
 
 export const Footer: React.FC = () => {
     return (
-        <footer className="bg-brand-charcoal text-brand-paper mt-auto">
+        <footer className="bg-brand-black text-white mt-auto">
             <div className="container mx-auto px-4 py-6">
                 <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
                     <div className="flex-shrink-0 rounded-md bg-white px-3 py-1.5">
@@ -26,7 +26,7 @@ export const Footer: React.FC = () => {
                                 href={link.href}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-brand-paper hover:text-brand-yellow transition-colors"
+                                className="text-white hover:text-brand-yellow transition-colors"
                                 aria-label={link.name}
                             >
                                 <link.icon className="h-6 w-6" />

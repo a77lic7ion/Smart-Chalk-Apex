@@ -128,11 +128,13 @@ const App: React.FC = () => {
         theme={theme}
         onThemeToggle={toggleTheme}
        />
-      <div className="flex-grow">
-        {renderMainView()}
-      </div>
+      <div className="flex min-h-screen flex-1 flex-col lg:pl-64">
+        <div className="flex-grow">
+          {renderMainView()}
+        </div>
 
-      <Footer />
+        <Footer />
+      </div>
     </div>
   );
 };

@@ -259,3 +259,12 @@ body,
 .theme-dark .text-black {
   color: var(--smartchalk-text) !important;
 }
+
+/* Keep the quick-start card assertive in dark mode and editorial in light mode. */
+.theme-light .quick-start-panel {
+  background-color: var(--smartchalk-panel) !important;
+}
+
+.theme-light .quick-start-panel .text-white {
+  color: var(--smartchalk-text) !important;
+}

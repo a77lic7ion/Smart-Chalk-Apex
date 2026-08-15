@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useLayoutEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import type { UserProfile } from '../types';
 import { SmartChalkLogo } from './Icons';
 import type { AppView, ThemeMode } from '../App';
@@ -13,146 +13,201 @@ interface HeaderProps {
   onThemeToggle: () => void;
 }
 
-const AnimatedLabel: React.FC<{ label: string }> = ({ label }) => (
-    <>
-        <span className="label-static">{label}</span>
-        <span className="label-animated" aria-hidden="true">
-            {label.split('').map((letter, index) => (
-                <div key={index} style={{ '--delay': index } as React.CSSProperties}>
-                    {letter === ' ' ? '\u00A0' : letter}
-                </div>
-            ))}
-        </span>
-    </>
-);
+const getNavItems = (isAdmin: boolean): { view: AppView; label: string }[] => {
+  const baseItems: { view: AppView; label: string }[] = [
+    { view: 'testGenerator', label: 'Test Gen' },
+    { view: 'exam', label: 'Exam Gen' },
+    { view: 'homeworkGenerator', label: 'Homework Gen' },
+    { view: 'lessonGenerator', label: 'Lesson Gen' },
+    { view: 'slidesGenerator', label: 'Slides Gen' },
+    { view: 'myContent', label: 'My Content' },
+  ];
 
-const getNavItems = (isAdmin: boolean): { view: AppView, label: string }[] => {
-    const baseItems: { view: AppView, label: string }[] = [
-        { view: 'testGenerator', label: 'Test Gen' },
-        { view: 'exam', label: 'Exam Gen' },
-        { view: 'homeworkGenerator', label: 'Homework Gen' },
-        { view: 'lessonGenerator', label: 'Lesson Gen' },
-        { view: 'slidesGenerator', label: 'Slides Gen' },
-        { view: 'myContent', label: 'My Content' },
-    ];
-
-    if (isAdmin) {
-        return [
-            { view: 'dashboard', label: 'Dashboard' },
-            { view: 'manualExamBuilder', label: 'Exam Creator' },
-            ...baseItems,
-            { view: 'settings', label: 'Settings' },
-        ];
-    }
-
-    return [
+  return isAdmin
+    ? [
+        { view: 'dashboard', label: 'Dashboard' },
+        { view: 'manualExamBuilder', label: 'Exam Creator' },
+        ...baseItems,
+        { view: 'settings', label: 'Settings' },
+      ]
+    : [
         { view: 'dashboard', label: 'Dashboard' },
         ...baseItems,
         { view: 'settings', label: 'Settings' },
-    ];
+      ];
+};
+
+const UserAvatar: React.FC<{ user: UserProfile; size?: 'sm' | 'md' }> = ({ user, size = 'sm' }) => {
+  const dimensions = size === 'md' ? 'h-10 w-10' : 'h-8 w-8';
+  const initial = user.name?.trim().charAt(0).toUpperCase() || 'S';
+
+  if (user.picture) {
+    return <img src={user.picture} alt={user.name || 'User profile'} className={`${dimensions} rounded-full object-cover`} />;
+  }
+
+  return (
+    <span aria-hidden="true" className={`${dimensions} inline-flex items-center justify-center rounded-full bg-brand-yellow text-sm font-black text-brand-black`}>
+      {initial}
+    </span>
+  );
 };
 
 export const Header: React.FC<HeaderProps> = ({ currentView, setView, user, onLogout, isAdmin, theme, onThemeToggle }) => {
-    const navRef = useRef<HTMLElement>(null);
-    const [bubbleLeft, setBubbleLeft] = useState(0);
-    const [bubbleWidth, setBubbleWidth] = useState(0);
-    const [bubbleVisible, setBubbleVisible] = useState(false);
-    const [isProfileOpen, setIsProfileOpen] = useState(false);
-    const profileRef = useRef<HTMLDivElement>(null);
+  const profileRef = useRef<HTMLDivElement>(null);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
+  const currentNavItems = useMemo(() => getNavItems(isAdmin), [isAdmin]);
 
-    const currentNavItems = useMemo(() => getNavItems(isAdmin), [isAdmin]);
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (profileRef.current && !profileRef.current.contains(event.target as Node)) {
+        setIsProfileOpen(false);
+      }
+    };
 
-    useLayoutEffect(() => {
-        const navNode = navRef.current;
-        if (!navNode) return;
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
-        const activeItem = navNode.querySelector('button.active');
-        if (activeItem) {
-            const navRect = navNode.getBoundingClientRect();
-            const itemRect = activeItem.getBoundingClientRect();
-            setBubbleLeft(itemRect.left - navRect.left);
-            setBubbleWidth(itemRect.width);
-            setBubbleVisible(true);
-        } else {
-            setBubbleVisible(false);
-        }
-    }, [currentView, currentNavItems]);
+  const handleViewChange = (nextView: AppView) => {
+    setView(nextView);
+    setIsMobileNavOpen(false);
+  };
 
-    useEffect(() => {
-        const handleClickOutside = (event: MouseEvent) => {
-            if (profileRef.current && !profileRef.current.contains(event.target as Node)) {
-                setIsProfileOpen(false);
-            }
-        };
-        document.addEventListener("mousedown", handleClickOutside);
-        return () => document.removeEventListener("mousedown", handleClickOutside);
-    }, []);
+  const profileMenu = (
+    <div ref={profileRef} className="relative">
+      <button
+        type="button"
+        onClick={() => setIsProfileOpen(open => !open)}
+        aria-expanded={isProfileOpen}
+        aria-label="Open user menu"
+        className="flex items-center gap-2 rounded-full p-1 transition-colors hover:bg-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-yellow"
+      >
+        <UserAvatar user={user} />
+      </button>
+      {isProfileOpen && (
+        <div className="absolute bottom-full right-0 z-50 mb-2 w-60 rounded-xl border border-slate-200 bg-white p-2 shadow-xl lg:bottom-auto lg:top-full lg:mt-2 lg:mb-0">
+          <div className="border-b border-slate-200 px-3 py-2">
+            <p className="truncate text-sm font-semibold text-brand-black">{user.name || 'User'}</p>
+            <p className="truncate text-xs text-slate-500">{user.email}</p>
+          </div>
+          <div className="py-1">
+            <button
+              type="button"
+              onClick={onLogout}
+              className="flex w-full items-center rounded-lg px-3 py-2 text-left text-sm text-slate-700 transition-colors hover:bg-slate-100"
+            >
+              Logout
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 
-    return (
-        <header className="bg-brand-paper sticky top-0 z-40 shadow-sm">
-            <div className="container mx-auto flex items-center gap-2 px-4 py-2 sm:px-6 lg:px-8">
-                <SmartChalkLogo className="h-12 w-auto shrink-0" />
+  return (
+    <header className="z-40">
+      <aside className="fixed inset-y-0 left-0 z-50 hidden w-64 flex-col border-r border-slate-200 bg-brand-paper px-5 py-6 lg:flex">
+        <SmartChalkLogo className="h-12 w-auto self-start" />
 
-                <div className="min-w-0 flex-1 overflow-x-auto px-1">
-                    <nav className="animated-tab-bar" ref={navRef}>
-                        <ul>
-                            {currentNavItems.map(item => (
-                                <li key={item.view}>
-                                    <button
-                                        onClick={() => setView(item.view)}
-                                        className={currentView === item.view ? 'active' : ''}
-                                    >
-                                        <AnimatedLabel label={item.label} />
-                                    </button>
-                                </li>
-                            ))}
-                        </ul>
-                        <div 
-                            className="bubble" 
-                            style={{ 
-                                left: bubbleLeft, 
-                                width: bubbleWidth,
-                                opacity: bubbleVisible ? 1 : 0,
-                                transform: bubbleVisible ? 'scale(1)' : 'scale(0.95)'
-                            }}
-                        ></div>
-                    </nav>
-                </div>
+        <nav className="mt-10" aria-label="Primary navigation">
+          <ul className="space-y-2">
+            {currentNavItems.map(item => {
+              const isActive = currentView === item.view;
+              return (
+                <li key={item.view}>
+                  <button
+                    type="button"
+                    onClick={() => handleViewChange(item.view)}
+                    className={`w-full rounded-xl px-4 py-3 text-left text-xs font-bold uppercase tracking-wide transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-brand-yellow ${
+                      isActive
+                        ? 'bg-brand-yellow text-brand-black shadow-sm'
+                        : 'text-slate-500 hover:bg-slate-100 hover:text-brand-charcoal'
+                    }`}
+                  >
+                    {item.label}
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        </nav>
 
-                <div className="flex shrink-0 items-center gap-2">
-                    <button
-                        type="button"
-                        onClick={onThemeToggle}
-                        aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} theme`}
-                        aria-pressed={theme === 'dark'}
-                        className="inline-flex h-10 items-center gap-2 rounded-full border border-brand-yellow bg-brand-black px-3 text-xs font-bold uppercase tracking-wide text-brand-yellow transition-colors hover:bg-brand-yellow hover:text-brand-black focus:outline-none focus:ring-2 focus:ring-brand-yellow focus:ring-offset-2"
-                    >
-                        <span aria-hidden="true" className="text-base leading-none">{theme === 'dark' ? '☀' : '◐'}</span>
-                        <span className="hidden sm:inline">{theme === 'dark' ? 'Light' : 'Dark'}</span>
-                    </button>
-                    <div className="relative">
-                    <button onClick={() => setIsProfileOpen(p => !p)} className="flex items-center gap-2 rounded-full hover:bg-slate-200 p-1 transition-colors">
-                        <img src={user.picture} alt={user.name || 'User profile'} className="h-8 w-8 rounded-full" />
-                    </button>
-                    {isProfileOpen && (
-                        <div ref={profileRef} className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-xl border border-slate-200 z-50 p-2">
-                            <div className="px-3 py-2 border-b border-slate-200">
-                                <p className="text-sm font-semibold text-brand-black truncate">{user.name || 'User'}</p>
-                                <p className="text-xs text-slate-500 truncate">{user.email}</p>
-                            </div>
-                            <div className="py-1">
-                                <button
-                                    onClick={onLogout}
-                                    className="flex items-center gap-3 w-full px-3 py-2 text-left text-sm text-slate-700 rounded-md hover:bg-slate-100 transition-colors"
-                                >
-                                    <span>Logout</span>
-                                </button>
-                            </div>
-                        </div>
-                    )}
-                    </div>
-                </div>
+        <div className="mt-auto space-y-3 border-t border-slate-200 pt-5">
+          <button
+            type="button"
+            onClick={onThemeToggle}
+            aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} theme`}
+            aria-pressed={theme === 'dark'}
+            className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-xl border border-brand-yellow bg-brand-black px-3 text-xs font-bold uppercase tracking-wide text-brand-yellow transition-colors hover:bg-brand-yellow hover:text-brand-black focus:outline-none focus:ring-2 focus:ring-brand-yellow focus:ring-offset-2"
+          >
+            <span aria-hidden="true" className="text-base leading-none">{theme === 'dark' ? '☀' : '◐'}</span>
+            <span>{theme === 'dark' ? 'Light mode' : 'Dark mode'}</span>
+          </button>
+          <div className="flex items-center justify-between gap-3">
+            <div className="min-w-0">
+              <p className="truncate text-sm font-semibold text-brand-black">{user.name || 'Educator'}</p>
+              <p className="truncate text-xs text-slate-500">Local workspace</p>
             </div>
-        </header>
-    );
+            {profileMenu}
+          </div>
+        </div>
+      </aside>
+
+      <div className="sticky top-0 z-50 border-b border-slate-200 bg-brand-paper px-4 py-3 shadow-sm lg:hidden">
+        <div className="flex items-center justify-between gap-2">
+          <SmartChalkLogo className="h-10 w-auto" />
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={onThemeToggle}
+              aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} theme`}
+              aria-pressed={theme === 'dark'}
+              className="inline-flex h-9 items-center gap-1 rounded-full border border-brand-yellow bg-brand-black px-3 text-xs font-bold uppercase tracking-wide text-brand-yellow transition-colors hover:bg-brand-yellow hover:text-brand-black focus:outline-none focus:ring-2 focus:ring-brand-yellow"
+            >
+              <span aria-hidden="true">{theme === 'dark' ? '☀' : '◐'}</span>
+              <span className="hidden sm:inline">{theme === 'dark' ? 'Light' : 'Dark'}</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setIsMobileNavOpen(open => !open)}
+              aria-controls="smartchalk-mobile-navigation"
+              aria-expanded={isMobileNavOpen}
+              className="inline-flex h-9 items-center gap-2 rounded-full bg-brand-yellow px-3 text-xs font-bold uppercase tracking-wide text-brand-black transition-colors hover:bg-brand-black hover:text-brand-yellow focus:outline-none focus:ring-2 focus:ring-brand-yellow"
+            >
+              <span aria-hidden="true" className="text-base leading-none">{isMobileNavOpen ? '×' : '☰'}</span>
+              <span>Menu</span>
+            </button>
+          </div>
+        </div>
+
+        {isMobileNavOpen && (
+          <div id="smartchalk-mobile-navigation" className="mt-3 border-t border-slate-200 pt-3">
+            <nav aria-label="Primary navigation">
+              <ul className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                {currentNavItems.map(item => {
+                  const isActive = currentView === item.view;
+                  return (
+                    <li key={item.view}>
+                      <button
+                        type="button"
+                        onClick={() => handleViewChange(item.view)}
+                        className={`w-full rounded-lg border px-3 py-3 text-left text-xs font-bold uppercase tracking-wide transition-colors focus:outline-none focus:ring-2 focus:ring-brand-yellow ${
+                          isActive
+                            ? 'border-brand-yellow bg-brand-yellow text-brand-black'
+                            : 'border-slate-200 bg-white text-brand-charcoal hover:border-brand-yellow hover:bg-slate-100'
+                        }`}
+                      >
+                        {item.label}
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+            </nav>
+          </div>
+        )}
+      </div>
+    </header>
+  );
 };
