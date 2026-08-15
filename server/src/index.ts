@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import path from 'path';
 
 dotenv.config();
 
@@ -17,6 +18,7 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(express.json({ limit: '1gb' }));
 app.use(express.urlencoded({ limit: '1gb', extended: true }));
+app.use('/uploads', express.static(path.resolve(process.env.LOCAL_STORAGE_DIR || path.join(process.cwd(), 'uploads'))));
 
 import testsRouter from './routes/tests';
 import presentationsRouter from './routes/presentations';

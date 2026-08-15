@@ -1,144 +1,123 @@
-import { put, del, list } from '@vercel/blob';
+import fs from 'fs/promises';
+import path from 'path';
 import multer from 'multer';
 
-export interface BlobUploadResult {
+export interface LocalUploadResult {
     url: string;
     pathname: string;
     contentType: string;
     contentDisposition: string;
 }
 
-/**
- * Upload an image file to Vercel Blob storage
- * @param file - The file buffer to upload
- * @param filename - The desired filename for the blob
- * @param folder - Optional folder path (e.g., 'images', 'presentations')
- * @param contentType - MIME type of the file
- * @returns Promise with the blob URL and metadata
- */
+const storageRoot = path.resolve(process.env.LOCAL_STORAGE_DIR || path.join(process.cwd(), 'uploads'));
+const publicBaseUrl = (process.env.PUBLIC_BASE_URL || `http://localhost:${process.env.PORT || 3001}`).replace(/\/$/, '');
+
+const safeSegment = (value: string, fallback: string): string => {
+    const cleaned = value.replace(/[^a-zA-Z0-9._-]/g, '_').replace(/^\.+/, '');
+    return cleaned || fallback;
+};
+
+const safeRelativePath = (folder: string, filename: string): string => {
+    const folderPath = folder.split(/[\\/]+/).filter(Boolean).map((part) => safeSegment(part, 'images')).join('/');
+    const safeFilename = safeSegment(filename, 'upload.bin');
+    return path.posix.join(folderPath || 'images', safeFilename);
+};
+
+const absolutePathFor = (relativePath: string): string => {
+    const absolutePath = path.resolve(storageRoot, relativePath);
+    if (absolutePath !== storageRoot && !absolutePath.startsWith(`${storageRoot}${path.sep}`)) {
+        throw new Error('Invalid storage path');
+    }
+    return absolutePath;
+};
+
+const toResult = (relativePath: string, contentType: string): LocalUploadResult => ({
+    url: `${publicBaseUrl}/uploads/${relativePath.split(path.sep).map(encodeURIComponent).join('/')}`,
+    pathname: relativePath,
+    contentType,
+    contentDisposition: 'inline',
+});
+
 export const uploadImageToBlob = async (
-    file: Buffer, 
-    filename: string, 
+    file: Buffer,
+    filename: string,
     folder: string = 'images',
     contentType: string = 'image/jpeg'
-): Promise<BlobUploadResult> => {
+): Promise<LocalUploadResult> => {
     try {
-        const pathname = `${folder}/${filename}`;
-        
-        const blob = await put(pathname, file, {
-            access: 'public',
-            contentType
-        });
-
-        return {
-            url: blob.url,
-            pathname: blob.pathname,
-            contentType: blob.contentType || contentType,
-            contentDisposition: blob.contentDisposition || ''
-        };
+        const relativePath = safeRelativePath(folder, filename);
+        const absolutePath = absolutePathFor(relativePath);
+        await fs.mkdir(path.dirname(absolutePath), { recursive: true });
+        await fs.writeFile(absolutePath, file, { flag: 'w' });
+        return toResult(relativePath, contentType);
     } catch (error) {
-        console.error('Error uploading image to blob storage:', error);
-        throw new Error(`Failed to upload image: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        console.error('Error writing local image storage:', error);
+        throw new Error(`Failed to save image: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
 };
 
-/**
- * Upload an image from a base64 string to Vercel Blob storage
- * @param base64Data - Base64 encoded image data (with or without data URL prefix)
- * @param filename - The desired filename for the blob
- * @param folder - Optional folder path
- * @returns Promise with the blob URL and metadata
- */
 export const uploadBase64ImageToBlob = async (
     base64Data: string,
     filename: string,
     folder: string = 'images'
-): Promise<BlobUploadResult> => {
+): Promise<LocalUploadResult> => {
     try {
-        // Remove data URL prefix if present
-        const base64String = base64Data.replace(/^data:image\/[a-z]+;base64,/, '');
-        
-        // Convert base64 to buffer
-        const buffer = Buffer.from(base64String, 'base64');
-        
-        // Determine content type from original data URL or default to jpeg
-        let contentType = 'image/jpeg';
-        const dataUrlMatch = base64Data.match(/^data:image\/([a-z]+);base64,/);
-        if (dataUrlMatch) {
-            contentType = `image/${dataUrlMatch[1]}`;
-        }
-        
-        return await uploadImageToBlob(buffer, filename, folder, contentType);
+        const dataUrlMatch = base64Data.match(/^data:(image\/[a-z0-9.+-]+);base64,/i);
+        const contentType = dataUrlMatch?.[1] || 'image/jpeg';
+        const base64String = base64Data.replace(/^data:image\/[a-z0-9.+-]+;base64,/i, '');
+        return await uploadImageToBlob(Buffer.from(base64String, 'base64'), filename, folder, contentType);
     } catch (error) {
-        console.error('Error uploading base64 image to blob storage:', error);
-        throw new Error(`Failed to upload base64 image: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        console.error('Error writing local base64 image storage:', error);
+        throw new Error(`Failed to save base64 image: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
 };
 
-/**
- * Delete an image from Vercel Blob storage
- * @param url - The blob URL to delete
- * @returns Promise that resolves when deletion is complete
- */
-export const deleteImageFromBlob = async (url: string): Promise<void> => {
+export const deleteImageFromBlob = async (urlOrPath: string): Promise<void> => {
     try {
-        await del(url);
+        const parsed = urlOrPath.startsWith('http') ? new URL(urlOrPath) : null;
+        const pathname = parsed ? decodeURIComponent(parsed.pathname.replace(/^\/uploads\//, '')) : urlOrPath.replace(/^\/?uploads\//, '');
+        await fs.rm(absolutePathFor(pathname), { force: true });
     } catch (error) {
-        console.error('Error deleting image from blob storage:', error);
+        console.error('Error deleting local image:', error);
         throw new Error(`Failed to delete image: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
 };
 
-/**
- * List all blobs in a specific folder
- * @param folder - The folder to list (e.g., 'images', 'presentations')
- * @param limit - Maximum number of results to return
- * @returns Promise with array of blob metadata
- */
-export const listImagesInFolder = async (folder: string = 'images', limit: number = 100) => {
+export const listImagesInFolder = async (folder: string = 'images', limit: number = 100): Promise<LocalUploadResult[]> => {
     try {
-        const { blobs } = await list({
-            prefix: `${folder}/`,
-            limit
+        const safeFolder = folder.split(/[\\/]+/).filter(Boolean).map((part) => safeSegment(part, 'images')).join('/');
+        const folderPath = absolutePathFor(safeFolder || 'images');
+        const entries = await fs.readdir(folderPath, { withFileTypes: true }).catch((error: NodeJS.ErrnoException) => {
+            if (error.code === 'ENOENT') return [];
+            throw error;
         });
-        
-        return blobs;
+        const files = entries.filter((entry) => entry.isFile()).slice(0, Math.max(0, limit));
+        return Promise.all(files.map(async (entry) => {
+            const relativePath = path.posix.join(safeFolder || 'images', entry.name);
+            const extension = path.extname(entry.name).toLowerCase();
+            const contentType = extension === '.png' ? 'image/png' : extension === '.webp' ? 'image/webp' : extension === '.gif' ? 'image/gif' : 'image/jpeg';
+            return toResult(relativePath, contentType);
+        }));
     } catch (error) {
-        console.error('Error listing images from blob storage:', error);
+        console.error('Error listing local images:', error);
         throw new Error(`Failed to list images: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
 };
 
-/**
- * Generate a unique filename for an image
- * @param originalName - Original filename
- * @param userId - User ID to include in filename
- * @returns Unique filename with timestamp
- */
 export const generateUniqueFilename = (originalName: string, userId?: string): string => {
     const timestamp = Date.now();
     const randomId = Math.random().toString(36).substring(2, 8);
     const extension = originalName.split('.').pop() || 'jpg';
     const baseName = originalName.split('.')[0].replace(/[^a-zA-Z0-9]/g, '_');
-    
     const userPrefix = userId ? `${userId}_` : '';
     return `${userPrefix}${baseName}_${timestamp}_${randomId}.${extension}`;
 };
 
-/**
- * Multer configuration for handling file uploads
- */
 export const upload = multer({
     storage: multer.memoryStorage(),
-    limits: {
-        fileSize: 10 * 1024 * 1024, // 10MB limit
-    },
+    limits: { fileSize: 10 * 1024 * 1024 },
     fileFilter: (req, file, cb) => {
-        // Accept only image files
-        if (file.mimetype.startsWith('image/')) {
-            cb(null, true);
-        } else {
-            cb(new Error('Only image files are allowed'));
-        }
+        if (file.mimetype.startsWith('image/')) cb(null, true);
+        else cb(new Error('Only image files are allowed'));
     }
 });

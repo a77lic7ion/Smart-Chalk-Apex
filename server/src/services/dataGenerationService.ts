@@ -5,7 +5,7 @@ import crypto from 'crypto';
 
 // Use a dynamic import for the ES Module
 const getOpenAIService = async () => {
-  const { generateContentWithOpenAI } = await import('../../../services/openai');
+  const { generateContentWithOpenAI } = await import('./openaiService');
   return generateContentWithOpenAI;
 };
 

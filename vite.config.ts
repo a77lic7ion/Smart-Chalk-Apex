@@ -16,6 +16,9 @@ export default defineConfig(({ mode }) => {
           },
         },
       },
+      preview: {
+        allowedHosts: ['.manus.computer'],
+      },
       resolve: {
         alias: {
           '@': path.resolve(__dirname, '.'),

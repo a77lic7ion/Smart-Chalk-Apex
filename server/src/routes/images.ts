@@ -7,7 +7,7 @@ const router = Router();
 
 /**
  * POST /api/images/upload
- * Upload an image file to Vercel Blob storage
+ * Upload an image file to local storage
  */
 router.post('/upload', authenticateToken, upload.single('image'), async (req: AuthenticatedRequest, res) => {
     try {
@@ -41,7 +41,7 @@ router.post('/upload', authenticateToken, upload.single('image'), async (req: Au
 
 /**
  * POST /api/images/upload-base64
- * Upload a base64 encoded image to Vercel Blob storage
+ * Upload a base64 encoded image to local storage
  */
 router.post('/upload-base64', authenticateToken, async (req: AuthenticatedRequest, res) => {
     try {
@@ -71,11 +71,11 @@ router.post('/upload-base64', authenticateToken, async (req: AuthenticatedReques
 
 /**
  * DELETE /api/images/:url
- * Delete an image from Vercel Blob storage
+ * Delete an image from local storage
  */
 router.delete('/:filename', authenticateToken, async (req: AuthenticatedRequest, res) => {
     try {
-        const url = decodeURIComponent(req.params.encodedUrl);
+        const url = decodeURIComponent(req.params.filename);
 
         await deleteImageFromBlob(url);
 
