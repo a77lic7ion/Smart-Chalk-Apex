@@ -109,7 +109,7 @@ const AddCustomQuestionModal: React.FC<{
                     <h2 className="text-lg font-semibold text-brand-black">Add Custom Question</h2>
                  </div>
                  <div className="p-6 space-y-4 overflow-y-auto">
-                     {error && <p className="text-sm text-red-600">{error}</p>}
+                     {error && <p role="alert" className="rounded-lg border border-slate-300 bg-brand-paper p-3 text-sm font-semibold text-brand-black">{error}</p>}
                      <TextArea label="Question" value={question} onChange={(e) => setQuestion(e.target.value)} rows={3} />
                      <TextArea label="Answer / Memo" value={answer} onChange={(e) => setAnswer(e.target.value)} rows={4} />
                      <div>
@@ -365,25 +365,28 @@ export const TestGenerator: React.FC<{ user: UserProfile, loadId: string | null;
     const translatedBloomsOptions = BLOOMS_LEVEL_OPTIONS.map(opt => ({...opt, label: t(`blooms.${opt.value.toLowerCase()}`, {fallback: opt.label})}));
 
     return (
-        <main className="p-4 md:p-8 max-w-4xl mx-auto">
-            <div className="bg-white p-6 rounded-xl shadow-md border border-slate-200">
-                {error && (
-                    <div className="mb-4 bg-red-50 border-l-4 border-red-400 p-4 rounded-r-lg shadow-md">
-                        <p className="text-sm text-red-700">{error}</p>
-                    </div>
-                )}
-                {lastSavedTestMessage && !error && (
-                     <div className="mb-4 bg-emerald-50 border-l-4 border-emerald-400 p-4 rounded-r-lg shadow-md">
-                        <p className="text-sm text-emerald-700">{lastSavedTestMessage}</p>
-                    </div>
-                )}
-                
-                {stagedQuestions === null ? (
-                    <form onSubmit={handleFormSubmit} className="space-y-6">
-                        <div>
-                            <h2 className="text-xl font-bold text-brand-black mb-2">{t('feature.testGenerator', { fallback: "Test Generator"})}</h2>
-                            <p className="text-slate-600">{t('testGenerator.subtitle', { fallback: `Craft customized training data for your models.`})}</p>
+        <main className="min-h-full bg-brand-paper">
+            <div className="mx-auto w-full max-w-5xl px-5 py-8 sm:px-8 lg:px-12 lg:py-12">
+                <section className="mb-8 border-b border-slate-200 pb-8">
+                    <p className="mb-3 text-xs font-bold uppercase tracking-[0.18em] text-brand-yellow">SmartChalk generator</p>
+                    <h1 className="text-3xl font-black tracking-tight text-brand-black sm:text-4xl">{t('feature.testGenerator', { fallback: "Test Generator"})}</h1>
+                    <p className="mt-3 max-w-2xl text-base text-slate-600">{t('testGenerator.subtitle', { fallback: `Craft customized training data for your models.`})}</p>
+                </section>
+
+                <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+                    {error && (
+                        <div role="alert" className="mb-6 rounded-xl border border-slate-300 bg-brand-paper p-4">
+                            <p className="text-sm font-semibold text-brand-black">{error}</p>
                         </div>
+                    )}
+                    {lastSavedTestMessage && !error && (
+                        <div role="status" className="mb-6 rounded-xl border border-brand-yellow bg-brand-paper p-4">
+                            <p className="text-sm font-semibold text-brand-black">{lastSavedTestMessage}</p>
+                        </div>
+                    )}
+                    
+                    {stagedQuestions === null ? (
+                    <form onSubmit={handleFormSubmit} className="space-y-6">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <Select label={t('testGenerator.form.curriculumLabel', { fallback: "Curriculum"})} name="curriculum" value={params.curriculum} onChange={handleInputChange} options={CURRICULUM_OPTS_FOR_SELECT} required />
                             <Select label={t('testGenerator.form.gradeLabel', { fallback: "Grade"})} name="grade" value={params.grade} onChange={handleInputChange} options={GRADES_OPTIONS} required />
@@ -393,9 +396,18 @@ export const TestGenerator: React.FC<{ user: UserProfile, loadId: string | null;
                             <div>
                                 <Input label={t('testGenerator.form.topicLabel', { fallback: "Topic(s)"})} name="topic" value={params.topic} onChange={handleInputChange} placeholder={t('testGenerator.form.topicPlaceholder', { fallback: "e.g., Photosynthesis or select a suggestion"})} required />
                                 {topicSuggestions.length > 0 && (
-                                    <div className="mt-2 flex flex-wrap gap-2">
+                                    <div className="mt-3 flex flex-wrap gap-2">
                                         {topicSuggestions.map(suggestion => (
-                                            <Button key={suggestion} type="button" variant="ghost" size="sm" onClick={() => handleTopicSuggestionClick(suggestion)} className={`border border-yellow-200 hover:bg-yellow-50 ${params.topic === suggestion ? 'bg-yellow-100 text-brand-black' : 'text-slate-600'}`}>{suggestion}</Button>
+                                            <Button
+                                                key={suggestion}
+                                                type="button"
+                                                variant="ghost"
+                                                size="sm"
+                                                onClick={() => handleTopicSuggestionClick(suggestion)}
+                                                className={`border-slate-300 ${params.topic === suggestion ? 'border-brand-yellow bg-brand-yellow text-brand-black' : 'text-brand-black'}`}
+                                            >
+                                                {suggestion}
+                                            </Button>
                                         ))}
                                     </div>
                                 )}
@@ -438,6 +450,7 @@ export const TestGenerator: React.FC<{ user: UserProfile, loadId: string | null;
                     />
                     </>
                 )}
+                </div>
             </div>
         </main>
     );
