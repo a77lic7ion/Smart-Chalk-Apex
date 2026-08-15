@@ -337,91 +337,104 @@ export const exportTestAsDocx = async (test: SavedTest, type: 'questions' | 'mem
     
     const buffer = await DocxPacker.toBlob(doc);
     saveAs(buffer, `${test.name.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_${type}.docx`);
-}
-
-// --- PPTX Export Function ---
+}// --- PPTX Export Function ---
 export const exportPresentationAsPptx = async (presentation: Presentation): Promise<void> => {
     const pptx = new PptxGenJS();
     pptx.layout = 'LAYOUT_WIDE';
+    pptx.author = 'SmartChalk';
+    pptx.company = 'SmartChalk';
+    pptx.subject = `${presentation.params.subject} — ${presentation.params.topic}`;
+    pptx.title = presentation.name;
+    pptx.lang = 'en-ZA';
 
-    const slides = await db.slides.where({ presentationId: presentation.id }).sortBy('slideNumber');
-
-    // --- Title Slide ---
-    const headerLogoBuffer = await getHeaderLogoBuffer();
-    const headerLogoBase64 = arrayBufferToBase64(headerLogoBuffer);
+    const slides = (await db.slides.where({ presentationId: presentation.id }).sortBy('slideNumber')).filter(slide => !slide.isIntro);
+    const headerLogoBase64 = arrayBufferToBase64(await getHeaderLogoBuffer());
     const logoDimensions = await getImageDimensions(headerLogoBase64);
-    
-    const logoW = 1.45;
+    const logoW = 1.15;
     const logoH = (logoW * logoDimensions.height) / logoDimensions.width;
+    const W = 13.333;
+    const H = 7.5;
+    const C = { navy: '0B1736', blue: '173B72', yellow: 'F9C400', paper: 'F7F5EF', white: 'FFFFFF', ink: '111111', muted: '5C6675', line: 'D9DDE5' };
 
-    const titleSlide = pptx.addSlide();
-    titleSlide.addImage({
-        data: headerLogoBase64,
-        x: (10 - logoW) / 2, y: 0.75, w: logoW, h: logoH,
-    });
-    titleSlide.addText(presentation.params.topic, { 
-        x: 0.5, y: 2.5, w: 9, h: 1.2, 
-        fontSize: 44, bold: true, align: 'center', color: '00154A', fontFace: 'Montserrat' 
-    });
-    const detailsText = [
-        { text: `Subject: ${presentation.params.subject}`, options: { breakLine: true } },
-        { text: `Grade: ${presentation.params.grade}`, options: { breakLine: true } },
-        { text: `Curriculum: ${presentation.params.curriculum}` }
-    ];
-    titleSlide.addText(detailsText, {
-        x: 0.5, y: 4.0, w: 9, h: 1.5,
-        fontSize: 20, align: 'center', color: '333333', fontFace: 'Montserrat'
-    });
-    
-    // --- Content Slides ---
+    const addBrandMark = (slide: PptxGenJS.Slide, color = C.navy) => {
+        slide.addShape(pptx.ShapeType.line, { x: 0.55, y: 7.08, w: 12.2, h: 0, line: { color: C.line, width: 0.8 } });
+        slide.addText('SMARTCHALK', { x: 0.58, y: 7.14, w: 1.3, h: 0.18, fontFace: 'Montserrat', fontSize: 6.5, bold: true, charSpacing: 1.5, color });
+    };
+
+    const addSectionTag = (slide: PptxGenJS.Slide, label: string, color = C.yellow) => {
+        slide.addShape(pptx.ShapeType.rect, { x: 0.62, y: 0.42, w: 1.05, h: 0.24, rectRadius: 0.03, fill: { color }, line: { color, transparency: 100 } });
+        slide.addText(label.toUpperCase(), { x: 1.82, y: 0.39, w: 2.8, h: 0.28, fontFace: 'Montserrat', fontSize: 8, bold: true, charSpacing: 1.2, color: C.muted, margin: 0 });
+    };
+
+    const addPageNumber = (slide: PptxGenJS.Slide, page: number) => {
+        slide.addText(String(page).padStart(2, '0'), { x: 12.2, y: 7.12, w: 0.55, h: 0.2, fontFace: 'Montserrat', fontSize: 7, bold: true, color: C.muted, align: 'right', margin: 0 });
+    };
+
+    const addBodyText = (slide: PptxGenJS.Slide, content: string, x: number, y: number, w: number, h: number, color = C.ink, fontSize = 17) => {
+        const lines = content.replace(/\*\*/g, '').split('\n').map(line => line.trim()).filter(Boolean);
+        const objects = lines.map((line, index) => ({ text: line.startsWith('⦁') ? line.substring(1).trim() : line, options: { bullet: line.startsWith('⦁'), breakLine: index < lines.length - 1 } }));
+        slide.addText(objects, { x, y, w, h, fontFace: 'Montserrat', fontSize, color, breakLine: false, valign: 'top', margin: 0.04, paraSpaceAfterPt: 10, fit: 'shrink' });
+    };
+
+    // Cover: intentionally sparse, with the logo and a strong full-screen brand field.
+    const cover = pptx.addSlide();
+    cover.background = { color: C.navy };
+    cover.addShape(pptx.ShapeType.rect, { x: 0, y: 0, w: W, h: H, fill: { color: C.navy }, line: { color: C.navy, transparency: 100 } });
+    cover.addShape(pptx.ShapeType.rect, { x: 0, y: 0, w: 0.22, h: H, fill: { color: C.yellow }, line: { color: C.yellow, transparency: 100 } });
+    cover.addImage({ data: headerLogoBase64, x: 0.8, y: 0.72, w: logoW, h: logoH, transparency: 0 });
+    cover.addText('SMARTCHALK GENERATOR', { x: 0.82, y: 2.05, w: 5.5, h: 0.3, fontFace: 'Montserrat', fontSize: 10, bold: true, charSpacing: 2.4, color: C.yellow, margin: 0 });
+    cover.addText(presentation.params.topic, { x: 0.78, y: 2.55, w: 7.8, h: 1.55, fontFace: 'Calibri Light', fontSize: 36, bold: true, color: C.white, margin: 0, fit: 'shrink' });
+    cover.addText(`${presentation.params.subject}  ·  ${presentation.params.grade}\n${presentation.params.curriculum}`, { x: 0.84, y: 4.55, w: 6.4, h: 0.75, fontFace: 'Montserrat', fontSize: 15, color: 'D8DFEC', breakLine: false, margin: 0, fit: 'shrink' });
+    cover.addShape(pptx.ShapeType.line, { x: 0.84, y: 5.75, w: 2.1, h: 0, line: { color: C.yellow, width: 2.2 } });
+    cover.addText('A clear lesson story, built for the classroom.', { x: 0.84, y: 5.95, w: 5.7, h: 0.35, fontFace: 'Montserrat', fontSize: 11, italic: true, color: 'AEBBD0', margin: 0 });
+
+    // A short section divider gives the deck an intentional beginning before the content slides.
+    const section = pptx.addSlide();
+    section.background = { color: C.paper };
+    section.addShape(pptx.ShapeType.rect, { x: 0, y: 0, w: W, h: H, fill: { color: C.paper }, line: { color: C.paper, transparency: 100 } });
+    section.addShape(pptx.ShapeType.rect, { x: 0.75, y: 0.78, w: 0.16, h: 5.45, fill: { color: C.yellow }, line: { color: C.yellow, transparency: 100 } });
+    section.addText('01', { x: 1.25, y: 1.0, w: 1.1, h: 0.55, fontFace: 'Calibri Light', fontSize: 28, bold: true, color: C.yellow, margin: 0 });
+    section.addText('THE BIG IDEA', { x: 1.27, y: 2.0, w: 5.4, h: 0.35, fontFace: 'Montserrat', fontSize: 10, bold: true, charSpacing: 2, color: C.muted, margin: 0 });
+    section.addText(presentation.params.topic, { x: 1.23, y: 2.48, w: 8.8, h: 1.4, fontFace: 'Calibri Light', fontSize: 32, bold: true, color: C.navy, margin: 0, fit: 'shrink' });
+    section.addText('Core concepts and classroom-ready explanations', { x: 1.27, y: 4.45, w: 6.5, h: 0.4, fontFace: 'Montserrat', fontSize: 15, color: C.muted, margin: 0 });
+    addBrandMark(section, C.navy);
+    addPageNumber(section, 2);
+
+    let page = 3;
     for (const slide of slides) {
-        if (slide.isIntro) continue;
-
-        const pptxSlide = pptx.addSlide();
-        pptxSlide.addText(slide.title, { 
-            x: 0.5, y: 0.25, w: 9, h: 0.75, 
-            fontSize: 18, bold: true, color: '00154A', fontFace: 'Montserrat' 
-        });
-        
-        const cleanContent = slide.content.replace(/\*\*/g, '');
-        const lines = cleanContent.split('\n').filter(line => line.trim() !== '');
-        
-        const textObjects = lines.map(line => {
-            if (line.trim().startsWith('⦁')) {
-                return { text: line.trim().substring(1).trim(), options: { bullet: true } };
-            }
-            return { text: line.trim(), options: { breakLine: true } };
-        });
-
-        const textY = 1.25;
-        const textH = 4.25;
+        const contentSlide = pptx.addSlide();
+        contentSlide.background = { color: C.paper };
+        contentSlide.addShape(pptx.ShapeType.rect, { x: 0, y: 0, w: W, h: H, fill: { color: C.paper }, line: { color: C.paper, transparency: 100 } });
+        addSectionTag(contentSlide, slide.slideNumber <= 3 ? 'Explore' : 'Explain');
+        contentSlide.addText(slide.title, { x: 0.62, y: 0.88, w: 8.6, h: 0.75, fontFace: 'Calibri Light', fontSize: 25, bold: true, color: C.navy, margin: 0, fit: 'shrink' });
+        contentSlide.addShape(pptx.ShapeType.line, { x: 0.62, y: 1.78, w: 12.05, h: 0, line: { color: C.line, width: 0.8 } });
 
         if (slide.imageData) {
-            const imageW = 4.0;
-            const imageH = 4.0;
-            const imageX = 5.5;
-            const imageY = 1.35;
-            
-            pptxSlide.addText(textObjects, { 
-                x: 0.5, y: textY, w: 4.8, h: textH, 
-                fontSize: 12, align: 'left', fontFace: 'Montserrat'
-            });
-            pptxSlide.addImage({ 
-                data: slide.imageData, x: imageX, y: imageY, w: imageW, h: imageH, 
-                sizing: { type: 'contain', w: imageW, h: imageH } 
-            });
+            contentSlide.addShape(pptx.ShapeType.roundRect, { x: 7.72, y: 2.14, w: 4.82, h: 4.12, rectRadius: 0.08, fill: { color: C.white }, line: { color: C.line, width: 0.7 } });
+            contentSlide.addImage({ data: slide.imageData, x: 7.86, y: 2.28, w: 4.54, h: 3.84, sizing: { type: 'crop', x: 7.86, y: 2.28, w: 4.54, h: 3.84 } });
+            addBodyText(contentSlide, slide.content, 0.72, 2.2, 6.25, 3.95, C.ink, 16);
         } else {
-            pptxSlide.addText(textObjects, { 
-                x: 0.5, y: textY, w: 9.0, h: textH, 
-                fontSize: 12, align: 'left', fontFace: 'Montserrat'
-            });
+            contentSlide.addShape(pptx.ShapeType.roundRect, { x: 0.62, y: 2.12, w: 12.05, h: 4.22, rectRadius: 0.08, fill: { color: C.white }, line: { color: C.line, width: 0.7 } });
+            addBodyText(contentSlide, slide.content, 0.95, 2.46, 11.35, 3.55, C.ink, 17);
         }
+        addBrandMark(contentSlide, C.navy);
+        addPageNumber(contentSlide, page++);
     }
-    
-    pptx.writeFile({ fileName: `${presentation.name.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.pptx` });
+
+    // Closing slide: minimal recap prompt, not another dense content page.
+    const closing = pptx.addSlide();
+    closing.background = { color: C.navy };
+    closing.addShape(pptx.ShapeType.rect, { x: 0, y: 0, w: W, h: H, fill: { color: C.navy }, line: { color: C.navy, transparency: 100 } });
+    closing.addImage({ data: headerLogoBase64, x: 0.8, y: 0.78, w: logoW, h: logoH });
+    closing.addText('TAKEAWAY', { x: 0.84, y: 2.55, w: 3.2, h: 0.35, fontFace: 'Montserrat', fontSize: 10, bold: true, charSpacing: 2, color: C.yellow, margin: 0 });
+    closing.addText('What should students remember?', { x: 0.8, y: 3.05, w: 8.5, h: 1.0, fontFace: 'Calibri Light', fontSize: 32, bold: true, color: C.white, margin: 0, fit: 'shrink' });
+    closing.addText(`${presentation.params.topic}\n${presentation.params.subject}  ·  ${presentation.params.grade}`, { x: 0.84, y: 4.55, w: 6.5, h: 0.7, fontFace: 'Montserrat', fontSize: 14, color: 'D8DFEC', margin: 0 });
+    closing.addShape(pptx.ShapeType.line, { x: 0.84, y: 5.82, w: 2.1, h: 0, line: { color: C.yellow, width: 2.2 } });
+
+    await pptx.writeFile({ fileName: `${presentation.name.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.pptx` });
 };
 
-const createLessonContentWithImages = async (content: string, imageMap: Map<string, string>): Promise<Paragraph[]> => {
+const createLessonContentWithImagess = async (content: string, imageMap: Map<string, string>): Promise<Paragraph[]> => {
     const paragraphs: Paragraph[] = [];
     const lines = content.split('\n');
     const placeholderRegex = /\[IMAGE_PLACEHOLDER:(.*?)\]/;
