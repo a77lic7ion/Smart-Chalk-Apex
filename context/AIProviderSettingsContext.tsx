@@ -8,7 +8,7 @@ export const PROVIDER_ENDPOINT_DEFAULTS: Record<AIProvider, string> = {
   cloudOllama: 'https://ollama.com',
   lmStudio: 'http://localhost:1234/v1',
   openRouter: 'https://openrouter.ai/api/v1',
-  nous: 'https://api.nousresearch.com/v1',
+  nous: 'https://inference-api.nousresearch.com/v1',
   custom: '',
   openai: 'https://api.openai.com/v1',
 };
@@ -51,7 +51,14 @@ const AIProviderSettingsContext = createContext<AIProviderSettingsContextType | 
 const migrateSettings = (stored: Partial<AISettings>): AISettings => ({
   ...DEFAULT_SETTINGS,
   ...stored,
-  providerEndpoints: { ...DEFAULT_SETTINGS.providerEndpoints, ...(stored.providerEndpoints ?? {}) },
+  providerEndpoints: {
+    ...DEFAULT_SETTINGS.providerEndpoints,
+    ...(stored.providerEndpoints ?? {}),
+    // Migrate the previously shipped NOUS default to the current inference API host.
+    nous: stored.providerEndpoints?.nous === 'https://api.nousresearch.com/v1' || !stored.providerEndpoints?.nous
+      ? DEFAULT_SETTINGS.providerEndpoints.nous
+      : stored.providerEndpoints.nous,
+  },
   selectedModels: { ...DEFAULT_SETTINGS.selectedModels, ...(stored.selectedModels ?? {}) },
   provider: stored.provider ?? 'gemini',
   providerApiKeys: {

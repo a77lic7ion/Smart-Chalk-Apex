@@ -9,6 +9,16 @@ import { discoverModels, type DiscoveredModel } from '../services/modelDiscovery
 
 const PROVIDERS: AIProvider[] = ['gemini', 'mistral', 'ollama', 'cloudOllama', 'lmStudio', 'openRouter', 'nous', 'custom'];
 
+const PROVIDER_KEY_URLS: Partial<Record<AIProvider, { label: string; url: string }>> = {
+  gemini: { label: 'Get a Gemini API key', url: 'https://aistudio.google.com/app/api-keys' },
+  mistral: { label: 'Get a Mistral API key', url: 'https://console.mistral.ai/api-keys/' },
+  ollama: { label: 'Manage Ollama keys', url: 'https://ollama.com/settings/keys' },
+  cloudOllama: { label: 'Manage Ollama keys', url: 'https://ollama.com/settings/keys' },
+  lmStudio: { label: 'LM Studio API docs', url: 'https://lmstudio.ai/docs/app/api/endpoints' },
+  openRouter: { label: 'Get an OpenRouter key', url: 'https://openrouter.ai/keys' },
+  nous: { label: 'Get a NOUS API key', url: 'https://portal.nousresearch.com/api-docs' },
+};
+
 const AdminSettings: React.FC<{ user: UserProfile }> = ({ user }) => {
   const [isExporting, setIsExporting] = React.useState(false);
   const [isImporting, setIsImporting] = React.useState(false);
@@ -141,7 +151,19 @@ const SettingsContent: React.FC<{ user: UserProfile; isAdmin: boolean }> = ({ us
             </div>
           )}
           <div>
-            <label htmlFor="provider-endpoint" className="mb-1.5 block text-sm font-medium text-slate-700">API endpoint</label>
+            <div className="mb-1.5 flex flex-wrap items-center justify-between gap-2">
+              <label htmlFor="provider-endpoint" className="block text-sm font-medium text-slate-700">API endpoint</label>
+              {PROVIDER_KEY_URLS[provider] && (
+                <a
+                  href={PROVIDER_KEY_URLS[provider].url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-xs font-semibold text-brand-black underline decoration-brand-yellow decoration-2 underline-offset-2 hover:text-brand-yellow"
+                >
+                  {PROVIDER_KEY_URLS[provider].label}
+                </a>
+              )}
+            </div>
             <input id="provider-endpoint" type="url" value={endpoint} onChange={(event) => updateEndpoint(event.target.value)} placeholder="https://…" className="w-full rounded-lg border border-slate-300 p-3 text-sm text-brand-black focus:border-brand-yellow focus:ring-1 focus:ring-brand-yellow" />
             <p className="mt-1 text-xs text-slate-500">{provider === 'openRouter' ? 'OpenRouter results are limited to model IDs or names containing “free”.' : 'You can replace the prefilled endpoint with a compatible server URL.'}</p>
           </div>
