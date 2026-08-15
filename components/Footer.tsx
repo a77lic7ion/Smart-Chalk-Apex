@@ -1,5 +1,5 @@
 import React from 'react';
-import { FacebookIcon, InstagramIcon, TwitterIcon, YouTubeIcon, TikTokIcon, WhatsAppIcon, LinkedInIcon, SmartChalkLogo } from './Icons';
+import { FacebookIcon, InstagramIcon, TwitterIcon, YouTubeIcon, TikTokIcon, WhatsAppIcon, LinkedInIcon } from './Icons';
 
 const socialLinks = [
     { name: 'Facebook', icon: FacebookIcon, href: 'https://www.facebook.com/' },
@@ -14,12 +14,9 @@ const socialLinks = [
 export const Footer: React.FC = () => {
     return (
         <footer className="bg-brand-black text-white mt-auto">
-            <div className="container mx-auto px-4 py-6">
-                <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
-                    <div className="smartchalk-logo-backdrop flex-shrink-0 rounded-md bg-white px-3 py-1.5">
-                        <SmartChalkLogo className="h-12 w-auto" />
-                    </div>
-                    <div className="flex flex-wrap justify-center gap-5">
+            <div className="container mx-auto px-4 py-3">
+                <div className="flex justify-center">
+                    <div className="flex flex-wrap justify-center gap-4">
                         {socialLinks.map((link) => (
                             <a
                                 key={link.name}
@@ -29,12 +26,12 @@ export const Footer: React.FC = () => {
                                 className="text-white hover:text-brand-yellow transition-colors"
                                 aria-label={link.name}
                             >
-                                <link.icon className="h-6 w-6" />
+                                <link.icon className="h-5 w-5" />
                             </a>
                         ))}
                     </div>
                 </div>
-                <div className="mt-6 pt-4 border-t border-gray-700 text-center text-xs text-gray-400">
+                <div className="mt-3 border-t border-gray-700 pt-2 text-center text-[10px] text-gray-400">
                     &copy; {new Date().getFullYear()} SmartChalk. All Rights Reserved.
                 </div>
             </div>
