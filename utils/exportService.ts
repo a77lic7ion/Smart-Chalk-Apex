@@ -418,8 +418,11 @@ export const exportPresentationAsPptx = async (presentation: Presentation, slide
         contentSlide.addShape(pptx.ShapeType.line, { x: 0.62, y: 1.78, w: 12.05, h: 0, line: { color: C.line, width: 0.8 } });
 
         if (slide.imageData) {
-            contentSlide.addShape(pptx.ShapeType.roundRect, { x: 7.72, y: 2.14, w: 4.82, h: 4.12, rectRadius: 0.08, fill: { color: C.white }, line: { color: C.line, width: 0.7 } });
-            contentSlide.addImage({ data: slide.imageData, x: 7.86, y: 2.28, w: 4.54, h: 3.84, sizing: { type: 'crop', x: 7.86, y: 2.28, w: 4.54, h: 3.84 } });
+            // Presentation images are normalized to 1:1 before they reach the exporter.
+            // Keep the PPTX image itself square and avoid PptxGenJS crop XML, which can
+            // emit negative srcRect values for square-to-landscape crops in PowerPoint.
+            contentSlide.addShape(pptx.ShapeType.roundRect, { x: 8.02, y: 2.14, w: 4.12, h: 4.12, rectRadius: 0.08, fill: { color: C.white }, line: { color: C.line, width: 0.7 } });
+            contentSlide.addImage({ data: slide.imageData, x: 8.16, y: 2.28, w: 3.84, h: 3.84 });
             addBodyText(contentSlide, slide.content, 0.72, 2.2, 6.25, 3.95, C.ink, 16);
         } else {
             contentSlide.addShape(pptx.ShapeType.roundRect, { x: 0.62, y: 2.12, w: 12.05, h: 4.22, rectRadius: 0.08, fill: { color: C.white }, line: { color: C.line, width: 0.7 } });
