@@ -121,10 +121,10 @@ const SettingsContent: React.FC<{ user: UserProfile; isAdmin: boolean }> = ({ us
                     <button
                         key={provider}
                         onClick={() => handleSettingsChange({ provider })}
-                        className={`px-3 py-1.5 text-sm font-semibold rounded-md transition-colors ${
+                        className={`provider-tab min-h-11 px-3 py-2 text-sm font-semibold rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-yellow focus-visible:ring-offset-2 ${
                             settings.provider === provider
-                            ? 'bg-white text-brand-charcoal shadow-sm'
-                            : 'bg-transparent text-slate-600 hover:bg-white/60'
+                            ? 'provider-tab-active bg-brand-yellow text-brand-black shadow-sm'
+                            : 'bg-transparent text-brand-black hover:bg-brand-paper'
                         }`}
                     >
                         {provider.charAt(0).toUpperCase() + provider.slice(1)}

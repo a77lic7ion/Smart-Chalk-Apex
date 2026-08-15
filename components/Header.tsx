@@ -108,7 +108,9 @@ export const Header: React.FC<HeaderProps> = ({ currentView, setView, user, onLo
   return (
     <header className="z-40">
       <aside className="fixed inset-y-0 left-0 z-50 hidden w-64 flex-col border-r border-slate-200 bg-brand-paper px-5 py-6 lg:flex">
-        <SmartChalkLogo className="h-12 w-auto self-start" />
+        <div className="smartchalk-logo-backdrop w-fit rounded-xl bg-white px-3 py-2 shadow-sm">
+          <SmartChalkLogo className="h-12 w-auto self-start" />
+        </div>
 
         <nav className="mt-10" aria-label="Primary navigation">
           <ul className="space-y-2">
@@ -156,7 +158,9 @@ export const Header: React.FC<HeaderProps> = ({ currentView, setView, user, onLo
 
       <div className="sticky top-0 z-50 border-b border-slate-200 bg-brand-paper px-4 py-3 shadow-sm lg:hidden">
         <div className="flex items-center justify-between gap-2">
-          <SmartChalkLogo className="h-10 w-auto" />
+          <div className="smartchalk-logo-backdrop w-fit rounded-xl bg-white px-2.5 py-1.5 shadow-sm">
+            <SmartChalkLogo className="h-10 w-auto" />
+          </div>
           <div className="flex items-center gap-2">
             <button
               type="button"

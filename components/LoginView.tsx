@@ -146,7 +146,7 @@ export const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess }) => {
                             </div>
                             <button
                                 type="submit"
-                                className="w-full flex justify-center items-center bg-brand-yellow text-white font-semibold py-2.5 px-4 rounded-lg hover:bg-yellow-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-yellow transition-colors duration-200"
+                                className="w-full min-h-11 flex justify-center items-center bg-brand-yellow text-brand-black font-semibold py-2.5 px-4 rounded-xl hover:bg-yellow-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-yellow transition-colors duration-200"
                             >
                                 {isSignUp ? 'Sign Up' : 'Sign In'}
                             </button>

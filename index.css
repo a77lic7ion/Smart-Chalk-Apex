@@ -51,6 +51,7 @@ body {
 }
 
 .animated-tab-bar button.active {
+    color: #111111;
     font-weight: 700; /* Bold */
 }
 
@@ -64,7 +65,7 @@ body {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  color: white;
+  color: #111111;
   display: flex;
 }
 
@@ -156,6 +157,10 @@ body,
 .theme-dark {
   background-color: var(--smartchalk-paper);
   color: var(--smartchalk-text);
+}
+
+.smartchalk-logo-backdrop {
+  background-color: #FFFFFF !important;
 }
 
 /* Reuse the existing neutral utility classes as dark command-centre surfaces. */
@@ -265,6 +270,14 @@ body,
   background-color: var(--smartchalk-panel) !important;
 }
 
-.theme-light .quick-start-panel .text-white {
+.theme-dark .quick-start-panel .text-white {
   color: var(--smartchalk-text) !important;
+}
+
+.theme-dark .provider-tab:not(.provider-tab-active) {
+  color: var(--smartchalk-text) !important;
+}
+
+.theme-dark .provider-tab-active {
+  color: #111111 !important;
 }

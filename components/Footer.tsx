@@ -16,7 +16,7 @@ export const Footer: React.FC = () => {
         <footer className="bg-brand-black text-white mt-auto">
             <div className="container mx-auto px-4 py-6">
                 <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
-                    <div className="flex-shrink-0 rounded-md bg-white px-3 py-1.5">
+                    <div className="smartchalk-logo-backdrop flex-shrink-0 rounded-md bg-white px-3 py-1.5">
                         <SmartChalkLogo className="h-12 w-auto" />
                     </div>
                     <div className="flex flex-wrap justify-center gap-5">
