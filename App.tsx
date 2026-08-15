@@ -37,11 +37,21 @@ const App: React.FC = () => {
   });
 
   useEffect(() => {
-    window.localStorage.setItem('smartchalk-theme', theme);
-    document.documentElement.dataset.theme = theme;
+    const root = document.documentElement;
+    root.dataset.theme = theme;
+    root.classList.toggle('theme-dark', theme === 'dark');
+    root.classList.toggle('theme-light', theme === 'light');
+    root.style.colorScheme = theme;
+    try {
+      window.localStorage.setItem('smartchalk-theme', theme);
+    } catch {
+      // Continue working when storage is unavailable or blocked.
+    }
   }, [theme]);
 
-  const toggleTheme = () => setTheme(currentTheme => currentTheme === 'dark' ? 'light' : 'dark');
+  const toggleTheme = () => {
+    setTheme(currentTheme => currentTheme === 'dark' ? 'light' : 'dark');
+  };
 
   const handleLoginSuccess = (profile: UserProfile) => {
     // Defensive check to prevent crash if email is not a string

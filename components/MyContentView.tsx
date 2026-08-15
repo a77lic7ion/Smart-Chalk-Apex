@@ -39,14 +39,14 @@ const ContentCard: React.FC<ContentCardProps> = ({ id, name, createdAt, type, on
 
     const getStyles = () => {
         switch(type) {
-            case 'test': return { Icon: PencilSquareIcon, bgColor: 'bg-sky-50 border-sky-200', iconColor: 'text-sky-600', accentColor: 'text-sky-800' };
-            case 'exam': return { Icon: ExamIcon, bgColor: 'bg-purple-50 border-purple-200', iconColor: 'text-purple-600', accentColor: 'text-purple-800' };
-            case 'presentation': return { Icon: PresentationChartLineIcon, bgColor: 'bg-fuchsia-50 border-fuchsia-200', iconColor: 'text-fuchsia-600', accentColor: 'text-fuchsia-800' };
-            case 'lesson': return { Icon: BookOpenIcon, bgColor: 'bg-emerald-50 border-emerald-200', iconColor: 'text-emerald-600', accentColor: 'text-emerald-800' };
-            case 'homework': return { Icon: ClipboardDocumentCheckIcon, bgColor: 'bg-blue-50 border-blue-200', iconColor: 'text-blue-600', accentColor: 'text-blue-800' };
-            case 'parsedExam': return { Icon: DocumentMagnifyingGlassIcon, bgColor: 'bg-orange-50 border-orange-200', iconColor: 'text-orange-600', accentColor: 'text-orange-800' };
-            case 'manualExam': return { Icon: PencilSquareIcon, bgColor: 'bg-indigo-50 border-indigo-200', iconColor: 'text-indigo-600', accentColor: 'text-indigo-800' };
-            default: return { Icon: PencilSquareIcon, bgColor: 'bg-slate-50 border-slate-200', iconColor: 'text-slate-600', accentColor: 'text-slate-800' };
+            case 'test': return { Icon: PencilSquareIcon, bgColor: 'bg-white border-slate-200', iconColor: 'bg-brand-yellow text-brand-black', accentColor: 'text-brand-black' };
+            case 'exam': return { Icon: ExamIcon, bgColor: 'bg-white border-slate-200', iconColor: 'bg-brand-black text-brand-yellow', accentColor: 'text-brand-black' };
+            case 'presentation': return { Icon: PresentationChartLineIcon, bgColor: 'bg-white border-slate-200', iconColor: 'bg-brand-yellow text-brand-black', accentColor: 'text-brand-black' };
+            case 'lesson': return { Icon: BookOpenIcon, bgColor: 'bg-white border-slate-200', iconColor: 'bg-brand-black text-brand-yellow', accentColor: 'text-brand-black' };
+            case 'homework': return { Icon: ClipboardDocumentCheckIcon, bgColor: 'bg-white border-slate-200', iconColor: 'bg-brand-yellow text-brand-black', accentColor: 'text-brand-black' };
+            case 'parsedExam': return { Icon: DocumentMagnifyingGlassIcon, bgColor: 'bg-white border-slate-200', iconColor: 'bg-brand-black text-brand-yellow', accentColor: 'text-brand-black' };
+            case 'manualExam': return { Icon: PencilSquareIcon, bgColor: 'bg-white border-slate-200', iconColor: 'bg-brand-yellow text-brand-black', accentColor: 'text-brand-black' };
+            default: return { Icon: PencilSquareIcon, bgColor: 'bg-white border-slate-200', iconColor: 'bg-brand-yellow text-brand-black', accentColor: 'text-brand-black' };
         }
     }
     const { Icon, bgColor, iconColor, accentColor } = getStyles();
@@ -102,7 +102,7 @@ const ContentCard: React.FC<ContentCardProps> = ({ id, name, createdAt, type, on
     }
 
     return (
-        <div className={`p-4 rounded-xl border ${bgColor} flex items-start gap-4 transition-shadow hover:shadow-md`}>
+        <div className={`flex items-start gap-4 rounded-2xl border p-4 shadow-sm transition-shadow hover:shadow-md ${bgColor}`}>
             <div className={`p-2 rounded-lg ${iconColor}`}>
                 <Icon className="h-6 w-6" />
             </div>
@@ -114,31 +114,31 @@ const ContentCard: React.FC<ContentCardProps> = ({ id, name, createdAt, type, on
             </div>
             <div className="flex items-center gap-2">
                  {(type === 'test' || type === 'lesson' || type === 'presentation') && onCreateHomework && (
-                    <button onClick={handleCreateHomework} title="Create Homework" disabled={isExporting} className="p-1.5 text-slate-500 hover:text-blue-600 hover:bg-white rounded-lg transition-colors shadow-sm border border-slate-200 disabled:opacity-50">
+                    <button onClick={handleCreateHomework} title="Create Homework" disabled={isExporting} className="p-1.5 text-slate-500 hover:text-brand-black hover:bg-brand-yellow rounded-lg transition-colors shadow-sm border border-slate-200 disabled:opacity-50">
                         <ClipboardDocumentCheckIcon className="h-5 w-5" />
                     </button>
                  )}
                  {(type === 'test' || type === 'lesson' || type === 'presentation' || type === 'parsedExam' || type === 'manualExam') && onFormatExam && (
-                    <button onClick={handleFormat} title="Format as Exam" disabled={isExporting} className="p-1.5 text-slate-500 hover:text-purple-600 hover:bg-white rounded-lg transition-colors shadow-sm border border-slate-200 disabled:opacity-50">
+                    <button onClick={handleFormat} title="Format as Exam" disabled={isExporting} className="p-1.5 text-slate-500 hover:text-brand-black hover:bg-brand-yellow rounded-lg transition-colors shadow-sm border border-slate-200 disabled:opacity-50">
                         <ExamIcon className="h-5 w-5" />
                     </button>
                 )}
                  {onExport && (
                      <div className="relative" ref={exportMenuRef}>
-                        <button onClick={handleExportClick} title={getExportTitle()} disabled={isExporting} className="p-1.5 text-slate-500 hover:text-brand-yellow hover:bg-white rounded-lg transition-colors shadow-sm border border-slate-200 disabled:cursor-wait disabled:bg-slate-100">
+                        <button onClick={handleExportClick} title={getExportTitle()} disabled={isExporting} className="rounded-lg border border-slate-300 p-2 text-brand-black transition-colors hover:bg-brand-yellow hover:text-brand-black focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-yellow disabled:cursor-wait disabled:opacity-50">
                             {isExporting ? <Loader className="h-5 w-5 text-brand-yellow" /> : <DocumentArrowDownIcon className="h-5 w-5" />}
                         </button>
                         {isExportMenuOpen && (type === 'test' || type === 'parsedExam') && (
-                            <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-xl border border-slate-200 z-10 p-2">
+                            <div className="absolute right-0 z-10 mt-2 w-56 rounded-xl border border-slate-200 bg-white p-2 shadow-xl">
                                 <button
                                     onClick={() => handleMenuExportClick('questions')}
-                                    className="flex items-center gap-3 w-full px-3 py-2 text-left text-sm text-slate-700 rounded-md hover:bg-slate-100 transition-colors"
+                                    className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm text-brand-black transition-colors hover:bg-brand-yellow"
                                 >
                                     Export Questions DOCX
                                 </button>
                                 <button
                                     onClick={() => handleMenuExportClick('memo')}
-                                    className="flex items-center gap-3 w-full px-3 py-2 text-left text-sm text-slate-700 rounded-md hover:bg-slate-100 transition-colors"
+                                    className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm text-brand-black transition-colors hover:bg-brand-yellow"
                                 >
                                     Export Memorandum DOCX
                                 </button>
@@ -146,10 +146,10 @@ const ContentCard: React.FC<ContentCardProps> = ({ id, name, createdAt, type, on
                         )}
                     </div>
                  )}
-                <button onClick={handleLoad} title="Load Content" disabled={isExporting} className="p-1.5 text-slate-500 hover:text-brand-yellow hover:bg-white rounded-lg transition-colors shadow-sm border border-slate-200 disabled:opacity-50">
+                <button onClick={handleLoad} title="Load Content" disabled={isExporting} className="rounded-lg border border-slate-300 p-2 text-brand-black transition-colors hover:bg-brand-yellow hover:text-brand-black focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-yellow disabled:opacity-50">
                     <FolderOpenIcon className="h-5 w-5" />
                 </button>
-                <button onClick={handleDelete} title="Delete Content" disabled={isExporting} className="p-1.5 text-slate-500 hover:text-red-600 hover:bg-white rounded-lg transition-colors shadow-sm border border-slate-200 disabled:opacity-50">
+                <button onClick={handleDelete} title="Delete Content" aria-label="Delete Content" disabled={isExporting} className="rounded-lg border border-slate-300 p-2 text-brand-black transition-colors hover:bg-brand-black hover:text-brand-yellow focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-yellow disabled:opacity-50">
                     <TrashIcon className="h-5 w-5" />
                 </button>
             </div>
@@ -171,7 +171,7 @@ interface ContentSectionProps {
 
 const ContentSection: React.FC<ContentSectionProps> = ({ title, items, type, exportingId, onLoad, onDelete, onExport, onFormatExam, onCreateHomework }) => (
     <section>
-        <h2 className="text-xl md:text-2xl font-bold text-brand-black mb-4 border-b-2 border-yellow-300 pb-2">{title}</h2>
+        <h2 className="mb-4 border-b border-slate-200 pb-3 text-xl font-black tracking-tight text-brand-black md:text-2xl">{title}</h2>
         {items && items.length > 0 ? (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 {items.map((item) => (
@@ -191,7 +191,7 @@ const ContentSection: React.FC<ContentSectionProps> = ({ title, items, type, exp
                 ))}
             </div>
         ) : (
-            <div className="text-center py-12 px-4 border-2 border-dashed border-slate-200 rounded-lg bg-slate-50">
+            <div className="rounded-xl border-2 border-dashed border-slate-300 bg-brand-paper px-4 py-12 text-center">
                 <p className="text-slate-500 font-medium">No {title.toLowerCase()} found.</p>
                 <p className="text-sm text-slate-400 mt-1">Go to the appropriate generator to create and save some!</p>
             </div>
@@ -373,16 +373,17 @@ export const MyContentView: React.FC<MyContentViewProps> = ({ user, isAdmin, onC
 
 
     return (
-        <main className="container mx-auto px-4 py-8">
-            <div className="max-w-6xl mx-auto space-y-12">
-                 <div className="text-left">
-                    <h1 className="text-3xl md:text-4xl font-bold text-brand-black">My Content</h1>
-                    <p className="text-lg text-slate-600 mt-1">A central place for all your generated and parsed content.</p>
-                </div>
+        <main className="min-h-full bg-brand-paper px-5 py-8 sm:px-8 lg:px-12 lg:py-12">
+            <div className="mx-auto max-w-6xl space-y-12">
+                 <section className="border-b border-slate-200 pb-8">
+                    <p className="mb-3 text-xs font-bold uppercase tracking-[0.18em] text-brand-yellow">SmartChalk library</p>
+                    <h1 className="text-3xl font-black tracking-tight text-brand-black md:text-4xl">My Content</h1>
+                    <p className="mt-3 max-w-2xl text-base text-slate-600">A central place for all your generated and parsed content.</p>
+                </section>
                 
                 {exportError && (
-                    <div className="mb-4 bg-red-50 border-l-4 border-red-400 p-4 rounded-r-lg shadow-md">
-                        <p className="text-sm text-red-700"><strong>Export Failed:</strong> {exportError}</p>
+                    <div role="alert" className="mb-6 rounded-xl border border-slate-300 bg-brand-paper p-4">
+                        <p className="text-sm font-semibold text-brand-black"><strong>Export failed:</strong> {exportError}</p>
                     </div>
                 )}
                 
@@ -406,7 +407,7 @@ export const MyContentView: React.FC<MyContentViewProps> = ({ user, isAdmin, onC
                             ))}
                         </div>
                     ) : (
-                        <div className="text-center py-12 px-4 border-2 border-dashed border-slate-200 rounded-lg bg-slate-50">
+                        <div className="rounded-xl border-2 border-dashed border-slate-300 bg-brand-paper px-4 py-12 text-center">
                             <p className="text-slate-500 font-medium">No Parsed or Manual Exams found.</p>
                             <p className="text-sm text-slate-400 mt-1">Go to the appropriate generator to create and save some!</p>
                         </div>
