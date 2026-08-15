@@ -28,6 +28,7 @@ const App: React.FC = () => {
     picture: ''
   });
   const [isAdmin, setIsAdmin] = useState(true);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [view, setView] = useState<AppView>('dashboard');
   const [contentToLoad, setContentToLoad] = useState<{type: ContentType, id: string} | null>(null);
   const [theme, setTheme] = useState<ThemeMode>(() => {
@@ -133,13 +134,15 @@ const App: React.FC = () => {
       <Header 
         currentView={view} 
         setView={setView}
+        isSidebarCollapsed={isSidebarCollapsed}
+        onSidebarToggle={() => setIsSidebarCollapsed(collapsed => !collapsed)}
         user={user}
         onLogout={handleLogout}
         isAdmin={isAdmin}
         theme={theme}
         onThemeToggle={toggleTheme}
        />
-      <div className="flex min-h-screen flex-1 flex-col lg:pl-64">
+      <div className={`flex min-h-screen flex-1 flex-col transition-[padding] duration-300 ${isSidebarCollapsed ? 'lg:pl-20' : 'lg:pl-64'}`}>
         <div className="flex-grow">
           {renderMainView()}
         </div>

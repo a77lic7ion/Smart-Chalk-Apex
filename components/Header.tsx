@@ -11,6 +11,8 @@ interface HeaderProps {
   isAdmin: boolean;
   theme: ThemeMode;
   onThemeToggle: () => void;
+  isSidebarCollapsed: boolean;
+  onSidebarToggle: () => void;
 }
 
 const getNavItems = (isAdmin: boolean): { view: AppView; label: string }[] => {
@@ -52,7 +54,7 @@ const UserAvatar: React.FC<{ user: UserProfile; size?: 'sm' | 'md' }> = ({ user,
   );
 };
 
-export const Header: React.FC<HeaderProps> = ({ currentView, setView, user, onLogout, isAdmin, theme, onThemeToggle }) => {
+export const Header: React.FC<HeaderProps> = ({ currentView, setView, user, onLogout, isAdmin, theme, onThemeToggle, isSidebarCollapsed, onSidebarToggle }) => {
   const profileRef = useRef<HTMLDivElement>(null);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
@@ -107,12 +109,25 @@ export const Header: React.FC<HeaderProps> = ({ currentView, setView, user, onLo
 
   return (
     <header className="z-40">
-      <aside className="fixed inset-y-0 left-0 z-50 hidden w-64 flex-col border-r border-slate-200 bg-brand-paper px-5 py-6 lg:flex">
-        <div className="smartchalk-logo-backdrop w-fit rounded-xl bg-white px-3 py-2 shadow-sm">
-          <SmartChalkLogo className="h-12 w-auto self-start" />
+      <aside className={`fixed inset-y-0 left-0 z-50 hidden flex-col border-r border-slate-200 bg-brand-paper px-4 py-6 transition-[width] duration-300 lg:flex ${isSidebarCollapsed ? 'w-20' : 'w-64'}`}>
+        <div className={`flex items-center ${isSidebarCollapsed ? 'justify-center' : 'justify-between gap-3'}`}>
+          {!isSidebarCollapsed && (
+            <div className="smartchalk-logo-backdrop w-fit rounded-xl bg-white px-3 py-2 shadow-sm">
+              <SmartChalkLogo className="h-12 w-auto self-start" />
+            </div>
+          )}
+          <button
+            type="button"
+            onClick={onSidebarToggle}
+            aria-label={isSidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+            title={isSidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+            className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-brand-yellow bg-brand-black text-lg font-black text-brand-yellow transition-colors hover:bg-brand-yellow hover:text-brand-black focus:outline-none focus:ring-2 focus:ring-brand-yellow"
+          >
+            {isSidebarCollapsed ? '☰' : '×'}
+          </button>
         </div>
 
-        <nav className="mt-10" aria-label="Primary navigation">
+        <nav className={`mt-10 ${isSidebarCollapsed ? 'mt-8' : ''}`} aria-label="Primary navigation">
           <ul className="space-y-2">
             {currentNavItems.map(item => {
               const isActive = currentView === item.view;
@@ -121,13 +136,15 @@ export const Header: React.FC<HeaderProps> = ({ currentView, setView, user, onLo
                   <button
                     type="button"
                     onClick={() => handleViewChange(item.view)}
-                    className={`w-full rounded-xl px-4 py-3 text-left text-xs font-bold uppercase tracking-wide transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-brand-yellow ${
+                    aria-label={item.label}
+                    title={isSidebarCollapsed ? item.label : undefined}
+                    className={`w-full rounded-xl px-3 py-3 text-xs font-bold uppercase tracking-wide transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-brand-yellow ${isSidebarCollapsed ? 'text-center' : 'text-left'} ${
                       isActive
                         ? 'bg-brand-yellow text-brand-black shadow-sm'
                         : 'text-slate-500 hover:bg-slate-100 hover:text-brand-charcoal'
                     }`}
                   >
-                    {item.label}
+                    {isSidebarCollapsed ? item.label.charAt(0) : item.label}
                   </button>
                 </li>
               );
@@ -144,13 +161,15 @@ export const Header: React.FC<HeaderProps> = ({ currentView, setView, user, onLo
             className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-xl border border-brand-yellow bg-brand-black px-3 text-xs font-bold uppercase tracking-wide text-brand-yellow transition-colors hover:bg-brand-yellow hover:text-brand-black focus:outline-none focus:ring-2 focus:ring-brand-yellow focus:ring-offset-2"
           >
             <span aria-hidden="true" className="text-base leading-none">{theme === 'dark' ? '☀' : '◐'}</span>
-            <span>{theme === 'dark' ? 'Light mode' : 'Dark mode'}</span>
+            {!isSidebarCollapsed && <span>{theme === 'dark' ? 'Light mode' : 'Dark mode'}</span>}
           </button>
-          <div className="flex items-center justify-between gap-3">
-            <div className="min-w-0">
-              <p className="truncate text-sm font-semibold text-brand-black">{user.name || 'Educator'}</p>
-              <p className="truncate text-xs text-slate-500">Local workspace</p>
-            </div>
+          <div className={`flex items-center gap-3 ${isSidebarCollapsed ? 'justify-center' : 'justify-between'}`}>
+            {!isSidebarCollapsed && (
+              <div className="min-w-0">
+                <p className="truncate text-sm font-semibold text-brand-black">{user.name || 'Educator'}</p>
+                <p className="truncate text-xs text-slate-500">Local workspace</p>
+              </div>
+            )}
             {profileMenu}
           </div>
         </div>

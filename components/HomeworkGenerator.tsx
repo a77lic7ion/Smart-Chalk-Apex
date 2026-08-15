@@ -144,10 +144,10 @@ const StagingArea: React.FC<{
 }> = ({ questions, homework, onUpdate, onDelete, onDiscard, onSave, onAddCustomQuestion, isSaving }) => {
     const [isExporting, setIsExporting] = useState(false);
 
-    const handleExport = async () => {
+    const handleExport = async (type: 'questions' | 'memo') => {
         setIsExporting(true);
         try {
-            await exportHomeworkAsDocx(homework);
+            await exportHomeworkAsDocx(homework, type);
         } catch (err) {
             console.error(err);
             alert(err instanceof Error ? `Export failed: ${err.message}` : 'An unknown error occurred during DOCX export.');
@@ -194,9 +194,13 @@ const StagingArea: React.FC<{
                     <BookmarkSquareIcon className="h-5 w-5 mr-2" />
                     Save Homework
                 </Button>
-                <Button onClick={handleExport} isLoading={isExporting} disabled={isBusy || questions.length === 0} size="lg" variant="secondary">
+                <Button onClick={() => handleExport('questions')} isLoading={isExporting} disabled={isBusy || questions.length === 0} size="lg" variant="secondary">
                     <DocumentArrowDownIcon className="h-5 w-5 mr-2" />
-                    Export DOCX
+                    Export Homework DOCX
+                </Button>
+                <Button onClick={() => handleExport('memo')} isLoading={isExporting} disabled={isBusy || questions.length === 0} size="lg" variant="secondary">
+                    <DocumentArrowDownIcon className="h-5 w-5 mr-2" />
+                    Export Memorandum DOCX
                 </Button>
                 <Button onClick={onDiscard} disabled={isBusy} variant="ghost" className="md:col-span-2 md:col-start-1">
                     <XMarkIcon className="h-5 w-5 mr-2" />

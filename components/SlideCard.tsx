@@ -63,29 +63,35 @@ const ContentSlide: React.FC<{ slide: Slide, onUpdate: (updatedSlide: Slide) => 
             formData.append('image', file);
             formData.append('folder', 'slides');
             
+            const token = localStorage.getItem('google_token') || localStorage.getItem('googleToken');
             const response = await fetch('/api/images/upload', {
                 method: 'POST',
                 body: formData,
-                headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('googleToken')}`
-                }
+                headers: token ? { 'Authorization': `Bearer ${token}` } : undefined
             });
-            
-            if (!response.ok) {
-                throw new Error('Failed to upload image to cloud storage');
-            }
-            
-            const result = await response.json();
-            const imageUrl = result.data.url;
-            
-            // Use the cloud URL instead of base64
-            onUpdate({ ...slide, imageData: imageUrl });
-            
-            // Also save to local library for offline access (keep base64 for this)
+
             const base64 = await readFileAsBase64(file as File);
+            if (response.ok) {
+                const result = await response.json();
+                const imageUrl = result.data?.url;
+                if (imageUrl) onUpdate({ ...slide, imageData: imageUrl });
+                else onUpdate({ ...slide, imageData: base64 });
+            } else {
+                // Keep the slide usable in the static-first/local workspace even when cloud upload is unavailable.
+                onUpdate({ ...slide, imageData: base64 });
+            }
+
+            // Keep a local copy available for the presentation image library.
             await saveImageToLibrary(base64);
         } catch (e) {
-            setImageError(e instanceof Error ? e.message : "Failed to upload image.");
+            try {
+                const base64 = await readFileAsBase64(file as File);
+                onUpdate({ ...slide, imageData: base64 });
+                await saveImageToLibrary(base64);
+                setImageError(null);
+            } catch {
+                setImageError(e instanceof Error ? e.message : "Failed to upload image.");
+            }
         } finally {
             setIsProcessing(false);
         }

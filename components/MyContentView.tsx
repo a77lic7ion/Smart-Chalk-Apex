@@ -8,7 +8,7 @@ import { Loader } from './Loader';
 import { exportTestAsDocx, exportPresentationAsPptx, exportLessonAsDocx, exportHomeworkAsDocx, exportFormalTestAsDocx, exportParsedExamAsDocx, exportParsedMemorandumAsDocx, exportManualExamAsDocx } from '../utils/exportService';
 import { ADMIN_EMAILS } from '../config';
 
-type ExportableContentType = ContentType | 'test_questions' | 'test_memo';
+type ExportableContentType = ContentType | 'test_questions' | 'test_memo' | 'homework_questions' | 'homework_memo';
 
 interface ContentCardProps {
     id: string;
@@ -65,7 +65,7 @@ const ContentCard: React.FC<ContentCardProps> = ({ id, name, createdAt, type, on
 
     const handleExportClick = (e: React.MouseEvent) => {
         e.stopPropagation();
-        if (type === 'test' || type === 'parsedExam') { // Add any type that needs a dropdown
+        if (type === 'test' || type === 'homework' || type === 'parsedExam') { // Add any type that needs a dropdown
             setIsExportMenuOpen(p => !p);
         } else {
             onExport?.(type, id);
@@ -76,6 +76,8 @@ const ContentCard: React.FC<ContentCardProps> = ({ id, name, createdAt, type, on
         setIsExportMenuOpen(false);
         if (type === 'test') {
             onExport?.(exportType === 'questions' ? 'test_questions' : 'test_memo', id);
+        } else if (type === 'homework') {
+            onExport?.(exportType === 'questions' ? 'homework_questions' : 'homework_memo', id);
         } else if (type === 'parsedExam') {
             onExport?.(type, id, { subType: exportType });
         }
@@ -128,13 +130,13 @@ const ContentCard: React.FC<ContentCardProps> = ({ id, name, createdAt, type, on
                         <button onClick={handleExportClick} title={getExportTitle()} disabled={isExporting} className="rounded-lg border border-slate-300 p-2 text-brand-black transition-colors hover:bg-brand-yellow hover:text-brand-black focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-yellow disabled:cursor-wait disabled:opacity-50">
                             {isExporting ? <Loader className="h-5 w-5 text-brand-yellow" /> : <DocumentArrowDownIcon className="h-5 w-5" />}
                         </button>
-                        {isExportMenuOpen && (type === 'test' || type === 'parsedExam') && (
+                        {isExportMenuOpen && (type === 'test' || type === 'homework' || type === 'parsedExam') && (
                             <div className="absolute right-0 z-10 mt-2 w-56 rounded-xl border border-slate-200 bg-white p-2 shadow-xl">
                                 <button
                                     onClick={() => handleMenuExportClick('questions')}
                                     className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm text-brand-black transition-colors hover:bg-brand-yellow"
                                 >
-                                    Export Questions DOCX
+                                    {type === 'homework' ? 'Export Homework DOCX' : 'Export Questions DOCX'}
                                 </button>
                                 <button
                                     onClick={() => handleMenuExportClick('memo')}
@@ -309,9 +311,9 @@ export const MyContentView: React.FC<MyContentViewProps> = ({ user, isAdmin, onC
                 const presentation = await db.presentations.get(id);
                 if (presentation) await exportPresentationAsPptx(presentation);
                 else throw new Error("Presentation not found.");
-            } else if (type === 'homework') {
+            } else if (type === 'homework_questions' || type === 'homework_memo') {
                 const homework = await db.savedHomework.get(id);
-                if (homework) await exportHomeworkAsDocx(homework);
+                if (homework) await exportHomeworkAsDocx(homework, type === 'homework_memo' ? 'memo' : 'questions');
                 else throw new Error("Homework not found.");
             } else if (type === 'lesson') {
                 const lesson = await db.lessonPlans.get(id);

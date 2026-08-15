@@ -259,7 +259,7 @@ const getPageBorderOptions = (): ISectionOptions["properties"] => ({
 
 // --- DOCX Export Functions ---
 
-export const exportHomeworkAsDocx = async (homework: SavedHomework): Promise<void> => {
+export const exportHomeworkAsDocx = async (homework: SavedHomework, type: 'questions' | 'memo'): Promise<void> => {
     const headerLogoBuffer = await getHeaderLogoBuffer();
     const footerLogoBuffer = await getFooterLogoBuffer();
     
@@ -268,38 +268,43 @@ export const exportHomeworkAsDocx = async (homework: SavedHomework): Promise<voi
         subject: homework.params.subject,
         grade: homework.params.grade,
         curriculum: homework.params.curriculum,
-        testType: 'Homework',
+        testType: type === 'memo' ? 'Homework Memorandum' : 'Homework',
     }, headerLogoBuffer);
 
     const footer = createFooter(footerLogoBuffer);
 
-    const questionPromises = homework.questions.map((q, index) => createDocxQuestion(q, index, 'questions'));
-    const questions = (await Promise.all(questionPromises)).flat();
-    
-    const memoPromises = homework.questions.map((q, index) => createDocxQuestion(q, index, 'memo'));
-    const memo = (await Promise.all(memoPromises)).flat();
+    const content = (await Promise.all(
+        homework.questions.map((q, index) => createDocxQuestion(q, index, type))
+    )).flat();
+
+    const children = type === 'memo'
+        ? [
+            ...coverPage,
+            new Paragraph({
+                children: [new TextRun({ text: 'Homework Memorandum', font: "Aquatico" })],
+                heading: HeadingLevel.HEADING_1,
+                alignment: AlignmentType.CENTER,
+                spacing: { after: 400 },
+            }),
+            ...content,
+        ]
+        : [
+            ...coverPage,
+            new Paragraph({ children: [new TextRun({ text: `Instructions: ${homework.params.instructions}`, italics: true, size: 24, font: "Montserrat" })], spacing: { after: 400 } }),
+            ...content,
+        ];
 
     const doc = new Document({
         sections: [{
             footers: { default: footer },
-            children: [
-                ...coverPage,
-                new Paragraph({ children: [new TextRun({ text: `Instructions: ${homework.params.instructions}`, italics: true, size: 24, font: "Montserrat" })], spacing: { after: 400 } }),
-                ...questions,
-                new Paragraph({
-                    children: [new TextRun({ text: 'Homework Memorandum', font: "Aquatico" })],
-                    heading: HeadingLevel.HEADING_1,
-                    alignment: AlignmentType.CENTER,
-                    pageBreakBefore: true,
-                }),
-                ...memo
-            ],
+            children,
             properties: getPageBorderOptions(),
         }],
     });
 
     const buffer = await DocxPacker.toBlob(doc);
-    saveAs(buffer, `${homework.name.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_homework.docx`);
+    const suffix = type === 'memo' ? 'memorandum' : 'homework';
+    saveAs(buffer, `${homework.name.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_${suffix}.docx`);
 };
 
 export const exportTestAsDocx = async (test: SavedTest, type: 'questions' | 'memo'): Promise<void> => {
