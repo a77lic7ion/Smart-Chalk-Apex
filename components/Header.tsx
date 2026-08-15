@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect, useLayoutEffect, useMemo } from 'react';
 import type { UserProfile } from '../types';
 import { SmartChalkLogo } from './Icons';
-import type { AppView } from '../App';
+import type { AppView, ThemeMode } from '../App';
 
 interface HeaderProps {
   currentView: AppView;
@@ -9,6 +9,8 @@ interface HeaderProps {
   user: UserProfile;
   onLogout: () => void;
   isAdmin: boolean;
+  theme: ThemeMode;
+  onThemeToggle: () => void;
 }
 
 const AnimatedLabel: React.FC<{ label: string }> = ({ label }) => (
@@ -50,7 +52,7 @@ const getNavItems = (isAdmin: boolean): { view: AppView, label: string }[] => {
     ];
 };
 
-export const Header: React.FC<HeaderProps> = ({ currentView, setView, user, onLogout, isAdmin }) => {
+export const Header: React.FC<HeaderProps> = ({ currentView, setView, user, onLogout, isAdmin, theme, onThemeToggle }) => {
     const navRef = useRef<HTMLElement>(null);
     const [bubbleLeft, setBubbleLeft] = useState(0);
     const [bubbleWidth, setBubbleWidth] = useState(0);
@@ -88,10 +90,10 @@ export const Header: React.FC<HeaderProps> = ({ currentView, setView, user, onLo
 
     return (
         <header className="bg-brand-paper sticky top-0 z-40 shadow-sm">
-            <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-2 flex justify-between items-center">
-                <SmartChalkLogo className="h-12 w-auto" />
+            <div className="container mx-auto flex items-center gap-2 px-4 py-2 sm:px-6 lg:px-8">
+                <SmartChalkLogo className="h-12 w-auto shrink-0" />
 
-                <div className="flex-grow flex justify-center">
+                <div className="min-w-0 flex-1 overflow-x-auto px-1">
                     <nav className="animated-tab-bar" ref={navRef}>
                         <ul>
                             {currentNavItems.map(item => (
@@ -117,7 +119,18 @@ export const Header: React.FC<HeaderProps> = ({ currentView, setView, user, onLo
                     </nav>
                 </div>
 
-                <div className="relative">
+                <div className="flex shrink-0 items-center gap-2">
+                    <button
+                        type="button"
+                        onClick={onThemeToggle}
+                        aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} theme`}
+                        aria-pressed={theme === 'dark'}
+                        className="inline-flex h-10 items-center gap-2 rounded-full border border-brand-yellow bg-brand-black px-3 text-xs font-bold uppercase tracking-wide text-brand-yellow transition-colors hover:bg-brand-yellow hover:text-brand-black focus:outline-none focus:ring-2 focus:ring-brand-yellow focus:ring-offset-2"
+                    >
+                        <span aria-hidden="true" className="text-base leading-none">{theme === 'dark' ? '☀' : '◐'}</span>
+                        <span className="hidden sm:inline">{theme === 'dark' ? 'Light' : 'Dark'}</span>
+                    </button>
+                    <div className="relative">
                     <button onClick={() => setIsProfileOpen(p => !p)} className="flex items-center gap-2 rounded-full hover:bg-slate-200 p-1 transition-colors">
                         <img src={user.picture} alt={user.name || 'User profile'} className="h-8 w-8 rounded-full" />
                     </button>
@@ -137,6 +150,7 @@ export const Header: React.FC<HeaderProps> = ({ currentView, setView, user, onLo
                             </div>
                         </div>
                     )}
+                    </div>
                 </div>
             </div>
         </header>

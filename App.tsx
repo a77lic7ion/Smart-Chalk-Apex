@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { db } from './db';
 import { Header } from './components/Header';
 import { TestGenerator } from './components/TestGenerator';
@@ -18,6 +18,7 @@ import { ManualExamBuilderView } from './components/ManualExamBuilderView';
 
 
 export type AppView = 'dashboard' | 'manualExamBuilder' | 'testGenerator' | 'slidesGenerator' | 'lessonGenerator' | 'exam' | 'homeworkGenerator' | 'myContent' | 'settings';
+export type ThemeMode = 'light' | 'dark';
 
 const App: React.FC = () => {
   const [user, setUser] = useState<UserProfile | null>({
@@ -28,6 +29,19 @@ const App: React.FC = () => {
   const [isAdmin, setIsAdmin] = useState(true);
   const [view, setView] = useState<AppView>('dashboard');
   const [contentToLoad, setContentToLoad] = useState<{type: ContentType, id: string} | null>(null);
+  const [theme, setTheme] = useState<ThemeMode>(() => {
+    if (typeof window === 'undefined') return 'light';
+    const savedTheme = window.localStorage.getItem('smartchalk-theme');
+    if (savedTheme === 'light' || savedTheme === 'dark') return savedTheme;
+    return window.matchMedia?.('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  });
+
+  useEffect(() => {
+    window.localStorage.setItem('smartchalk-theme', theme);
+    document.documentElement.dataset.theme = theme;
+  }, [theme]);
+
+  const toggleTheme = () => setTheme(currentTheme => currentTheme === 'dark' ? 'light' : 'dark');
 
   const handleLoginSuccess = (profile: UserProfile) => {
     // Defensive check to prevent crash if email is not a string
@@ -104,13 +118,15 @@ const App: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-brand-paper font-sans text-brand-charcoal flex flex-col">
+    <div className={`min-h-screen ${theme === 'dark' ? 'theme-dark' : 'theme-light'} bg-brand-paper font-sans text-brand-charcoal flex flex-col transition-colors duration-300`}>
       <Header 
         currentView={view} 
         setView={setView}
         user={user}
         onLogout={handleLogout}
         isAdmin={isAdmin}
+        theme={theme}
+        onThemeToggle={toggleTheme}
        />
       <div className="flex-grow">
         {renderMainView()}
