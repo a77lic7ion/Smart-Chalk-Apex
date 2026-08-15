@@ -1,5 +1,6 @@
 {
   "name": "smartchalk",
+  "description": "Static-first education content workspace: stabilize client-side logic and browser-local data before offline and internal database phases.",
   "private": true,
   "version": "0.0.0",
   "type": "module",
