@@ -109,6 +109,12 @@ export const TEST_STRUCTURE_PRESETS = [
   { label: "Formal Exam", value: "Section A: 15 marks multiple choice. Section B: 25 marks source-based/case study. Section C: 10 marks long-form essay. Total: 50 marks." },
 ];
 
+export const PRESENTATION_STRUCTURE_PRESETS = [
+  { label: "Concept Overview", value: "Create a clear 8-slide concept overview with an engaging title, key definitions, core ideas, one worked example, a visual summary, and a final recap." },
+  { label: "Lesson Sequence", value: "Create a 10-slide lesson sequence with learning objectives, prior knowledge, teacher explanation, guided activity, independent practice, assessment check, and recap." },
+  { label: "Revision Deck", value: "Create a 12-slide revision presentation with concise topic summaries, key vocabulary, common misconceptions, worked examples, exam tips, and self-check questions." },
+];
+
 export const SUBJECT_TOPIC_SUGGESTIONS: { [key: string]: string[] } = {
   'Default': [
     'Introduction to Core Concepts',

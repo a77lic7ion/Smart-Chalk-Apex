@@ -22,9 +22,10 @@ export type ThemeMode = 'light' | 'dark';
 
 const App: React.FC = () => {
   const [user, setUser] = useState<UserProfile | null>({
+    sub: '12345',
     email: 'Admin@smartchalk.co.za',
     name: 'Admin User',
-    id: '12345'
+    picture: ''
   });
   const [isAdmin, setIsAdmin] = useState(true);
   const [view, setView] = useState<AppView>('dashboard');

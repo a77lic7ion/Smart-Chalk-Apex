@@ -6,7 +6,7 @@ import { Select } from './Select';
 import { generateSlides as dispatchGenerateSlides } from '../services/aiDispatchService';
 import { db } from '../db';
 import type { TestGenerationParams, Presentation, Slide, UserProfile } from '../types';
-import { CURRICULUM_OPTS_FOR_SELECT, GRADES_OPTIONS, COMPREHENSIVE_SUBJECT_OPTIONS, BLOOMS_LEVEL_OPTIONS, TEST_STRUCTURE_PRESETS } from '../constants';
+import { CURRICULUM_OPTS_FOR_SELECT, GRADES_OPTIONS, COMPREHENSIVE_SUBJECT_OPTIONS, BLOOMS_LEVEL_OPTIONS, PRESENTATION_STRUCTURE_PRESETS } from '../constants';
 import { useLanguage } from '../i18n/LanguageContext';
 import { useAIProviderSettings } from '../context/AIProviderSettingsContext';
 import { Loader } from './Loader';
@@ -218,9 +218,9 @@ export const SlidesGenerator: React.FC<SlidesGeneratorProps> = ({ user, loadId, 
                         <div>
                             <label className="block text-sm font-medium text-brand-charcoal">{t('presentationGenerator.form.presetsLabel')}</label>
                             <div className="flex flex-wrap gap-2 mb-2">
-                                {TEST_STRUCTURE_PRESETS.map(preset => (
+                                {PRESENTATION_STRUCTURE_PRESETS.map(preset => (
                                     <Button key={preset.label} type="button" variant="secondary" size="sm" onClick={() => handlePresetSelect(preset.value)}>
-                                        {t(`testGenerator.presets.${preset.label.replace(/[^a-zA-Z0-9]/g, '')}`, { fallback: preset.label })}
+                                        {t(`presentationGenerator.presets.${preset.label.replace(/[^a-zA-Z0-9]/g, '')}`, { fallback: preset.label })}
                                     </Button>
                                 ))}
                             </div>
