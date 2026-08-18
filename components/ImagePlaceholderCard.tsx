@@ -6,6 +6,7 @@ import { Button } from './Button';
 import { ImageSearchModal } from './ImageSearchModal';
 import { ImageLibraryModal } from './ImageLibraryModal';
 import { db } from '../db';
+import { compressImage, saveImageAsset } from '../utils/imageAssetService';
 
 const readFileAsBase64 = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
@@ -18,7 +19,7 @@ const readFileAsBase64 = (file: File): Promise<string> => {
 
 interface ImagePlaceholderCardProps {
     placeholder: ImagePlaceholder;
-    onImageUpload: (placeholderId: string, imageData: string, status: ImagePlaceholder['status']) => void;
+    onImageUpload: (placeholderId: string, imageData: string, status: ImagePlaceholder['status'], imageAssetId?: string) => void;
     subject: string;
     topic: string;
 }
@@ -32,20 +33,7 @@ export const ImagePlaceholderCard: React.FC<ImagePlaceholderCardProps> = ({ plac
     
     const isBusy = isProcessing || placeholder.status === 'generating';
 
-     const saveImageToLibrary = async (imageData: string) => {
-        const newRecord = {
-            id: crypto.randomUUID(),
-            imageData,
-            subject,
-            topic,
-            createdAt: Date.now()
-        };
-        try {
-            await db.imageLibrary.add(newRecord);
-        } catch (error) {
-            console.warn("Could not save image to library. It might already exist.", error);
-        }
-    }
+    const saveImageToLibrary = async (imageData: string) => saveImageAsset(imageData, { subject, topic });
 
     const processAndUploadFile = async (file: File | Blob) => {
         if (!file.type.startsWith('image/')) {
@@ -59,10 +47,9 @@ export const ImagePlaceholderCard: React.FC<ImagePlaceholderCardProps> = ({ plac
             // lesson editing depend on the optional cloud upload endpoint and keeps
             // the image available offline and embeddable in DOCX exports.
             const base64 = await readFileAsBase64(file as File);
-            onImageUpload(placeholder.id, base64, 'uploaded');
-
-            // Also save the image to the reusable local library.
-            await saveImageToLibrary(base64);
+            const compressed = await compressImage(base64);
+            const imageAssetId = await saveImageToLibrary(compressed);
+            onImageUpload(placeholder.id, compressed, 'uploaded', imageAssetId);
         } catch (e) {
             setImageError(e instanceof Error ? e.message : "Failed to upload image.");
         } finally {
@@ -95,8 +82,10 @@ export const ImagePlaceholderCard: React.FC<ImagePlaceholderCardProps> = ({ plac
         await processAndUploadFile(imageBlob);
     };
 
-    const handleLibraryImageSelect = (imageData: string) => {
-        onImageUpload(placeholder.id, imageData, 'uploaded');
+    const handleLibraryImageSelect = async (imageData: string) => {
+        const compressed = await compressImage(imageData);
+        const imageAssetId = await saveImageToLibrary(compressed);
+        onImageUpload(placeholder.id, compressed, 'uploaded', imageAssetId);
         setIsLibraryModalOpen(false);
     };
 

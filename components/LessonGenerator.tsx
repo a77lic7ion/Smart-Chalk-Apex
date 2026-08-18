@@ -5,6 +5,7 @@ import { Input, TextArea } from './Input';
 import { Select } from './Select';
 import { generateLesson as dispatchGenerateLesson } from '../services/aiDispatchService';
 import { db } from '../db';
+import { resolveImageAsset } from '../utils/imageAssetService';
 import type { LessonGenerationParams, LessonPlan, ImagePlaceholder, UserProfile, DbRecord, ImageLibraryRecord } from '../types';
 import { CURRICULUM_OPTS_FOR_SELECT, GRADES_OPTIONS, COMPREHENSIVE_SUBJECT_OPTIONS, BLOOMS_LEVEL_OPTIONS } from '../constants';
 import { useAIProviderSettings } from '../context/AIProviderSettingsContext';
@@ -142,12 +143,12 @@ export const LessonGenerator: React.FC<LessonGeneratorProps> = ({ user, loadId, 
         setError(null);
     }, []);
 
-    const handleImageUpdate = useCallback((placeholderId: string, imageData: string, status: ImagePlaceholder['status']) => {
+    const handleImageUpdate = useCallback((placeholderId: string, imageData: string, status: ImagePlaceholder['status'], imageAssetId?: string) => {
         setGeneratedData(currentData => {
             if (!currentData) return null;
 
             const updatedPlaceholders = currentData.placeholders.map(p =>
-                p.id === placeholderId ? { ...p, imageData, status } : p
+                p.id === placeholderId ? { ...p, imageData, imageAssetId, status } : p
             );
 
             return { ...currentData, placeholders: updatedPlaceholders };
@@ -164,10 +165,15 @@ export const LessonGenerator: React.FC<LessonGeneratorProps> = ({ user, loadId, 
             syncStatus: 'dirty'
         };
 
-        const placeholdersToSave: ImagePlaceholder[] = placeholders.map(p => ({
-            ...p,
-            syncStatus: 'dirty'
-        }));
+        const placeholdersToSave: ImagePlaceholder[] = placeholders.map(p => {
+            const { imageData, ...rest } = p;
+            return {
+                ...rest,
+                // Keep legacy inline data only when no canonical asset exists.
+                ...(p.imageAssetId ? {} : { imageData }),
+                syncStatus: 'dirty'
+            };
+        });
 
         try {
             await db.transaction('rw', db.lessonPlans, db.imagePlaceholders, db.trainingData, async () => {
@@ -194,7 +200,7 @@ export const LessonGenerator: React.FC<LessonGeneratorProps> = ({ user, loadId, 
                         subject: q.subject,
                         createdAt: Date.now(),
                         sourceId: lessonPlan.id,
-                        imageData: q.imageData,
+                        ...(q.imageAssetId ? { imageAssetId: q.imageAssetId } : { imageData: q.imageData }),
                         syncStatus: 'dirty',
                     }));
                     await db.trainingData.bulkAdd(recordsToSave);
@@ -214,7 +220,12 @@ export const LessonGenerator: React.FC<LessonGeneratorProps> = ({ user, loadId, 
         setSuccessMessage(null);
         try {
             const lessonPlan = await db.lessonPlans.get(lessonId);
-            const placeholders = await db.imagePlaceholders.where({ presentationId: lessonId }).toArray();
+            const storedPlaceholders = await db.imagePlaceholders.where({ presentationId: lessonId }).toArray();
+            const placeholders = await Promise.all(storedPlaceholders.map(async placeholder => ({
+                ...placeholder,
+                imageData: await resolveImageAsset(placeholder.imageAssetId, placeholder.imageData),
+                status: placeholder.imageAssetId || placeholder.imageData ? 'uploaded' as const : placeholder.status,
+            })));
 
             if (!lessonPlan || lessonPlan.userId !== user.sub) {
                 throw new Error("Could not find the lesson plan or access is denied.");

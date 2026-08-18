@@ -2,6 +2,7 @@
 import { saveAs } from 'file-saver';
 import PptxGenJS from 'pptxgenjs';
 import { db } from '../db';
+import { resolveImageAsset } from './imageAssetService';
 import type { SavedTest, Presentation, Slide, ImagePlaceholder, LessonPlan, FormalTestParams, TrainingQuestion, SavedHomework, ManualExam, ParsedExamData, ExamQuestion, Curriculum } from '../types';
 import { Document, Paragraph, TextRun, ImageRun, Packer as DocxPacker, HeadingLevel, AlignmentType, convertInchesToTwip, Header, Footer, PageNumber, PageBorderDisplay, PageBorders, PageBorderOffsetFrom, BorderStyle, ISectionOptions, HeightRule } from 'docx';
 import templateLogoMark from '@/SmartChalk-logo-mark.png';
@@ -592,7 +593,8 @@ export const exportLessonAsDocx = async (lesson: LessonPlan): Promise<void> => {
     const imagePlaceholders = await db.imagePlaceholders.where({ presentationId: lesson.id }).toArray();
     const imageMap = new Map<string, string>();
     for (const placeholder of imagePlaceholders) {
-        if (placeholder.imageData) imageMap.set(placeholder.placeholderId, placeholder.imageData);
+        const imageData = await resolveImageAsset(placeholder.imageAssetId, placeholder.imageData);
+        if (imageData) imageMap.set(placeholder.placeholderId, imageData);
     }
 
     const coverPage = await createCoverPage({

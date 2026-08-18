@@ -5,6 +5,7 @@ import { Input, TextArea } from './Input';
 import { Select } from './Select';
 import { generateSlides as dispatchGenerateSlides } from '../services/aiDispatchService';
 import { db } from '../db';
+import { resolveImageAsset } from '../utils/imageAssetService';
 import type { TestGenerationParams, Presentation, Slide, UserProfile } from '../types';
 import { CURRICULUM_OPTS_FOR_SELECT, GRADES_OPTIONS, COMPREHENSIVE_SUBJECT_OPTIONS, BLOOMS_LEVEL_OPTIONS, PRESENTATION_STRUCTURE_PRESETS } from '../constants';
 import { useLanguage } from '../i18n/LanguageContext';
@@ -94,10 +95,14 @@ export const SlidesGenerator: React.FC<SlidesGeneratorProps> = ({ user, loadId, 
             userId: user.sub,
             syncStatus: 'dirty'
         };
-        const slidesToSave: Slide[] = generatedData.slides.map(slide => ({
-            ...slide,
-            syncStatus: 'dirty'
-        }));
+        const slidesToSave: Slide[] = generatedData.slides.map(slide => {
+            const { imageData, ...rest } = slide;
+            return {
+                ...rest,
+                ...(slide.imageAssetId ? {} : { imageData }),
+                syncStatus: 'dirty'
+            };
+        });
 
         try {
             await db.transaction('rw', db.presentations, db.slides, async () => {
@@ -134,12 +139,10 @@ export const SlidesGenerator: React.FC<SlidesGeneratorProps> = ({ user, loadId, 
         try {
             const presentation = await db.presentations.get(presentationId);
             const storedSlides = await db.slides.where({ presentationId }).toArray();
-            const libraryImages = await db.imageLibrary.toArray();
-            const slides = storedSlides.map(slide => {
-                if (slide.imageData) return slide;
-                const libraryImage = libraryImages.find(image => image.slideId === slide.id && image.imageData);
-                return libraryImage ? { ...slide, imageData: libraryImage.imageData } : slide;
-            });
+            const slides = await Promise.all(storedSlides.map(async slide => ({
+                ...slide,
+                imageData: await resolveImageAsset(slide.imageAssetId, slide.imageData),
+            })));
 
             if (!presentation || presentation.userId !== user.sub) {
                 throw new Error("Could not find the presentation or access is denied.");

@@ -28,7 +28,8 @@ export interface TrainingQuestion {
   standard: string;
   grade: string;
   subject: string;
-  imageData?: string; // Optional base64 encoded image
+  imageData?: string; // Legacy inline image data; new records use imageAssetId
+  imageAssetId?: string;
 }
 
 // Type for the actual record stored in the IndexedDB database.
@@ -42,7 +43,8 @@ export interface DbRecord {
   grade: string;
   subject: string;
   createdAt: number;
-  imageData?: string; // Optional base64 encoded image
+  imageData?: string; // Legacy inline image data
+  imageAssetId?: string;
   sourceId?: string; // Links back to the parent document (SavedTest, LessonPlan etc.)
   syncStatus: SyncStatus;
 }
@@ -112,7 +114,8 @@ export interface Slide {
     slideNumber: number;
     title: string;
     content: string;
-    imageData?: string;
+    imageData?: string; // Legacy inline image data
+    imageAssetId?: string;
     isIntro?: boolean;
     syncStatus: SyncStatus;
 }
@@ -124,7 +127,8 @@ export interface ImagePlaceholder {
     placeholderId: string; // AI-generated ID for linking
     description: string;
     status: 'pending' | 'generating' | 'uploaded';
-    imageData?: string; // Base64 encoded image data
+    imageData?: string; // Legacy inline image data
+    imageAssetId?: string;
     syncStatus: SyncStatus;
 }
 
@@ -248,7 +252,7 @@ export interface ManualExam {
 // --- Image Library Types ---
 export interface ImageLibraryRecord {
     id: string; // uuid
-    imageData: string; // base64
+    imageData: string; // Canonical compressed image data
     subject: string;
     topic: string;
     slideId?: string;

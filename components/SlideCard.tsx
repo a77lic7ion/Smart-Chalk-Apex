@@ -7,6 +7,7 @@ import { Loader } from './Loader';
 import { ImageSearchModal } from './ImageSearchModal';
 import { ImageLibraryModal } from './ImageLibraryModal';
 import { db } from '../db';
+import { compressImage, saveImageAsset } from '../utils/imageAssetService';
 import { FormattedText } from './FormattedText';
 
 const readFileAsBase64 = (file: File): Promise<string> => {
@@ -60,23 +61,12 @@ const ContentSlide: React.FC<{ slide: Slide, onUpdate: (updatedSlide: Slide) => 
     const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
     const [isLibraryModalOpen, setIsLibraryModalOpen] = useState(false);
 
-    const saveImageToLibrary = async (imageData: string) => {
-        const newRecord = {
-            id: crypto.randomUUID(),
-            imageData,
-            subject,
-            topic,
-            slideId: slide.id,
-            presentationId: slide.presentationId,
-            createdAt: Date.now(),
-            syncStatus: 'dirty'
-        };
-        try {
-            await db.imageLibrary.add(newRecord);
-        } catch (error) {
-            console.warn("Could not save image to library. It might already exist.", error);
-        }
-    }
+    const saveImageToLibrary = async (imageData: string) => saveImageAsset(imageData, {
+        subject,
+        topic,
+        slideId: slide.id,
+        presentationId: slide.presentationId,
+    });
 
     const processAndUploadFile = async (file: File | Blob) => {
         if (!file.type.startsWith('image/')) {
@@ -88,38 +78,17 @@ const ContentSlide: React.FC<{ slide: Slide, onUpdate: (updatedSlide: Slide) => 
         setImageError(null);
         try {
             const squareFile = await cropImageToSquare(file);
-            // Upload to Vercel Blob storage
-            const formData = new FormData();
-            formData.append('image', squareFile);
-            formData.append('folder', 'slides');
-            
-            const token = localStorage.getItem('google_token') || localStorage.getItem('googleToken');
-            const response = await fetch('/api/images/upload', {
-                method: 'POST',
-                body: formData,
-                headers: token ? { 'Authorization': `Bearer ${token}` } : undefined
-            });
-
             const base64 = await readFileAsBase64(squareFile);
-            if (response.ok) {
-                await response.json();
-                // Keep the durable local copy on the slide itself. The remote URL is optional;
-                // local base64 prevents saved presentations from losing images when cloud storage
-                // is unavailable, expired, or inaccessible from the browser.
-                onUpdate({ ...slide, imageData: base64 });
-            } else {
-                // Keep the slide usable in the static-first/local workspace even when cloud upload is unavailable.
-                onUpdate({ ...slide, imageData: base64 });
-            }
-
-            // Keep a local copy available for the presentation image library.
-            await saveImageToLibrary(base64);
+            const compressed = await compressImage(base64);
+            const imageAssetId = await saveImageToLibrary(compressed);
+            onUpdate({ ...slide, imageData: compressed, imageAssetId });
         } catch (e) {
             try {
                 const squareFile = await cropImageToSquare(file);
                 const base64 = await readFileAsBase64(squareFile);
-                onUpdate({ ...slide, imageData: base64 });
-                await saveImageToLibrary(base64);
+                const compressed = await compressImage(base64);
+                const imageAssetId = await saveImageToLibrary(compressed);
+                onUpdate({ ...slide, imageData: compressed, imageAssetId });
                 setImageError(null);
             } catch {
                 setImageError(e instanceof Error ? e.message : "Failed to upload image.");
@@ -160,8 +129,10 @@ const ContentSlide: React.FC<{ slide: Slide, onUpdate: (updatedSlide: Slide) => 
         await processAndUploadFile(imageBlob);
     };
 
-    const handleLibraryImageSelect = (imageData: string) => {
-        onUpdate({ ...slide, imageData: imageData });
+    const handleLibraryImageSelect = async (imageData: string) => {
+        const compressed = await compressImage(imageData);
+        const imageAssetId = await saveImageToLibrary(compressed);
+        onUpdate({ ...slide, imageData: compressed, imageAssetId });
         setIsLibraryModalOpen(false);
     };
 

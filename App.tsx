@@ -15,6 +15,7 @@ import { ADMIN_EMAILS } from './config';
 import { HomeworkGenerator } from './components/HomeworkGenerator';
 import { Footer } from './components/Footer';
 import { ManualExamBuilderView } from './components/ManualExamBuilderView';
+import { migrateLegacyImageStorage } from './utils/imageAssetMigration';
 
 
 export type AppView = 'dashboard' | 'manualExamBuilder' | 'testGenerator' | 'slidesGenerator' | 'lessonGenerator' | 'exam' | 'homeworkGenerator' | 'myContent' | 'settings';
@@ -37,6 +38,13 @@ const App: React.FC = () => {
     if (savedTheme === 'light' || savedTheme === 'dark') return savedTheme;
     return window.matchMedia?.('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
   });
+
+  useEffect(() => {
+    if (!user) return;
+    void migrateLegacyImageStorage().catch(error => {
+      console.warn('SmartChalk image migration deferred:', error);
+    });
+  }, [user?.sub]);
 
   useEffect(() => {
     const root = document.documentElement;
