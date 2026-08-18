@@ -100,7 +100,7 @@ export const Header: React.FC<HeaderProps> = ({ currentView, setView, user, onLo
         <UserAvatar user={user} />
       </button>
       {isProfileOpen && (
-        <div className="absolute bottom-full right-0 z-50 mb-2 w-60 rounded-xl border border-slate-200 bg-white p-2 shadow-xl lg:bottom-auto lg:top-full lg:mt-2 lg:mb-0">
+        <div className="absolute bottom-full right-0 z-[80] mb-2 w-60 rounded-xl border border-slate-200 bg-white p-2 shadow-xl lg:bottom-0 lg:left-full lg:right-auto lg:top-auto lg:ml-3 lg:mt-0 lg:mb-0">
           <div className="border-b border-slate-200 px-3 py-2">
             <p className="truncate text-sm font-semibold text-brand-black">{user.name || 'User'}</p>
             <p className="truncate text-xs text-slate-500">{user.email}</p>
