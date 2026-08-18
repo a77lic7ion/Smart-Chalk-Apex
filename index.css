@@ -163,6 +163,11 @@ body,
   background-color: #FFFFFF !important;
 }
 
+.theme-dark .smartchalk-logo-backdrop-dark {
+  background-color: #000000 !important;
+  border: 1px solid rgba(255, 198, 0, 0.35);
+}
+
 /* Reuse the existing neutral utility classes as dark command-centre surfaces. */
 .theme-dark .bg-white,
 .theme-dark .bg-slate-50,

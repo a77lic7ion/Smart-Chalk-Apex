@@ -104,30 +104,30 @@ const ContentCard: React.FC<ContentCardProps> = ({ id, name, createdAt, type, on
     }
 
     return (
-        <div className={`flex items-start gap-4 rounded-2xl border p-4 shadow-sm transition-shadow hover:shadow-md ${bgColor}`}>
-            <div className={`p-2 rounded-lg ${iconColor}`}>
+        <div className={`grid grid-cols-[auto_minmax(0,1fr)] items-start gap-4 rounded-2xl border p-4 shadow-sm transition-shadow hover:shadow-md sm:flex ${bgColor}`}>
+            <div className={`shrink-0 rounded-lg p-2 ${iconColor}`}>
                 <Icon className="h-6 w-6" />
             </div>
-            <div className="flex-grow">
-                <p className={`font-semibold ${accentColor}`}>{name}</p>
+            <div className="min-w-0 flex-1">
+                <p className={`break-words font-semibold ${accentColor}`}>{name}</p>
                 <p className="text-xs text-slate-500">
                     Created: {new Date(createdAt).toLocaleDateString()}
                 </p>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="col-span-2 flex flex-wrap items-center gap-2 border-t border-slate-200 pt-3 sm:col-auto sm:ml-auto sm:flex-nowrap sm:border-0 sm:pt-0">
                  {(type === 'test' || type === 'lesson' || type === 'presentation') && onCreateHomework && (
-                    <button onClick={handleCreateHomework} title="Create Homework" disabled={isExporting} className="p-1.5 text-slate-500 hover:text-brand-black hover:bg-brand-yellow rounded-lg transition-colors shadow-sm border border-slate-200 disabled:opacity-50">
+                    <button onClick={handleCreateHomework} title="Create Homework" disabled={isExporting} className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-slate-200 p-1.5 text-slate-500 shadow-sm transition-colors hover:bg-brand-yellow hover:text-brand-black disabled:opacity-50">
                         <ClipboardDocumentCheckIcon className="h-5 w-5" />
                     </button>
                  )}
                  {(type === 'test' || type === 'lesson' || type === 'presentation' || type === 'parsedExam' || type === 'manualExam') && onFormatExam && (
-                    <button onClick={handleFormat} title="Format as Exam" disabled={isExporting} className="p-1.5 text-slate-500 hover:text-brand-black hover:bg-brand-yellow rounded-lg transition-colors shadow-sm border border-slate-200 disabled:opacity-50">
+                    <button onClick={handleFormat} title="Format as Exam" disabled={isExporting} className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-slate-200 p-1.5 text-slate-500 shadow-sm transition-colors hover:bg-brand-yellow hover:text-brand-black disabled:opacity-50">
                         <ExamIcon className="h-5 w-5" />
                     </button>
                 )}
                  {onExport && (
                      <div className="relative" ref={exportMenuRef}>
-                        <button onClick={handleExportClick} title={getExportTitle()} disabled={isExporting} className="rounded-lg border border-slate-300 p-2 text-brand-black transition-colors hover:bg-brand-yellow hover:text-brand-black focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-yellow disabled:cursor-wait disabled:opacity-50">
+                        <button onClick={handleExportClick} title={getExportTitle()} disabled={isExporting} className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-slate-300 p-2 text-brand-black transition-colors hover:bg-brand-yellow hover:text-brand-black focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-yellow disabled:cursor-wait disabled:opacity-50">
                             {isExporting ? <Loader className="h-5 w-5 text-brand-yellow" /> : <DocumentArrowDownIcon className="h-5 w-5" />}
                         </button>
                         {isExportMenuOpen && (type === 'test' || type === 'homework' || type === 'parsedExam') && (
@@ -148,10 +148,10 @@ const ContentCard: React.FC<ContentCardProps> = ({ id, name, createdAt, type, on
                         )}
                     </div>
                  )}
-                <button onClick={handleLoad} title="Load Content" disabled={isExporting} className="rounded-lg border border-slate-300 p-2 text-brand-black transition-colors hover:bg-brand-yellow hover:text-brand-black focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-yellow disabled:opacity-50">
+                <button onClick={handleLoad} title="Load Content" disabled={isExporting} className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-slate-300 p-2 text-brand-black transition-colors hover:bg-brand-yellow hover:text-brand-black focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-yellow disabled:opacity-50">
                     <FolderOpenIcon className="h-5 w-5" />
                 </button>
-                <button onClick={handleDelete} title="Delete Content" aria-label="Delete Content" disabled={isExporting} className="rounded-lg border border-slate-300 p-2 text-brand-black transition-colors hover:bg-brand-black hover:text-brand-yellow focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-yellow disabled:opacity-50">
+                <button onClick={handleDelete} title="Delete Content" aria-label="Delete Content" disabled={isExporting} className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-slate-300 p-2 text-brand-black transition-colors hover:bg-brand-black hover:text-brand-yellow focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-yellow disabled:opacity-50">
                     <TrashIcon className="h-5 w-5" />
                 </button>
             </div>

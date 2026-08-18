@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import type { UserProfile } from '../types';
 import { SmartChalkLogo, ChevronDoubleLeftIcon, ChevronDoubleRightIcon } from './Icons';
+import darkThemeLogo from '../SmartChalk-logo-dark.png';
 import type { AppView, ThemeMode } from '../App';
 
 interface HeaderProps {
@@ -66,6 +67,14 @@ const UserAvatar: React.FC<{ user: UserProfile; size?: 'sm' | 'md' }> = ({ user,
   );
 };
 
+const HeaderLogo: React.FC<{ theme: ThemeMode; compact?: boolean }> = ({ theme, compact = false }) => (
+  <div className={`smartchalk-logo-backdrop w-fit rounded-xl px-2.5 py-1.5 shadow-sm ${theme === 'dark' ? 'smartchalk-logo-backdrop-dark' : 'bg-white'}`}>
+    {theme === 'dark'
+      ? <img src={darkThemeLogo} alt="SmartChalk" className={`${compact ? 'h-10' : 'h-12'} w-auto object-contain`} />
+      : <SmartChalkLogo className={`${compact ? 'h-10' : 'h-12'} w-auto self-start`} />}
+  </div>
+);
+
 export const Header: React.FC<HeaderProps> = ({ currentView, setView, user, onLogout, isAdmin, theme, onThemeToggle, isSidebarCollapsed, onSidebarToggle }) => {
   const profileRef = useRef<HTMLDivElement>(null);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
@@ -124,9 +133,7 @@ export const Header: React.FC<HeaderProps> = ({ currentView, setView, user, onLo
       <aside className={`fixed inset-y-0 left-0 z-50 hidden flex-col border-r border-slate-200 bg-brand-paper px-4 py-6 transition-[width] duration-300 lg:flex ${isSidebarCollapsed ? 'w-20' : 'w-64'}`}>
         <div className={`flex items-center ${isSidebarCollapsed ? 'justify-center' : 'justify-between gap-3'}`}>
           {!isSidebarCollapsed && (
-            <div className="smartchalk-logo-backdrop w-fit rounded-xl bg-white px-3 py-2 shadow-sm">
-              <SmartChalkLogo className="h-12 w-auto self-start" />
-            </div>
+            <HeaderLogo theme={theme} />
           )}
           <button
             type="button"
@@ -189,9 +196,7 @@ export const Header: React.FC<HeaderProps> = ({ currentView, setView, user, onLo
 
       <div className="sticky top-0 z-50 border-b border-slate-200 bg-brand-paper px-4 py-3 shadow-sm lg:hidden">
         <div className="flex items-center justify-between gap-2">
-          <div className="smartchalk-logo-backdrop w-fit rounded-xl bg-white px-2.5 py-1.5 shadow-sm">
-            <SmartChalkLogo className="h-10 w-auto" />
-          </div>
+          <HeaderLogo theme={theme} compact />
           <div className="flex items-center gap-2">
             <button
               type="button"
