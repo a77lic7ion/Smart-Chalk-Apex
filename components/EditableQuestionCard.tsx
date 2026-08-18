@@ -30,12 +30,6 @@ const DisplayCard: React.FC<{ questionData: TrainingQuestion }> = ({ questionDat
                 <span className="inline-flex max-w-full items-center rounded-full bg-brand-yellow px-2.5 py-1 text-xs font-bold !text-brand-black shadow-sm break-words">{questionData.subject}</span>
             </div>
             <p className="break-words pt-1 text-xs font-medium !text-brand-black">{questionData.standard}</p>
-            {questionData.curriculumEvidence && (
-                <div className="rounded-lg border border-slate-200 bg-brand-paper p-2 text-xs !text-brand-black">
-                    <p className="font-bold">Source-grounded: {questionData.curriculumEvidence.publisher}</p>
-                    <a href={questionData.curriculumEvidence.sourceUrl} target="_blank" rel="noreferrer" className="block truncate text-slate-600 underline">{questionData.curriculumEvidence.sourceName}</a>
-                </div>
-            )}
         </div>
     </div>
 );

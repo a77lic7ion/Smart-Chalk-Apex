@@ -14,6 +14,7 @@ import { ImagePlaceholderCard } from './ImagePlaceholderCard';
 import { BookOpenIcon, FolderOpenIcon, TrashIcon } from './Icons';
 import { LessonPlanCard } from './LessonPlanCard';
 import { CurriculumSourcePanel } from './CurriculumSourcePanel';
+import { OfficialSourcesFooter } from './OfficialSourcesFooter';
 
 
 interface GeneratedLesson {
@@ -74,6 +75,7 @@ const ResultsView: React.FC<{
                 <Button onClick={onDiscard} variant="ghost" size="md">Discard</Button>
                 <Button onClick={handleSave} isLoading={isSaving} size="lg">Save Lesson Plan</Button>
             </div>
+            <OfficialSourcesFooter evidence={lessonPlan.curriculumEvidence} />
         </div>
     );
 };

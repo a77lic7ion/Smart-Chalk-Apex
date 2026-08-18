@@ -13,6 +13,7 @@ import { Loader } from './Loader';
 import { CheckIcon, XMarkIcon, BookmarkSquareIcon, DocumentPlusIcon, UploadIcon } from './Icons';
 import { FormattedText } from './FormattedText';
 import { CurriculumSourcePanel } from './CurriculumSourcePanel';
+import { OfficialSourcesFooter } from './OfficialSourcesFooter';
 
 const readFileAsBase64 = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
@@ -197,6 +198,7 @@ const StagingArea: React.FC<{
                     Discard
                 </Button>
             </div>
+            <OfficialSourcesFooter evidence={questions[0]?.curriculumEvidence} />
         </div>
     );
 };

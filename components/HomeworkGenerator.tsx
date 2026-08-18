@@ -11,6 +11,7 @@ import { EditableQuestionCard } from './EditableQuestionCard';
 import { exportHomeworkAsDocx } from '../utils/exportService';
 import { XMarkIcon, DocumentArrowDownIcon, BookmarkSquareIcon, DocumentPlusIcon, UploadIcon } from './Icons';
 import { CurriculumSourcePanel } from './CurriculumSourcePanel';
+import { OfficialSourcesFooter } from './OfficialSourcesFooter';
 
 const readFileAsBase64 = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
@@ -208,6 +209,7 @@ const StagingArea: React.FC<{
                     Discard & Start Over
                 </Button>
             </div>
+            <OfficialSourcesFooter evidence={questions[0]?.curriculumEvidence} />
         </div>
     );
 };

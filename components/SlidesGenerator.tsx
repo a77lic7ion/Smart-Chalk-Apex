@@ -15,6 +15,7 @@ import { SlideCard } from './SlideCard';
 import { TrashIcon, FolderOpenIcon } from './Icons';
 import { exportPresentationAsPptx } from '../utils/exportService';
 import { CurriculumSourcePanel } from './CurriculumSourcePanel';
+import { OfficialSourcesFooter } from './OfficialSourcesFooter';
 
 interface GeneratedPresentation {
     presentation: Presentation;
@@ -290,6 +291,7 @@ export const SlidesGenerator: React.FC<SlidesGeneratorProps> = ({ user, loadId, 
                                 />
                              ))}
                         </div>
+                        <OfficialSourcesFooter evidence={generatedData.presentation.curriculumEvidence} />
                     </div>
                 )}
                 </div>
