@@ -235,34 +235,54 @@ const validateAndEnrichLessonData = (parsedData: any, params: LessonGenerationPa
     }));
 
     const usedPlaceholderIds = new Set<string>();
-    const placeholderIdsBySource = new Map<string, string[]>();
-    const placeholders: ImagePlaceholder[] = parsedData.image_placeholders.map((p: any) => {
-        if (!p.placeholder_id || !p.description) throw new Error("An image placeholder from the API is missing required fields.");
+    const definitionsBySource = new Map<string, { description: string }>();
+    for (const definition of parsedData.image_placeholders) {
+        if (!definition.placeholder_id || !definition.description) {
+            throw new Error("An image placeholder from the API is missing required fields.");
+        }
+        const sourceId = String(definition.placeholder_id).trim();
+        // Keep the first description for a reused source ID. Each occurrence
+        // still receives its own independent placeholder record below.
+        if (!definitionsBySource.has(sourceId)) {
+            definitionsBySource.set(sourceId, { description: String(definition.description) });
+        }
+    }
 
-        const sourceId = String(p.placeholder_id).trim();
+    const placeholders: ImagePlaceholder[] = [];
+    const createUniquePlaceholder = (sourceId: string, description: string): string => {
         let uniqueId = sourceId;
         let suffix = 2;
         while (usedPlaceholderIds.has(uniqueId)) uniqueId = `${sourceId}-${suffix++}`;
         usedPlaceholderIds.add(uniqueId);
-        const ids = placeholderIdsBySource.get(sourceId) ?? [];
-        ids.push(uniqueId);
-        placeholderIdsBySource.set(sourceId, ids);
+        placeholders.push({
+            id: crypto.randomUUID(),
+            presentationId: lessonPlanId,
+            slideNumber: 0,
+            placeholderId: uniqueId,
+            description,
+            status: 'pending',
+        });
+        return uniqueId;
+    };
 
-        return { id: crypto.randomUUID(), presentationId: lessonPlanId, slideNumber: 0, placeholderId: uniqueId, description: p.description, status: 'pending' };
-    });
-
-    // If an AI response reused a placeholder_id, map occurrences in document order
-    // to their own unique records. This prevents a library replacement from
-    // propagating to every image in the lesson.
-    const occurrenceBySource = new Map<string, number>();
-    const lessonContent = parsedData.lesson_plan_content.replace(/\[IMAGE_PLACEHOLDER:([^\]]+)\]/g, (fullMatch: string, sourceId: string) => {
-        const ids = placeholderIdsBySource.get(sourceId);
-        if (!ids || ids.length === 0) return fullMatch;
-        const occurrence = occurrenceBySource.get(sourceId) ?? 0;
-        occurrenceBySource.set(sourceId, occurrence + 1);
-        const uniqueId = ids[Math.min(occurrence, ids.length - 1)];
+    // Create one record per tag occurrence, not one record per source ID. This
+    // prevents a replacement in one lesson section from updating every section
+    // when the AI reused the same placeholder_id.
+    const lessonContent = parsedData.lesson_plan_content.replace(/\[IMAGE_PLACEHOLDER:([^\]]+)\]/g, (fullMatch: string, rawSourceId: string) => {
+        const sourceId = String(rawSourceId).trim();
+        const definition = definitionsBySource.get(sourceId);
+        if (!definition) return fullMatch;
+        const uniqueId = createUniquePlaceholder(sourceId, definition.description);
         return `[IMAGE_PLACEHOLDER:${uniqueId}]`;
     });
+
+    // Preserve definitions that were returned by the model but not referenced
+    // in the content, without allowing them to share an ID with another slot.
+    for (const [sourceId, definition] of definitionsBySource) {
+        if (!placeholders.some(placeholder => placeholder.placeholderId === sourceId || placeholder.placeholderId.startsWith(`${sourceId}-`))) {
+            createUniquePlaceholder(sourceId, definition.description);
+        }
+    }
 
     const lessonPlan: LessonPlan = { id: lessonPlanId, name: parsedData.title, params: params, content: lessonContent, questions: questions, createdAt: Date.now() };
     return { lessonPlan, placeholders };
