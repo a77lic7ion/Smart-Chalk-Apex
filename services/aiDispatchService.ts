@@ -1,4 +1,4 @@
-import type { TestGenerationParams, AISettings, TrainingQuestion, Presentation, Slide, ImagePlaceholder, LessonGenerationParams, LessonPlan, DbRecord, HomeworkGenerationParams } from '../types';
+import type { TestGenerationParams, AISettings, TrainingQuestion, Presentation, Slide, ImagePlaceholder, LessonGenerationParams, LessonPlan, DbRecord, HomeworkGenerationParams, CurriculumEvidence, CurriculumGroundingContext } from '../types';
 import { generateContentWithGemini } from './gemini';
 import { generateContentWithOpenAI } from './openai';
 import { generateContentWithOllama } from './ollama';
@@ -6,10 +6,21 @@ import { generateContentWithOpenRouter } from './openRouter';
 import { generateContentWithNous } from './nous';
 import { generateUUID } from '../utils/uuidCompat';
 import { db } from '../db';
+import { resolveCurriculumGrounding, selectAssessmentGuidance } from './curriculumGroundingService';
 
 // --- System Instruction Generators ---
+const getCurriculumGroundingPrompt = (params: TestGenerationParams, evidence?: CurriculumGroundingContext, assessmentGuidance?: CurriculumGroundingContext): string => {
+    if (!evidence) {
+        return `\n**Curriculum status:** No external source context was supplied. Do not claim that this output is officially curriculum-aligned.\n`;
+    }
 
-export const getSystemInstructionForTest = (params: TestGenerationParams, existingQuestions?: DbRecord[]): string => {
+    const assessmentPrompt = assessmentGuidance ? `\n**IEB Assessment Guidance:**\nUse the following IEB requirements for assessment format and cognitive demand. Do not reproduce the guidance verbatim.\nSource: ${assessmentGuidance.sourceName} (${assessmentGuidance.sourceUrl})\n\"\"\"\n${assessmentGuidance.sourceExcerpt}\n\"\"\"\n` : (params.curriculum === 'IEB' ? `\n**IEB assessment note:** IEB uses CAPS as the subject-content basis. No IEB Subject Assessment Guideline was imported, so use the DBE CAPS content source below and do not make unverified IEB-specific assessment claims.\n` : '');
+
+    const publisherLabel = evidence.publisher === 'DBE' ? 'Department of Basic Education (DBE)' : 'Independent Examinations Board (IEB)';
+    return `\n**Authoritative South African Curriculum Source — Mandatory Grounding:**\nUse only the concepts, scope, progression, and assessment implications supported by this official source excerpt. Do not invent curriculum topics, term placement, or formal assessment requirements. If the requested topic is absent or ambiguous, return an empty questions array rather than guessing.\nPublisher: ${publisherLabel}\nSource: ${evidence.sourceName}\nSource URL: ${evidence.sourceUrl}\n\"\"\"\n${evidence.sourceExcerpt}\n\"\"\"\n${assessmentPrompt}`;
+};
+
+export const getSystemInstructionForTest = (params: TestGenerationParams, existingQuestions?: DbRecord[], evidence?: CurriculumGroundingContext, assessmentGuidance?: CurriculumGroundingContext): string => {
     let existingQuestionsPrompt = '';
     if (existingQuestions && existingQuestions.length > 0) {
         const questionsForPrompt = existingQuestions.map(({ question, answer }) => ({ question, answer }));
@@ -26,6 +37,7 @@ ${JSON.stringify(questionsForPrompt, null, 2)}
 
     return `
 You are an expert South African educator and content creator. Your task is to generate a list of high-quality questions and answers based on the following specifications.
+${getCurriculumGroundingPrompt(params, evidence, assessmentGuidance)}
 ${existingQuestionsPrompt}
 
 **Content Specifications:**
@@ -52,8 +64,9 @@ Do not include any introductory text, closing remarks, or any other content outs
 `;
 }
 
-export const getSystemInstructionForSlides = (params: TestGenerationParams): string => {
+export const getSystemInstructionForSlides = (params: TestGenerationParams, evidence?: CurriculumGroundingContext, assessmentGuidance?: CurriculumGroundingContext): string => {
     return `You are an expert educational content creator. Your task is to generate the content for a presentation.
+${getCurriculumGroundingPrompt(params, evidence, assessmentGuidance)}
 
 **Presentation Specifications:**
 - **Curriculum:** ${params.curriculum}
@@ -76,7 +89,7 @@ Do not include a main title for the presentation or a slide for introductions; t
 `;
 }
 
-export const getSystemInstructionForLesson = (params: LessonGenerationParams, existingQuestions?: DbRecord[]): string => {
+export const getSystemInstructionForLesson = (params: LessonGenerationParams, existingQuestions?: DbRecord[], evidence?: CurriculumGroundingContext, assessmentGuidance?: CurriculumGroundingContext): string => {
     let existingQuestionsPrompt = '';
     if (existingQuestions && existingQuestions.length > 0) {
         const questionsForPrompt = existingQuestions.map(({ question, answer }) => ({ question, answer }));
@@ -92,6 +105,7 @@ ${JSON.stringify(questionsForPrompt, null, 2)}
     }
 
     return `You are an expert South African educator and curriculum designer. Your task is to generate a detailed, high-quality lesson plan based on the provided specifications.
+${getCurriculumGroundingPrompt(params, evidence, assessmentGuidance)}
 ${existingQuestionsPrompt}
 
 **Lesson Specifications:**
@@ -116,7 +130,7 @@ Do not include any text or explanations outside of the single root JSON object.
 `;
 }
 
-export const getSystemInstructionForHomework = (params: HomeworkGenerationParams, sourceContent?: {type: string, name: string, content: string | TrainingQuestion[]}): string => {
+export const getSystemInstructionForHomework = (params: HomeworkGenerationParams, sourceContent?: {type: string, name: string, content: string | TrainingQuestion[]}, evidence?: CurriculumGroundingContext, assessmentGuidance?: CurriculumGroundingContext): string => {
     let sourceContentPrompt = '';
     if (sourceContent) {
         const contentString = typeof sourceContent.content === 'string' 
@@ -136,6 +150,7 @@ ${contentString}
 
     return `
 You are an expert educator creating a homework assignment sheet. Your task is to generate a list of questions and answers based on the user's specifications.
+${getCurriculumGroundingPrompt(params, evidence, assessmentGuidance)}
 
 **Homework Specifications:**
 - **Curriculum:** ${params.curriculum}
@@ -232,7 +247,13 @@ const findQuestionArray = (value: unknown, depth = 0): any[] | undefined => {
     return undefined;
 };
 
-const validateAndEnrichGeneratedData = (parsedData: any): TrainingQuestion[] => {
+const compactEvidence = (evidence?: CurriculumGroundingContext): CurriculumEvidence | undefined => {
+    if (!evidence) return undefined;
+    const { sourceExcerpt: _sourceExcerpt, ...compact } = evidence;
+    return compact;
+};
+
+const validateAndEnrichGeneratedData = (parsedData: any, params?: TestGenerationParams, evidence?: CurriculumGroundingContext): TrainingQuestion[] => {
     const dataArray = findQuestionArray(parsedData);
     if (!dataArray) {
         throw new Error("The provider response did not contain a questions array. Please retry the generation; if the error persists, select another model in Settings.");
@@ -241,14 +262,22 @@ const validateAndEnrichGeneratedData = (parsedData: any): TrainingQuestion[] => 
         if (!item || typeof item !== 'object' || !item.question || !item.answer || !item.curriculum || !item.standard || !item.grade || !item.subject) {
             throw new Error(`Item at index ${index} in the generated response is missing required fields.`);
         }
-        return { ...item, id: generateUUID() };
+        return {
+            ...item,
+            id: generateUUID(),
+            curriculum: params?.curriculum ?? item.curriculum,
+            grade: params?.grade ?? item.grade,
+            subject: params?.subject ?? item.subject,
+            standard: evidence ? `${evidence.publisher} source-grounded | ${params?.grade} - ${params?.subject} - ${params?.topic}` : item.standard,
+            curriculumEvidence: compactEvidence(evidence),
+        };
     });
 };
 
-const validateAndEnrichSlidesData = (parsedData: any, params: TestGenerationParams): { presentation: Presentation, slides: Slide[] } => {
+const validateAndEnrichSlidesData = (parsedData: any, params: TestGenerationParams, evidence?: CurriculumGroundingContext): { presentation: Presentation, slides: Slide[] } => {
     if (!parsedData.slides || !Array.isArray(parsedData.slides)) throw new Error("API response is missing the root 'slides' array.");
     const presentationId = generateUUID();
-    const presentation: Presentation = { id: presentationId, name: params.topic, params: params, createdAt: Date.now() };
+    const presentation: Presentation = { id: presentationId, name: params.topic, params: params, curriculumEvidence: compactEvidence(evidence), createdAt: Date.now() };
     const introSlide: Slide = { id: generateUUID(), presentationId: presentationId, slideNumber: 1, title: params.topic, content: `A presentation on ${params.topic} for ${params.grade} ${params.subject}`, isIntro: true };
     const contentSlides: Slide[] = parsedData.slides.map((slideData: any, index: number) => {
         if (!slideData.title || !slideData.content) throw new Error(`Slide at index ${index} is missing title or content.`);
@@ -259,13 +288,13 @@ const validateAndEnrichSlidesData = (parsedData: any, params: TestGenerationPara
     return { presentation, slides: [introSlide, ...contentSlides] };
 };
 
-const validateAndEnrichLessonData = (parsedData: any, params: LessonGenerationParams): { lessonPlan: LessonPlan, placeholders: ImagePlaceholder[] } => {
+const validateAndEnrichLessonData = (parsedData: any, params: LessonGenerationParams, evidence?: CurriculumGroundingContext): { lessonPlan: LessonPlan, placeholders: ImagePlaceholder[] } => {
     if (!parsedData.title || typeof parsedData.lesson_plan_content !== 'string' || !Array.isArray(parsedData.assessment_questions) || !Array.isArray(parsedData.image_placeholders)) {
         throw new Error("API response is missing required fields: title, lesson_plan_content, assessment_questions, or image_placeholders.");
     }
     const lessonPlanId = generateUUID();
     const questions: TrainingQuestion[] = parsedData.assessment_questions.map((q: any) => ({
-        id: generateUUID(), question: q.question, answer: q.answer, curriculum: params.curriculum, grade: params.grade, subject: params.subject, standard: `${params.grade} - ${params.subject} - Lesson: ${params.topic}`
+        id: generateUUID(), question: q.question, answer: q.answer, curriculum: params.curriculum, grade: params.grade, subject: params.subject, standard: evidence ? `${evidence.publisher} source-grounded | ${params.grade} - ${params.subject} - Lesson: ${params.topic}` : `${params.grade} - ${params.subject} - Lesson: ${params.topic}`, curriculumEvidence: compactEvidence(evidence)
     }));
 
     const usedPlaceholderIds = new Set<string>();
@@ -318,7 +347,7 @@ const validateAndEnrichLessonData = (parsedData: any, params: LessonGenerationPa
         }
     }
 
-    const lessonPlan: LessonPlan = { id: lessonPlanId, name: parsedData.title, params: params, content: lessonContent, questions: questions, createdAt: Date.now() };
+    const lessonPlan: LessonPlan = { id: lessonPlanId, name: parsedData.title, params: params, curriculumEvidence: compactEvidence(evidence), content: lessonContent, questions: questions, createdAt: Date.now() };
     return { lessonPlan, placeholders };
 };
 
@@ -374,32 +403,48 @@ const dispatchAndValidate = async (
 
 // --- Public Service Functions ---
 
-export const generateTest = async (params: TestGenerationParams, settings: AISettings): Promise<TrainingQuestion[]> => {
+export const generateTest = async (params: TestGenerationParams, settings: AISettings, userId?: string): Promise<TrainingQuestion[]> => {
+    const [evidence, assessmentGuidance] = await Promise.all([
+        resolveCurriculumGrounding(params, userId),
+        selectAssessmentGuidance(params, userId),
+    ]);
     const existingQuestions = await db.trainingData.where({ subject: params.subject, grade: params.grade }).limit(50).toArray();
-    const systemInstruction = getSystemInstructionForTest(params, existingQuestions);
+    const systemInstruction = getSystemInstructionForTest(params, existingQuestions, evidence, assessmentGuidance);
     const userPrompt = "Please generate the test now based on the system instructions.";
     const parsedData = await dispatchAndValidate(systemInstruction, userPrompt, settings, 0.5);
-    return validateAndEnrichGeneratedData(parsedData);
+    return validateAndEnrichGeneratedData(parsedData, params, evidence);
 };
 
-export const generateHomework = async (params: HomeworkGenerationParams, settings: AISettings, sourceContent?: {type: string, name: string, content: string | TrainingQuestion[]}): Promise<TrainingQuestion[]> => {
-    const systemInstruction = getSystemInstructionForHomework(params, sourceContent);
+export const generateHomework = async (params: HomeworkGenerationParams, settings: AISettings, sourceContent?: {type: string, name: string, content: string | TrainingQuestion[]}, userId?: string): Promise<TrainingQuestion[]> => {
+    const [evidence, assessmentGuidance] = await Promise.all([
+        resolveCurriculumGrounding(params, userId),
+        selectAssessmentGuidance(params, userId),
+    ]);
+    const systemInstruction = getSystemInstructionForHomework(params, sourceContent, evidence, assessmentGuidance);
     const userPrompt = "Please generate the homework sheet now based on the system instructions.";
     const parsedData = await dispatchAndValidate(systemInstruction, userPrompt, settings, 0.6);
-    return validateAndEnrichGeneratedData(parsedData);
+    return validateAndEnrichGeneratedData(parsedData, params, evidence);
 };
 
-export const generateSlides = async (params: TestGenerationParams, settings: AISettings): Promise<{ presentation: Presentation, slides: Slide[] }> => {
-    const systemInstruction = getSystemInstructionForSlides(params);
+export const generateSlides = async (params: TestGenerationParams, settings: AISettings, userId?: string): Promise<{ presentation: Presentation, slides: Slide[] }> => {
+    const [evidence, assessmentGuidance] = await Promise.all([
+        resolveCurriculumGrounding(params, userId),
+        selectAssessmentGuidance(params, userId),
+    ]);
+    const systemInstruction = getSystemInstructionForSlides(params, evidence, assessmentGuidance);
     const userPrompt = "Please generate the presentation now based on the system instructions.";
     const parsedData = await dispatchAndValidate(systemInstruction, userPrompt, settings, 0.6);
-    return validateAndEnrichSlidesData(parsedData, params);
+    return validateAndEnrichSlidesData(parsedData, params, evidence);
 };
 
-export const generateLesson = async (params: LessonGenerationParams, settings: AISettings): Promise<{ lessonPlan: LessonPlan, placeholders: ImagePlaceholder[] }> => {
+export const generateLesson = async (params: LessonGenerationParams, settings: AISettings, userId?: string): Promise<{ lessonPlan: LessonPlan, placeholders: ImagePlaceholder[] }> => {
+    const [evidence, assessmentGuidance] = await Promise.all([
+        resolveCurriculumGrounding(params, userId),
+        selectAssessmentGuidance(params, userId),
+    ]);
     const existingQuestions = await db.trainingData.where({ subject: params.subject, grade: params.grade }).limit(50).toArray();
-    const systemInstruction = getSystemInstructionForLesson(params, existingQuestions);
+    const systemInstruction = getSystemInstructionForLesson(params, existingQuestions, evidence, assessmentGuidance);
     const userPrompt = "Please generate the lesson plan now based on the system instructions.";
     const parsedData = await dispatchAndValidate(systemInstruction, userPrompt, settings, 0.7);
-    return validateAndEnrichLessonData(parsedData, params);
+    return validateAndEnrichLessonData(parsedData, params, evidence);
 };

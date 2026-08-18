@@ -1,5 +1,5 @@
 import Dexie, { type Table } from 'dexie';
-import type { DbRecord, SavedTest, Presentation, Slide, ImagePlaceholder, LessonPlan, SavedExam, SavedHomework, SavedParsedExam, ManualExam, ImageLibraryRecord } from './types';
+import type { DbRecord, SavedTest, Presentation, Slide, ImagePlaceholder, LessonPlan, SavedExam, SavedHomework, SavedParsedExam, ManualExam, ImageLibraryRecord, CurriculumSourceRecord } from './types';
 
 // Create the db instance and cast it to a type that includes the Dexie methods
 // and our custom table properties. This is a robust pattern that avoids
@@ -16,10 +16,11 @@ export const db = new Dexie('TrainingDataGeneratorDB') as Dexie & {
     savedParsedExams: Table<SavedParsedExam, string>;
     savedManualExams: Table<ManualExam, string>;
     imageLibrary: Table<ImageLibraryRecord, string>;
+    curriculumSources: Table<CurriculumSourceRecord, string>;
 };
 
 // Now define the database versions and stores. This is the runtime part.
-db.version(19).stores({
+const coreStores = {
     trainingData: '++id, sourceId, userId, curriculum, standard, grade, subject, createdAt, syncStatus',
     savedTests: 'id, userId, name, createdAt, syncStatus',
     presentations: 'id, userId, name, createdAt, syncStatus',
@@ -31,4 +32,10 @@ db.version(19).stores({
     savedParsedExams: 'id, userId, name, createdAt, syncStatus',
     savedManualExams: 'id, userId, name, createdAt, syncStatus',
     imageLibrary: 'id, subject, topic, createdAt, syncStatus'
+};
+
+db.version(19).stores(coreStores);
+db.version(20).stores({
+    ...coreStores,
+    curriculumSources: 'id, userId, curriculum, publisher, grade, subject, importedAt, syncStatus'
 });

@@ -10,6 +10,7 @@ import { useAIProviderSettings } from '../context/AIProviderSettingsContext';
 import { EditableQuestionCard } from './EditableQuestionCard';
 import { exportHomeworkAsDocx } from '../utils/exportService';
 import { XMarkIcon, DocumentArrowDownIcon, BookmarkSquareIcon, DocumentPlusIcon, UploadIcon } from './Icons';
+import { CurriculumSourcePanel } from './CurriculumSourcePanel';
 
 const readFileAsBase64 = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
@@ -321,7 +322,7 @@ export const HomeworkGenerator: React.FC<{ user: UserProfile, loadId: string | n
         }
 
         try {
-            const questions = await dispatchGenerateHomework(params, settings, sourceContent ?? undefined);
+            const questions = await dispatchGenerateHomework(params, settings, sourceContent ?? undefined, user.sub);
             setStagedQuestions(questions);
         } catch (err: any) {
             setError(err.message || 'An unexpected error occurred during homework generation.');
@@ -385,6 +386,7 @@ export const HomeworkGenerator: React.FC<{ user: UserProfile, loadId: string | n
             name: homeworkName,
             params: params,
             questions: stagedQuestions,
+            curriculumEvidence: stagedQuestions[0]?.curriculumEvidence,
             createdAt: Date.now(),
             syncStatus: 'dirty'
         };
@@ -452,6 +454,8 @@ export const HomeworkGenerator: React.FC<{ user: UserProfile, loadId: string | n
                         <TextArea label="Question Description" name="questionTypes" value={params.questionTypes} onChange={handleInputChange} placeholder={`e.g., "${QUESTION_TYPE_SUGGESTIONS[0]}"`} required rows={3} helperText="Describe the number and types of questions to generate." />
                         <Select label="Bloom's Taxonomy Level Focus" name="bloomsLevel" value={params.bloomsLevel} onChange={handleInputChange} options={BLOOMS_LEVEL_OPTIONS} required />
                         
+                        <CurriculumSourcePanel params={params} user={user} />
+
                         <div className="pt-2 flex flex-wrap gap-3">
                             <Button type="submit" isLoading={isLoading} disabled={isLoading} size="lg">
                                 {isLoading ? 'Generating Questions...' : 'Generate Questions'}

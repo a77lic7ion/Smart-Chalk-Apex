@@ -47,6 +47,7 @@ test('saved test persists in My Content across reloads', async ({ page }) => {
   await page.goto('/');
   await page.getByRole('button', { name: 'TEST GEN' }).click();
 
+  await page.locator('select[name="curriculum"]').selectOption('Other');
   await page.locator('input[name="topic"]').fill('Photosynthesis');
   await page.locator('textarea[name="questionTypes"]').fill('One short-answer question.');
   await page.getByRole('button', { name: /Generate Test/i }).click();

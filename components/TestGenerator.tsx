@@ -12,6 +12,7 @@ import { EditableQuestionCard } from './EditableQuestionCard';
 import { Loader } from './Loader';
 import { CheckIcon, XMarkIcon, BookmarkSquareIcon, DocumentPlusIcon, UploadIcon } from './Icons';
 import { FormattedText } from './FormattedText';
+import { CurriculumSourcePanel } from './CurriculumSourcePanel';
 
 const readFileAsBase64 = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
@@ -309,7 +310,7 @@ export const TestGenerator: React.FC<{ user: UserProfile, loadId: string | null;
         }
 
         try {
-            const questions = await dispatchGenerateTest(currentParamsForGeneration, settings);
+            const questions = await dispatchGenerateTest(currentParamsForGeneration, settings, user.sub);
             setStagedQuestions(questions);
         } catch (err: any) {
             setError(err.message || t('testGenerator.errors.unexpectedGenerationError', { fallback: 'An unexpected error occurred during test generation.'}));
@@ -373,6 +374,7 @@ export const TestGenerator: React.FC<{ user: UserProfile, loadId: string | null;
             name: testName,
             params: params,
             questions: stagedQuestions,
+            curriculumEvidence: stagedQuestions[0]?.curriculumEvidence,
             createdAt: Date.now(),
             syncStatus: 'dirty'
         };
@@ -474,6 +476,8 @@ export const TestGenerator: React.FC<{ user: UserProfile, loadId: string | null;
                         <TextArea label={t('testGenerator.form.questionTypesLabel', { fallback: "Question Types & Structure"})} name="questionTypes" value={params.questionTypes} onChange={handleInputChange} placeholder={t('testGenerator.form.questionTypesPlaceholder', { example: QUESTION_TYPE_SUGGESTIONS[1], fallback: `e.g., "${QUESTION_TYPE_SUGGESTIONS[1]}"`})} required rows={4} helperText={t('testGenerator.form.questionTypesHelper', { fallback: "Describe types, number of questions, total marks. Use a preset or type your own."})} />
                         <Select label={t('testGenerator.form.bloomsLevelLabel', { fallback: "Bloom's Taxonomy Level Focus"})} name="bloomsLevel" value={params.bloomsLevel} onChange={handleInputChange} options={translatedBloomsOptions} required />
                         
+                        <CurriculumSourcePanel params={params} user={user} />
+
                         <div className="pt-2 flex flex-wrap gap-3">
                             <Button type="submit" isLoading={isLoading} disabled={isLoading} size="lg" className="flex-grow md:flex-grow-0">
                                 {isLoading ? t('testGenerator.buttons.generating', { fallback: 'Generating...'}) : t('testGenerator.buttons.generateTest', { fallback: 'Generate Data'})}

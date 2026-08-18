@@ -18,6 +18,34 @@ export interface AISettings {
 export type Curriculum = 'CAPS' | 'IEB' | 'Cambridge' | 'Other';
 export type SyncStatus = 'synced' | 'dirty';
 
+export interface CurriculumSourceRecord {
+  id: string;
+  userId?: string;
+  curriculum: 'CAPS' | 'IEB';
+  publisher: 'DBE' | 'IEB';
+  name: string;
+  sourceUrl: string;
+  sourceText: string;
+  subject: string;
+  grade: string;
+  importedAt: number;
+  lastVerifiedAt: number;
+  syncStatus: SyncStatus;
+}
+
+export interface CurriculumEvidence {
+  sourceId: string;
+  publisher: 'DBE' | 'IEB';
+  sourceName: string;
+  sourceUrl: string;
+  importedAt: number;
+  alignmentStatus: 'source-grounded';
+}
+
+export interface CurriculumGroundingContext extends CurriculumEvidence {
+  sourceExcerpt: string;
+}
+
 // Type for the data structure used in the staging area (after AI processing).
 // A client-side UUID is used for React keys and edit/delete operations.
 export interface TrainingQuestion {
@@ -30,6 +58,7 @@ export interface TrainingQuestion {
   subject: string;
   imageData?: string; // Legacy inline image data; new records use imageAssetId
   imageAssetId?: string;
+  curriculumEvidence?: CurriculumEvidence;
 }
 
 // Type for the actual record stored in the IndexedDB database.
@@ -45,6 +74,7 @@ export interface DbRecord {
   createdAt: number;
   imageData?: string; // Legacy inline image data
   imageAssetId?: string;
+  curriculumEvidence?: CurriculumEvidence;
   sourceId?: string; // Links back to the parent document (SavedTest, LessonPlan etc.)
   syncStatus: SyncStatus;
 }
@@ -74,6 +104,7 @@ export interface SavedTest {
   name: string;
   params: TestGenerationParams;
   questions: TrainingQuestion[];
+  curriculumEvidence?: CurriculumEvidence;
   createdAt: number;
   userId?: string;
   syncStatus: SyncStatus;
@@ -91,6 +122,7 @@ export interface SavedExam {
   name: string;
   params: FormalTestParams;
   questions: TrainingQuestion[];
+  curriculumEvidence?: CurriculumEvidence;
   createdAt: number;
   userId?: string;
   syncStatus: SyncStatus;
@@ -103,6 +135,7 @@ export interface Presentation {
     id: string; // uuid
     name: string;
     params: TestGenerationParams;
+    curriculumEvidence?: CurriculumEvidence;
     createdAt: number;
     userId?: string;
     syncStatus: SyncStatus;
@@ -141,6 +174,7 @@ export interface LessonPlan {
     id: string; // uuid
     name: string;
     params: LessonGenerationParams;
+    curriculumEvidence?: CurriculumEvidence;
     content: string; // Generated lesson plan content, with image placeholder IDs
     questions: TrainingQuestion[]; // Assessment questions
     createdAt: number;
@@ -158,6 +192,7 @@ export interface SavedHomework {
   name: string;
   params: HomeworkGenerationParams;
   questions: TrainingQuestion[];
+  curriculumEvidence?: CurriculumEvidence;
   createdAt: number;
   userId?: string;
   syncStatus: SyncStatus;

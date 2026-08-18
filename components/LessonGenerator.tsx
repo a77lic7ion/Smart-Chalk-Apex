@@ -13,6 +13,7 @@ import { Loader } from './Loader';
 import { ImagePlaceholderCard } from './ImagePlaceholderCard';
 import { BookOpenIcon, FolderOpenIcon, TrashIcon } from './Icons';
 import { LessonPlanCard } from './LessonPlanCard';
+import { CurriculumSourcePanel } from './CurriculumSourcePanel';
 
 
 interface GeneratedLesson {
@@ -128,7 +129,7 @@ export const LessonGenerator: React.FC<LessonGeneratorProps> = ({ user, loadId, 
         setIsLoading(true);
 
         try {
-            const result = await dispatchGenerateLesson(params, settings);
+            const result = await dispatchGenerateLesson(params, settings, user.sub);
             setGeneratedData(result);
         } catch (err: any) {
             setError(err.message || 'An unexpected error occurred during lesson generation.');
@@ -311,6 +312,8 @@ export const LessonGenerator: React.FC<LessonGeneratorProps> = ({ user, loadId, 
                             <Select label="Bloom's Taxonomy Level Focus" name="bloomsLevel" value={params.bloomsLevel} onChange={handleInputChange} options={translatedBloomsOptions} required />
                         </div>
                         
+                        <CurriculumSourcePanel params={params} user={user} />
+
                         <div className="pt-4 border-t border-slate-200 flex flex-wrap items-center justify-start gap-4">
                             <Button type="submit" isLoading={isLoading} disabled={isLoading} size="lg">
                                 {isLoading ? 'Generating Lesson...' : 'Generate Lesson Plan'}
@@ -328,7 +331,7 @@ export const LessonGenerator: React.FC<LessonGeneratorProps> = ({ user, loadId, 
                                             <p className="font-semibold text-brand-charcoal">{p.name}</p>
                                             <p className="text-xs text-slate-500">Created: {new Date(p.createdAt).toLocaleString()}</p>
                                         </div>
-                                        <div className="flex items-center gap-2">
+                                        <div className="flex flex-wrap gap-3">
                                             <button onClick={() => handleLoadLesson(p.id)} title="Load Lesson Plan" aria-label="Load Lesson Plan" className="rounded-lg border border-slate-300 p-2 text-brand-black transition-colors hover:border-brand-yellow hover:bg-brand-yellow hover:text-brand-black focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-yellow"><FolderOpenIcon className="h-5 w-5"/></button>
                                             <button onClick={() => handleDeleteLesson(p.id)} title="Delete Lesson Plan" aria-label="Delete Lesson Plan" className="rounded-lg border border-slate-300 p-2 text-brand-black transition-colors hover:border-brand-black hover:bg-brand-black hover:text-brand-yellow focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-yellow"><TrashIcon className="h-5 w-5"/></button>
                                         </div>

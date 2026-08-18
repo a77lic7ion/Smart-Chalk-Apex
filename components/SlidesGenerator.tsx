@@ -14,6 +14,7 @@ import { Loader } from './Loader';
 import { SlideCard } from './SlideCard';
 import { TrashIcon, FolderOpenIcon } from './Icons';
 import { exportPresentationAsPptx } from '../utils/exportService';
+import { CurriculumSourcePanel } from './CurriculumSourcePanel';
 
 interface GeneratedPresentation {
     presentation: Presentation;
@@ -72,7 +73,7 @@ export const SlidesGenerator: React.FC<SlidesGeneratorProps> = ({ user, loadId, 
         setIsLoading(true);
 
         try {
-            const result = await dispatchGenerateSlides(params, settings);
+            const result = await dispatchGenerateSlides(params, settings, user.sub);
             setGeneratedData(result);
         } catch (err: any) {
             setError(err.message || t('presentationGenerator.errors.unexpectedGenerationError'));
@@ -227,7 +228,7 @@ export const SlidesGenerator: React.FC<SlidesGeneratorProps> = ({ user, loadId, 
                         </div>
                         <div>
                             <label className="block text-sm font-medium text-brand-charcoal">{t('presentationGenerator.form.presetsLabel')}</label>
-                            <div className="flex flex-wrap gap-2 mb-2">
+                            <div className="mt-2 flex flex-wrap gap-3">
                                 {PRESENTATION_STRUCTURE_PRESETS.map(preset => (
                                     <Button key={preset.label} type="button" variant="secondary" size="sm" onClick={() => handlePresetSelect(preset.value)}>
                                         {t(`presentationGenerator.presets.${preset.label.replace(/[^a-zA-Z0-9]/g, '')}`, { fallback: preset.label })}
@@ -237,6 +238,8 @@ export const SlidesGenerator: React.FC<SlidesGeneratorProps> = ({ user, loadId, 
                         </div>
                         <TextArea label={t('presentationGenerator.form.questionTypesLabel')} name="questionTypes" value={params.questionTypes} onChange={handleInputChange} placeholder={t('presentationGenerator.form.questionTypesPlaceholder')} required rows={4} helperText={t('presentationGenerator.form.questionTypesHelper')} />
                         <Select label={t('presentationGenerator.form.bloomsLevelLabel')} name="bloomsLevel" value={params.bloomsLevel} onChange={handleInputChange} options={translatedBloomsOptions} required />
+
+                        <CurriculumSourcePanel params={params} user={user} />
                         
                         <div className="pt-4 border-t flex flex-wrap items-center justify-start gap-4">
                             <Button type="submit" isLoading={isLoading} disabled={isLoading} size="lg">

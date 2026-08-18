@@ -10,6 +10,7 @@ import { useAIProviderSettings } from '../context/AIProviderSettingsContext';
 import { EditableQuestionCard } from './EditableQuestionCard';
 import { exportFormalTestAsDocx } from '../utils/exportService';
 import { XMarkIcon, DocumentArrowDownIcon, BookmarkSquareIcon, ClipboardDocumentCheckIcon, DocumentPlusIcon, UploadIcon } from './Icons';
+import { CurriculumSourcePanel } from './CurriculumSourcePanel';
 
 const readFileAsBase64 = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
@@ -381,7 +382,7 @@ export const TemplatedTestView: React.FC<{ user: UserProfile, loadId: string | n
         }
 
         try {
-            const questions = await dispatchGenerateTest(generationParams, settings);
+            const questions = await dispatchGenerateTest(generationParams, settings, user.sub);
             setStagedQuestions(questions);
         } catch (err: any) {
             setError(err.message || 'An unexpected error occurred during test generation.');
@@ -445,6 +446,7 @@ export const TemplatedTestView: React.FC<{ user: UserProfile, loadId: string | n
             name: examName,
             params: params,
             questions: stagedQuestions,
+            curriculumEvidence: stagedQuestions[0]?.curriculumEvidence,
             createdAt: Date.now()
         };
         
@@ -521,6 +523,8 @@ export const TemplatedTestView: React.FC<{ user: UserProfile, loadId: string | n
                         <TextArea label="Question Description" name="questionTypes" value={params.questionTypes} onChange={handleInputChange} placeholder={`e.g., "${QUESTION_TYPE_SUGGESTIONS[0]}"`} required rows={3} helperText="Describe the number and types of questions to generate." />
                         <Select label="Bloom's Taxonomy Level Focus" name="bloomsLevel" value={params.bloomsLevel} onChange={handleInputChange} options={BLOOMS_LEVEL_OPTIONS} required />
                         
+                        <CurriculumSourcePanel params={params} user={user} />
+
                         <div className="pt-2 flex flex-wrap gap-3">
                             <Button type="submit" isLoading={isLoading} disabled={isLoading} size="lg">
                                 {isLoading ? 'Generating Questions...' : 'Generate Questions'}
