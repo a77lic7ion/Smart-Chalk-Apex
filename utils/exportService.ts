@@ -171,6 +171,72 @@ const createRuledLine = () => new Paragraph({
     spacing: { after: 150 },
 });
 
+const normaliseMemoLines = (answerText: string): string[] => {
+    const cleaned = answerText
+        .replace(/^\s*Answer:\s*/i, '')
+        .replace(/\r\n/g, '\n')
+        .trim();
+
+    if (!cleaned) return ['No answer provided.'];
+
+    return cleaned
+        .split('\n')
+        .map(line => line.trim())
+        .filter(Boolean)
+        .map(line => line.replace(/^[-•]\s*/, ''));
+};
+
+const createMemoAnswerParagraphs = (answerText: string, marksText: string): Paragraph[] => {
+    const lines = normaliseMemoLines(answerText);
+    const paragraphs: Paragraph[] = [];
+    let rubricMode = false;
+
+    lines.forEach((line, lineIndex) => {
+        const isRubricHeading = /^(beoordelingscriteria|marking criteria|rubric|memorandum notes?)\s*:?$/i.test(line);
+        const isRubricItem = rubricMode && (/^[-•]/.test(line) || /:\s*\d+\s*(marks?|punt(e|e)?)?/i.test(line));
+
+        if (isRubricHeading) {
+            rubricMode = true;
+            paragraphs.push(new Paragraph({
+                children: [new TextRun({ text: line.replace(/:$/, ''), bold: true, color: '111111', size: 21, font: 'Montserrat' })],
+                spacing: { before: 180, after: 80 },
+                keepNext: true,
+            }));
+            return;
+        }
+
+        const isSubAnswer = /^(vraag|question)\s+\d+/i.test(line);
+        const prefixMatch = line.match(/^((?:Vraag|Question)\s+\d+(?:\.\d+)?)\s*:\s*(.*)$/i);
+        const label = prefixMatch?.[1];
+        const value = prefixMatch?.[2] ?? line;
+
+        paragraphs.push(new Paragraph({
+            children: label
+                ? [
+                    new TextRun({ text: `${label}: `, bold: true, color: '02A552', size: 21, font: 'Montserrat' }),
+                    new TextRun({ text: value, color: '02A552', size: 21, font: 'Montserrat' }),
+                ]
+                : [
+                    new TextRun({ text: isRubricItem ? '• ' : '', color: isRubricItem ? '555555' : '02A552', size: 21, font: 'Montserrat' }),
+                    new TextRun({ text: line, color: isRubricItem ? '555555' : '02A552', size: 21, font: 'Montserrat' }),
+                ],
+            indent: isSubAnswer ? { left: 240 } : undefined,
+            spacing: { after: 80 },
+            keepLines: true,
+        }));
+
+        if (/^\(Totaal:|^\(Total:/i.test(line)) rubricMode = false;
+        if (lineIndex === lines.length - 1 && marksText && !/\(\s*\d+\s*(marks?|punt(e|e)?)\s*\)/i.test(line)) {
+            paragraphs.push(new Paragraph({
+                children: [new TextRun({ text: `Marks available: ${marksText}`, bold: true, color: '111111', size: 20, font: 'Montserrat' })],
+                spacing: { before: 120, after: 80 },
+            }));
+        }
+    });
+
+    return paragraphs;
+};
+
 const createDocxQuestion = async (q: TrainingQuestion | ExamQuestion, index: number, type: 'questions' | 'memo'): Promise<Paragraph[]> => {
     const questionNumberText = 'questionNumber' in q && q.questionNumber ? q.questionNumber : `Question ${index + 1}`;
     const questionText = 'text' in q ? q.text : q.question;
@@ -180,15 +246,15 @@ const createDocxQuestion = async (q: TrainingQuestion | ExamQuestion, index: num
     const content: Paragraph[] = [
         new Paragraph({
             children: [
-                new TextRun({ text: `${questionNumberText} `, bold: true, size: 28, font: "Aquatico" }),
-                new TextRun({ text: `\t\t${marksText}`, size: 24, bold: true, font: "Montserrat" }),
+                new TextRun({ text: questionNumberText, bold: true, size: 27, font: "Aquatico", color: '111111' }),
+                ...(marksText ? [new TextRun({ text: `   ${marksText}`, size: 22, bold: true, font: "Montserrat", color: '555555' })] : []),
             ],
-            spacing: { after: 200 },
+            spacing: { before: type === 'memo' ? 260 : 120, after: 120 },
             keepNext: true,
         }),
         new Paragraph({
-            children: [new TextRun({ text: questionText, size: 24, font: "Montserrat" })],
-            spacing: { after: 200 },
+            children: [new TextRun({ text: questionText, size: 23, font: "Montserrat", color: '111111' })],
+            spacing: { after: type === 'memo' ? 180 : 200 },
             keepNext: true,
             keepLines: true,
         }),
@@ -203,11 +269,11 @@ const createDocxQuestion = async (q: TrainingQuestion | ExamQuestion, index: num
 
             if (['png', 'jpg', 'gif', 'bmp'].includes(imageType)) {
                 const dimensions = await getImageDimensions(base64String);
-                const targetWidth = 400; 
+                const targetWidth = 400;
                 const aspectRatio = dimensions.height / dimensions.width;
                 const targetHeight = Math.round(targetWidth * aspectRatio);
 
-                 content.push(new Paragraph({
+                content.push(new Paragraph({
                     children: [new ImageRun({
                         data: imageBuffer,
                         transformation: { width: targetWidth, height: targetHeight },
@@ -224,15 +290,18 @@ const createDocxQuestion = async (q: TrainingQuestion | ExamQuestion, index: num
     }
 
     if (type === 'memo') {
-         content.push(new Paragraph({
-            children: [
-                new TextRun({ text: "Answer: ", bold: true, color: "02A552", size: 22, font: "Montserrat" }),
-                new TextRun({ text: answerText, color: "02A552", size: 22, font: "Montserrat" })
-            ],
-            spacing: { after: 600 },
+        content.push(new Paragraph({
+            children: [new TextRun({ text: 'EXPECTED ANSWER', bold: true, color: '02A552', size: 20, font: 'Montserrat' })],
+            spacing: { before: 80, after: 60 },
+            keepNext: true,
+        }));
+        content.push(...createMemoAnswerParagraphs(answerText, marksText));
+        content.push(new Paragraph({
+            children: [new TextRun({ text: '____________________________________________________________', color: 'D9DDE5', size: 16, font: 'Montserrat' })],
+            spacing: { before: 100, after: 220 },
         }));
     } else {
-        content.push(new Paragraph({ text: "" })); 
+        content.push(new Paragraph({ text: "" }));
         content.push(createRuledLine());
         content.push(createRuledLine());
         content.push(createRuledLine());
