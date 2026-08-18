@@ -7,7 +7,7 @@ import { FormattedText } from './FormattedText';
 
 // A display-only card for when not in editing mode
 const DisplayCard: React.FC<{ questionData: TrainingQuestion }> = ({ questionData }) => (
-    <div className="border border-slate-200 rounded-xl p-4 bg-white transition-shadow hover:shadow-lg">
+    <div className="border border-slate-200 rounded-xl p-4 !bg-white !text-brand-black transition-shadow hover:shadow-lg">
         {questionData.imageData && (
              <div className="mb-4 rounded-lg overflow-hidden border border-slate-200">
                 <img src={questionData.imageData} alt="Question visual aid" className="w-full h-auto object-contain max-h-64 bg-slate-50" />
@@ -23,13 +23,13 @@ const DisplayCard: React.FC<{ questionData: TrainingQuestion }> = ({ questionDat
                  <FormattedText text={questionData.answer} as="div" className="inline" />
             </div>
         </div>
-        <div className="border-t border-slate-200 pt-3 text-sm text-slate-600 space-y-2">
-            <div className="flex flex-wrap items-center gap-2">
-                <span className="font-semibold text-brand-black py-0.5 px-2 rounded-full bg-yellow-100 text-xs">{questionData.curriculum}</span>
-                <span className="font-semibold text-brand-black py-0.5 px-2 rounded-full bg-yellow-100 text-xs">{questionData.grade}</span>
-                <span className="font-semibold text-brand-black py-0.5 px-2 rounded-full bg-yellow-100 text-xs">{questionData.subject}</span>
+        <div className="border-t border-slate-200 pt-3 text-sm !text-slate-700 space-y-2">
+            <div className="flex flex-wrap items-center gap-2" aria-label="Question metadata">
+                <span className="inline-flex max-w-full items-center whitespace-nowrap rounded-full bg-brand-yellow px-2.5 py-1 text-xs font-bold !text-brand-black shadow-sm">{questionData.curriculum}</span>
+                <span className="inline-flex max-w-full items-center whitespace-nowrap rounded-full bg-brand-yellow px-2.5 py-1 text-xs font-bold !text-brand-black shadow-sm">{questionData.grade}</span>
+                <span className="inline-flex max-w-full items-center rounded-full bg-brand-yellow px-2.5 py-1 text-xs font-bold !text-brand-black shadow-sm break-words">{questionData.subject}</span>
             </div>
-            <p className="text-xs text-slate-500 pt-1">{questionData.standard}</p>
+            <p className="break-words pt-1 text-xs font-medium !text-slate-700">{questionData.standard}</p>
         </div>
     </div>
 );
