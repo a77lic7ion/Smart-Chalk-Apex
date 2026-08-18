@@ -2,7 +2,6 @@ import { test, expect } from '@playwright/test';
 
 const tabs = [
   'DASHBOARD',
-  'EXAM CREATOR',
   'TEST GEN',
   'EXAM GEN',
   'HOMEWORK GEN',

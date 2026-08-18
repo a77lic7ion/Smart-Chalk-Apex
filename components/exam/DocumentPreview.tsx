@@ -1,12 +1,8 @@
 
 import React, { useEffect, useRef, useState } from 'react';
-import * as pdfjsLib from 'pdfjs-dist';
 import mammoth from 'mammoth';
 import { Loader } from '../Loader';
-
-if (typeof window !== 'undefined') {
-  pdfjsLib.GlobalWorkerOptions.workerSrc = `https://esm.sh/pdfjs-dist@4.5.136/build/pdf.worker.mjs`;
-}
+import { loadPdfDocument } from '../../utils/fileParser';
 
 interface DocumentPreviewProps {
   file: File;
@@ -33,9 +29,8 @@ const renderDocx = async (file: File, container: HTMLElement) => {
 };
 
 const renderPdf = async (file: File, container: HTMLElement) => {
-    const uri = URL.createObjectURL(file);
+    const pdf = await loadPdfDocument(file);
     try {
-        const pdf = await pdfjsLib.getDocument(uri).promise;
         for (let i = 1; i <= pdf.numPages; i++) {
             const page = await pdf.getPage(i);
             const viewport = page.getViewport({ scale: 1.5 });
@@ -60,7 +55,7 @@ const renderPdf = async (file: File, container: HTMLElement) => {
             }
         }
     } finally {
-        URL.revokeObjectURL(uri);
+        await pdf.destroy();
     }
 };
 

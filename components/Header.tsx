@@ -18,7 +18,6 @@ interface HeaderProps {
 
 const getCompactNavLabel = (view: AppView): string => ({
   dashboard: 'DB',
-  manualExamBuilder: 'EX',
   testGenerator: 'TG',
   exam: 'EG',
   homeworkGenerator: 'HW',
@@ -41,7 +40,6 @@ const getNavItems = (isAdmin: boolean): { view: AppView; label: string }[] => {
   return isAdmin
     ? [
         { view: 'dashboard', label: 'Dashboard' },
-        { view: 'manualExamBuilder', label: 'Exam Creator' },
         ...baseItems,
         { view: 'settings', label: 'Settings' },
       ]

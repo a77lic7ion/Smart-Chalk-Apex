@@ -1,11 +1,8 @@
 
 import * as pdfjsLib from 'pdfjs-dist';
 import mammoth from 'mammoth';
+import { loadPdfDocument } from '../utils/fileParser';
 import type { ExtractedPdfData, ParsedExamData, ExamQuestion, ExamAnnexure } from '../types';
-
-if (typeof window !== 'undefined') {
-  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://esm.sh/pdfjs-dist@4.5.136/build/pdf.worker.mjs';
-}
 
 const FIGURE_CAPTURE_REGEX = /\b(FIGURE|FIGUUR)\s+[A-Z0-9]+/i;
 
@@ -70,13 +67,11 @@ async function extractDataFromDocx(file: File): Promise<ExtractedPdfData> {
  * @returns A promise that resolves to an object containing extracted text lines and image data URLs.
  */
 export async function extractDataFromPdf(file: File): Promise<ExtractedPdfData> {
-    const uri = URL.createObjectURL(file);
     const textLines: { page: number; text: string }[] = [];
     const images: { page: number; url: string }[] = [];
+    const pdf = await loadPdfDocument(file);
 
     try {
-        const pdf = await pdfjsLib.getDocument(uri).promise;
-
         for (let i = 1; i <= pdf.numPages; i++) {
             const page = await pdf.getPage(i);
             
@@ -158,11 +153,8 @@ export async function extractDataFromPdf(file: File): Promise<ExtractedPdfData> 
                 }
             }
         }
-    } catch (e) {
-        URL.revokeObjectURL(uri);
-        throw e;
     } finally {
-        URL.revokeObjectURL(uri);
+        await pdf.destroy();
     }
     
     return { textLines, images, tables: [] }; // PDF parsing for tables is not implemented
