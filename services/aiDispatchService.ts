@@ -233,11 +233,38 @@ const validateAndEnrichLessonData = (parsedData: any, params: LessonGenerationPa
     const questions: TrainingQuestion[] = parsedData.assessment_questions.map((q: any) => ({
         id: crypto.randomUUID(), question: q.question, answer: q.answer, curriculum: params.curriculum, grade: params.grade, subject: params.subject, standard: `${params.grade} - ${params.subject} - Lesson: ${params.topic}`
     }));
-    const lessonPlan: LessonPlan = { id: lessonPlanId, name: parsedData.title, params: params, content: parsedData.lesson_plan_content, questions: questions, createdAt: Date.now() };
+
+    const usedPlaceholderIds = new Set<string>();
+    const placeholderIdsBySource = new Map<string, string[]>();
     const placeholders: ImagePlaceholder[] = parsedData.image_placeholders.map((p: any) => {
         if (!p.placeholder_id || !p.description) throw new Error("An image placeholder from the API is missing required fields.");
-        return { id: crypto.randomUUID(), presentationId: lessonPlanId, slideNumber: 0, placeholderId: p.placeholder_id, description: p.description, status: 'pending' };
+
+        const sourceId = String(p.placeholder_id).trim();
+        let uniqueId = sourceId;
+        let suffix = 2;
+        while (usedPlaceholderIds.has(uniqueId)) uniqueId = `${sourceId}-${suffix++}`;
+        usedPlaceholderIds.add(uniqueId);
+        const ids = placeholderIdsBySource.get(sourceId) ?? [];
+        ids.push(uniqueId);
+        placeholderIdsBySource.set(sourceId, ids);
+
+        return { id: crypto.randomUUID(), presentationId: lessonPlanId, slideNumber: 0, placeholderId: uniqueId, description: p.description, status: 'pending' };
     });
+
+    // If an AI response reused a placeholder_id, map occurrences in document order
+    // to their own unique records. This prevents a library replacement from
+    // propagating to every image in the lesson.
+    const occurrenceBySource = new Map<string, number>();
+    const lessonContent = parsedData.lesson_plan_content.replace(/\[IMAGE_PLACEHOLDER:([^\]]+)\]/g, (fullMatch: string, sourceId: string) => {
+        const ids = placeholderIdsBySource.get(sourceId);
+        if (!ids || ids.length === 0) return fullMatch;
+        const occurrence = occurrenceBySource.get(sourceId) ?? 0;
+        occurrenceBySource.set(sourceId, occurrence + 1);
+        const uniqueId = ids[Math.min(occurrence, ids.length - 1)];
+        return `[IMAGE_PLACEHOLDER:${uniqueId}]`;
+    });
+
+    const lessonPlan: LessonPlan = { id: lessonPlanId, name: parsedData.title, params: params, content: lessonContent, questions: questions, createdAt: Date.now() };
     return { lessonPlan, placeholders };
 };
 

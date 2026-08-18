@@ -55,29 +55,9 @@ export const ImagePlaceholderCard: React.FC<ImagePlaceholderCardProps> = ({ plac
         setIsProcessing(true);
         setImageError(null);
         try {
-            // Upload to Vercel Blob storage
-            const formData = new FormData();
-            formData.append('image', file);
-            formData.append('folder', 'presentations');
-            
-            const response = await fetch('/api/images/upload', {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('googleToken')}`
-                }
-            });
-            
-            if (!response.ok) {
-                throw new Error('Failed to upload image to cloud storage');
-            }
-            
-            const result = await response.json();
-            const imageUrl = result.data.url;
-
-            // Keep a self-contained copy on the lesson record. Cloud URLs may expire
-            // or be inaccessible to DOCX generation, while base64 works offline and
-            // can be embedded directly into the exported document.
+            // Keep a self-contained copy on the lesson record. This avoids making
+            // lesson editing depend on the optional cloud upload endpoint and keeps
+            // the image available offline and embeddable in DOCX exports.
             const base64 = await readFileAsBase64(file as File);
             onImageUpload(placeholder.id, base64, 'uploaded');
 
