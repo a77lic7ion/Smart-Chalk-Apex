@@ -587,13 +587,12 @@ export const exportLessonAsDocx = async (lesson: LessonPlan): Promise<void> => {
     const headerLogoBuffer = await getHeaderLogoBuffer();
     const footerLogoBuffer = await getFooterLogoBuffer();
     const footer = createFooter(footerLogoBuffer);
+    const safeName = lesson.name.replace(/[^a-z0-9]/gi, '_').toLowerCase();
 
     const imagePlaceholders = await db.imagePlaceholders.where({ presentationId: lesson.id }).toArray();
     const imageMap = new Map<string, string>();
     for (const placeholder of imagePlaceholders) {
-        if (placeholder.imageData) {
-            imageMap.set(placeholder.placeholderId, placeholder.imageData);
-        }
+        if (placeholder.imageData) imageMap.set(placeholder.placeholderId, placeholder.imageData);
     }
 
     const coverPage = await createCoverPage({
@@ -604,48 +603,43 @@ export const exportLessonAsDocx = async (lesson: LessonPlan): Promise<void> => {
         testType: 'Lesson Plan',
         timeLimit: lesson.params.duration,
     }, headerLogoBuffer);
-    
-    // Process lesson content for DOCX
-    const lessonContentParagraphs = await createLessonContentWithImages(lesson.content, imageMap);
 
-    // Process assessment questions
-    const assessmentHeader = new Paragraph({
-        children: [new TextRun({ text: 'Assessment Questions', font: "Aquatico" })],
-        heading: HeadingLevel.HEADING_2,
-        spacing: { before: 400, after: 200 },
-        pageBreakBefore: lesson.questions.length > 0
-    });
-    
+    const lessonContentParagraphs = await createLessonContentWithImages(lesson.content, imageMap);
     const questionPromises = lesson.questions.map((q, index) => createDocxQuestion(q, index, 'questions'));
     const questions = (await Promise.all(questionPromises)).flat();
-    
     const memoPromises = lesson.questions.map((q, index) => createDocxQuestion(q, index, 'memo'));
     const memo = (await Promise.all(memoPromises)).flat();
-    
-    const doc = new Document({
-        sections: [{
-            footers: { default: footer },
-            children: [
-                ...coverPage,
-                new Paragraph({ children: [new TextRun({ text: 'Lesson Plan', bold: true, size: 32, font: "Aquatico" })], alignment: AlignmentType.CENTER, spacing: { after: 400 } }),
-                ...lessonContentParagraphs,
-                ...(lesson.questions.length > 0 ? [assessmentHeader, ...questions] : []),
-                ...(lesson.questions.length > 0 ? [
-                     new Paragraph({
-                        children: [new TextRun({ text: 'Assessment Memorandum', font: "Aquatico" })],
-                        heading: HeadingLevel.HEADING_1,
+
+    const createLessonDocument = async (title: string, body: Paragraph[], fileSuffix: string): Promise<void> => {
+        const doc = new Document({
+            sections: [{
+                footers: { default: footer },
+                children: [
+                    ...coverPage,
+                    new Paragraph({
+                        children: [new TextRun({ text: title, bold: true, size: 32, font: 'Aquatico' })],
                         alignment: AlignmentType.CENTER,
-                        pageBreakBefore: true,
+                        spacing: { after: 500 },
+                        keepNext: true,
                     }),
-                    ...memo
-                ] : []),
-            ],
-            properties: getPageBorderOptions(),
-        }],
-    });
-    
-    const buffer = await DocxPacker.toBlob(doc);
-    saveAs(buffer, `${lesson.name.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_lesson_plan.docx`);
+                    ...(body.length > 0 ? body : [new Paragraph({
+                        children: [new TextRun({ text: 'No content available.', font: 'Montserrat', size: 24, color: '666666' })],
+                        alignment: AlignmentType.CENTER,
+                    })]),
+                ],
+                properties: getPageBorderOptions(),
+            }],
+        });
+
+        const buffer = await DocxPacker.toBlob(doc);
+        saveAs(buffer, `${safeName}_${fileSuffix}.docx`);
+    };
+
+    // Each export is an independent DOCX. The cover page ends with a page break,
+    // so the document title and content always begin on a clean page.
+    await createLessonDocument('Lesson Plan', lessonContentParagraphs, 'lesson_plan');
+    await createLessonDocument('Assessment Questions', questions, 'assessment_questions');
+    await createLessonDocument('Assessment Memorandum', memo, 'assessment_memorandum');
 };
 
 export const exportFormalTestAsDocx = async (testName: string, questions: TrainingQuestion[], params: FormalTestParams, type: 'questions' | 'memo'): Promise<void> => {
