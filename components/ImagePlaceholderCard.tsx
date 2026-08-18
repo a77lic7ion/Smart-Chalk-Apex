@@ -74,12 +74,14 @@ export const ImagePlaceholderCard: React.FC<ImagePlaceholderCardProps> = ({ plac
             
             const result = await response.json();
             const imageUrl = result.data.url;
-            
-            // Use the cloud URL instead of base64
-            onImageUpload(placeholder.id, imageUrl, 'uploaded');
-            
-            // Also save to local library for offline access (keep base64 for this)
+
+            // Keep a self-contained copy on the lesson record. Cloud URLs may expire
+            // or be inaccessible to DOCX generation, while base64 works offline and
+            // can be embedded directly into the exported document.
             const base64 = await readFileAsBase64(file as File);
+            onImageUpload(placeholder.id, base64, 'uploaded');
+
+            // Also save the image to the reusable local library.
             await saveImageToLibrary(base64);
         } catch (e) {
             setImageError(e instanceof Error ? e.message : "Failed to upload image.");

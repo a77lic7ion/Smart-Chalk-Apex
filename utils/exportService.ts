@@ -514,7 +514,21 @@ export const exportPresentationAsPptx = async (presentation: Presentation, slide
     await pptx.writeFile({ fileName: `${presentation.name.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.pptx` });
 };
 
-const createLessonContentWithImagess = async (content: string, imageMap: Map<string, string>): Promise<Paragraph[]> => {
+const resolveImageDataForDocx = async (imageData: string): Promise<string> => {
+    if (imageData.startsWith('data:image/')) return imageData;
+
+    const response = await fetch(imageData);
+    if (!response.ok) throw new Error(`Failed to fetch lesson image: ${response.status}`);
+    const blob = await response.blob();
+    return await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = () => reject(new Error('Failed to convert lesson image for DOCX export.'));
+        reader.readAsDataURL(blob);
+    });
+};
+
+const createLessonContentWithImages = async (content: string, imageMap: Map<string, string>): Promise<Paragraph[]> => {
     const paragraphs: Paragraph[] = [];
     const lines = content.split('\n');
     const placeholderRegex = /\[IMAGE_PLACEHOLDER:(.*?)\]/;
@@ -524,15 +538,19 @@ const createLessonContentWithImagess = async (content: string, imageMap: Map<str
         if (match && match[1]) {
             const placeholderId = match[1];
             const imageData = imageMap.get(placeholderId);
+            const textBefore = line.slice(0, match.index).trim();
+            const textAfter = line.slice((match.index ?? 0) + match[0].length).trim();
+            if (textBefore) paragraphs.push(new Paragraph({ children: [new TextRun({ text: textBefore, font: 'Montserrat', size: 24 })], spacing: { after: 150 } }));
 
             if (imageData) {
                 try {
-                    const imageBuffer = base64ToArrayBuffer(imageData);
-                    const dimensions = await getImageDimensions(imageData);
+                    const embeddableImageData = await resolveImageDataForDocx(imageData);
+                    const imageBuffer = base64ToArrayBuffer(embeddableImageData);
+                    const dimensions = await getImageDimensions(embeddableImageData);
                     const targetWidth = 400;
                     const aspectRatio = dimensions.height / dimensions.width;
                     const targetHeight = Math.round(targetWidth * aspectRatio);
-                    let imageType = (imageData.match(/data:image\/(.*?);base64,/) || [])[1] || 'png';
+                    let imageType = (embeddableImageData.match(/data:image\/(.*?);base64,/) || [])[1] || 'png';
                     if (imageType === 'jpeg') imageType = 'jpg';
 
                     if (['png', 'jpg', 'gif', 'bmp'].includes(imageType)) {
@@ -551,8 +569,9 @@ const createLessonContentWithImagess = async (content: string, imageMap: Map<str
                 }
             } else {
                 // Handle case where placeholder is found but no image data is available
-                 paragraphs.push(new Paragraph({ children: [new TextRun({ text: `[Image placeholder: ${placeholderId} - image not found]`, font: "Montserrat", size: 24, italics: true, color: "888888" })]}));
+                paragraphs.push(new Paragraph({ children: [new TextRun({ text: `[Image placeholder: ${placeholderId} - image not found]`, font: 'Montserrat', size: 24, italics: true, color: '888888' })] }));
             }
+            if (textAfter) paragraphs.push(new Paragraph({ children: [new TextRun({ text: textAfter, font: 'Montserrat', size: 24 })], spacing: { after: 150 } }));
         } else {
             paragraphs.push(new Paragraph({
                 children: [new TextRun({ text: line, font: "Montserrat", size: 24 })],
