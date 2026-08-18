@@ -227,6 +227,54 @@ export const TestGenerator: React.FC<{ user: UserProfile, loadId: string | null;
         setTopicSuggestions(suggestions);
     }, []);
 
+    useEffect(() => {
+        let cancelled = false;
+
+        const loadSavedTest = async () => {
+            if (!loadId || !user?.sub) return;
+
+            setError(null);
+            setLastSavedTestMessage(null);
+
+            try {
+                const savedTest = await db.savedTests.get(loadId);
+                if (!savedTest) {
+                    throw new Error('Could not find the saved test.');
+                }
+
+                if (savedTest.userId && savedTest.userId !== user.sub) {
+                    throw new Error('You do not have permission to load this test.');
+                }
+
+                if (!savedTest.userId) {
+                    savedTest.userId = user.sub;
+                    await db.savedTests.put(savedTest);
+                }
+
+                if (cancelled) return;
+
+                setParams(current => ({
+                    ...current,
+                    ...(savedTest.params || {}),
+                }));
+                setStagedQuestions((savedTest.questions || []).map(question => ({
+                    ...question,
+                    id: question.id || crypto.randomUUID(),
+                })));
+                onDidLoad();
+            } catch (loadError) {
+                if (cancelled) return;
+                console.error('Failed to load saved test:', loadError);
+                setError(loadError instanceof Error ? loadError.message : 'Could not load the saved test.');
+            }
+        };
+
+        loadSavedTest();
+        return () => {
+            cancelled = true;
+        };
+    }, [loadId, user?.sub, onDidLoad]);
+
     const handleInputChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
         if (name === 'subject') {

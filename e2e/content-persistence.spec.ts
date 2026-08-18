@@ -62,8 +62,16 @@ test('saved test persists in My Content across reloads', async ({ page }) => {
   await page.getByRole('button', { name: 'MY CONTENT' }).click();
   await expect(page.getByRole('heading', { name: 'My Content' })).toBeVisible();
   await expect(page.getByText(testName)).toBeVisible();
+  const savedTestCard = page.getByText(testName).locator('xpath=../..');
+  await savedTestCard.getByTitle('Load Content').click();
+  await expect(page.getByText('Review & Commit Questions')).toBeVisible();
+  await expect(page.getByText('What process do plants use to convert light energy into chemical energy?')).toBeVisible();
 
   await page.reload();
   await page.getByRole('button', { name: 'MY CONTENT' }).click();
   await expect(page.getByText(testName)).toBeVisible();
+  const reloadedTestCard = page.getByText(testName).locator('xpath=../..');
+  await reloadedTestCard.getByTitle('Load Content').click();
+  await expect(page.getByText('Review & Commit Questions')).toBeVisible();
+  await expect(page.getByText('What process do plants use to convert light energy into chemical energy?')).toBeVisible();
 });
