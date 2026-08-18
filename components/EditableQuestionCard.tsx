@@ -13,14 +13,14 @@ const DisplayCard: React.FC<{ questionData: TrainingQuestion }> = ({ questionDat
                 <img src={questionData.imageData} alt="Question visual aid" className="w-full h-auto object-contain max-h-64 bg-slate-50" />
             </div>
         )}
-        <div className="mb-3 prose prose-sm max-w-none">
-            <div className="font-semibold mb-1 text-brand-black">
-                <span className="text-brand-yellow font-bold mr-2">Q:</span>
-                <FormattedText text={questionData.question} as="div" className="inline" />
+        <div className="mb-3 !text-brand-black prose prose-sm max-w-none">
+            <div className="mb-1 font-semibold !text-brand-black">
+                <span className="mr-2 font-bold !text-brand-yellow">Q:</span>
+                <FormattedText text={questionData.question} as="div" className="inline !text-brand-black" />
             </div>
-            <div className="text-brand-charcoal">
-                <span className="text-slate-500 font-bold mr-2">A:</span>
-                 <FormattedText text={questionData.answer} as="div" className="inline" />
+            <div className="!text-brand-black">
+                <span className="mr-2 font-bold !text-slate-700">A:</span>
+                 <FormattedText text={questionData.answer} as="div" className="inline !text-brand-black" />
             </div>
         </div>
         <div className="border-t border-slate-200 pt-3 text-sm !text-slate-700 space-y-2">
@@ -29,7 +29,7 @@ const DisplayCard: React.FC<{ questionData: TrainingQuestion }> = ({ questionDat
                 <span className="inline-flex max-w-full items-center whitespace-nowrap rounded-full bg-brand-yellow px-2.5 py-1 text-xs font-bold !text-brand-black shadow-sm">{questionData.grade}</span>
                 <span className="inline-flex max-w-full items-center rounded-full bg-brand-yellow px-2.5 py-1 text-xs font-bold !text-brand-black shadow-sm break-words">{questionData.subject}</span>
             </div>
-            <p className="break-words pt-1 text-xs font-medium !text-slate-700">{questionData.standard}</p>
+            <p className="break-words pt-1 text-xs font-medium !text-brand-black">{questionData.standard}</p>
         </div>
     </div>
 );
