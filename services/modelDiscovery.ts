@@ -12,11 +12,24 @@ export interface DiscoveredModel {
   id: string;
   label: string;
   provider: AIProvider;
+  isFree: boolean;
 }
 
 const withBase = (endpoint: string, path: string) => {
   const base = endpoint.replace(/\/+$/, '');
   return `${base}${path.startsWith('/') ? path : `/${path}`}`;
+};
+
+const hasFreePricing = (record: Record<string, unknown>, id: string, label: string): boolean => {
+  if (/\bfree\b/i.test(`${id} ${label}`)) return true;
+  if (record.free === true || record.is_free === true || record.isFree === true) return true;
+
+  const pricing = record.pricing;
+  if (!pricing || typeof pricing !== 'object') return false;
+  const rates = Object.values(pricing as Record<string, unknown>)
+    .filter(value => typeof value === 'string' || typeof value === 'number')
+    .map(value => Number(value));
+  return rates.length > 0 && rates.every(rate => Number.isFinite(rate) && rate === 0);
 };
 
 const parseModels = (payload: unknown, provider: AIProvider): DiscoveredModel[] => {
@@ -28,13 +41,13 @@ const parseModels = (payload: unknown, provider: AIProvider): DiscoveredModel[] 
 
   return candidates
     .map((item) => {
-      if (typeof item === 'string') return { id: item, label: item, provider };
+      if (typeof item === 'string') return { id: item, label: item, provider, isFree: /\bfree\b/i.test(item) };
       if (!item || typeof item !== 'object') return null;
       const record = item as Record<string, unknown>;
       const id = String(record.id ?? record.name ?? record.model ?? '').trim();
       if (!id) return null;
       const label = String(record.displayName ?? record.name ?? record.id ?? record.model ?? id).trim();
-      return { id, label, provider };
+      return { id, label, provider, isFree: hasFreePricing(record, id, label) };
     })
     .filter((model): model is DiscoveredModel => Boolean(model));
 };
@@ -72,8 +85,8 @@ export async function discoverModels(request: ModelDiscoveryRequest): Promise<Di
     }
 
     let models = parseModels(payload, request.provider);
-    if (request.provider === 'openRouter') {
-      models = models.filter(model => /free/i.test(`${model.id} ${model.label}`));
+    if (request.provider === 'openRouter' || request.provider === 'nous') {
+      models = models.filter(model => model.isFree);
     }
     return models;
   } catch (error) {

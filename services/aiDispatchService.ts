@@ -4,6 +4,7 @@ import { generateContentWithOpenAI } from './openai';
 import { generateContentWithOllama } from './ollama';
 import { generateContentWithOpenRouter } from './openRouter';
 import { generateContentWithNous } from './nous';
+import { generateUUID } from '../utils/uuidCompat';
 import { db } from '../db';
 
 // --- System Instruction Generators ---
@@ -200,27 +201,60 @@ const robustJsonParse = (jsonString: string) => {
     }
 };
 
+const findQuestionArray = (value: unknown, depth = 0): any[] | undefined => {
+    if (depth > 4 || value === null || value === undefined) return undefined;
+    if (Array.isArray(value)) {
+        return value.some(item => item && typeof item === 'object' && ('question' in item || 'answer' in item)) ? value : undefined;
+    }
+    if (typeof value === 'string') {
+        const cleaned = cleanJsonString(value);
+        if (cleaned !== value.trim() || cleaned.startsWith('{') || cleaned.startsWith('[')) {
+            try {
+                return findQuestionArray(robustJsonParse(cleaned), depth + 1);
+            } catch {
+                return undefined;
+            }
+        }
+        return undefined;
+    }
+    if (typeof value !== 'object') return undefined;
+
+    const record = value as Record<string, unknown>;
+    const preferredKeys = ['questions', 'assessment_questions', 'items', 'data', 'result', 'output', 'response', 'content'];
+    for (const key of preferredKeys) {
+        const found = findQuestionArray(record[key], depth + 1);
+        if (found) return found;
+    }
+    for (const nestedValue of Object.values(record)) {
+        const found = findQuestionArray(nestedValue, depth + 1);
+        if (found) return found;
+    }
+    return undefined;
+};
+
 const validateAndEnrichGeneratedData = (parsedData: any): TrainingQuestion[] => {
-    const dataArray = Array.isArray(parsedData) ? parsedData : parsedData.questions;
-    if (!Array.isArray(dataArray)) throw new Error("API response is not a JSON array or could not be found.");
+    const dataArray = findQuestionArray(parsedData);
+    if (!dataArray) {
+        throw new Error("The provider response did not contain a questions array. Please retry the generation; if the error persists, select another model in Settings.");
+    }
     return dataArray.map((item, index) => {
-        if (!item.question || !item.answer || !item.curriculum || !item.standard || !item.grade || !item.subject) {
+        if (!item || typeof item !== 'object' || !item.question || !item.answer || !item.curriculum || !item.standard || !item.grade || !item.subject) {
             throw new Error(`Item at index ${index} in the generated response is missing required fields.`);
         }
-        return { ...item, id: crypto.randomUUID() };
+        return { ...item, id: generateUUID() };
     });
 };
 
 const validateAndEnrichSlidesData = (parsedData: any, params: TestGenerationParams): { presentation: Presentation, slides: Slide[] } => {
     if (!parsedData.slides || !Array.isArray(parsedData.slides)) throw new Error("API response is missing the root 'slides' array.");
-    const presentationId = crypto.randomUUID();
+    const presentationId = generateUUID();
     const presentation: Presentation = { id: presentationId, name: params.topic, params: params, createdAt: Date.now() };
-    const introSlide: Slide = { id: crypto.randomUUID(), presentationId: presentationId, slideNumber: 1, title: params.topic, content: `A presentation on ${params.topic} for ${params.grade} ${params.subject}`, isIntro: true };
+    const introSlide: Slide = { id: generateUUID(), presentationId: presentationId, slideNumber: 1, title: params.topic, content: `A presentation on ${params.topic} for ${params.grade} ${params.subject}`, isIntro: true };
     const contentSlides: Slide[] = parsedData.slides.map((slideData: any, index: number) => {
         if (!slideData.title || !slideData.content) throw new Error(`Slide at index ${index} is missing title or content.`);
         // Clean up markdown as a fallback
         const cleanContent = slideData.content.replace(/\*\*/g, '');
-        return { id: crypto.randomUUID(), presentationId: presentationId, slideNumber: index + 2, title: slideData.title, content: cleanContent, isIntro: false };
+        return { id: generateUUID(), presentationId: presentationId, slideNumber: index + 2, title: slideData.title, content: cleanContent, isIntro: false };
     });
     return { presentation, slides: [introSlide, ...contentSlides] };
 };
@@ -229,9 +263,9 @@ const validateAndEnrichLessonData = (parsedData: any, params: LessonGenerationPa
     if (!parsedData.title || typeof parsedData.lesson_plan_content !== 'string' || !Array.isArray(parsedData.assessment_questions) || !Array.isArray(parsedData.image_placeholders)) {
         throw new Error("API response is missing required fields: title, lesson_plan_content, assessment_questions, or image_placeholders.");
     }
-    const lessonPlanId = crypto.randomUUID();
+    const lessonPlanId = generateUUID();
     const questions: TrainingQuestion[] = parsedData.assessment_questions.map((q: any) => ({
-        id: crypto.randomUUID(), question: q.question, answer: q.answer, curriculum: params.curriculum, grade: params.grade, subject: params.subject, standard: `${params.grade} - ${params.subject} - Lesson: ${params.topic}`
+        id: generateUUID(), question: q.question, answer: q.answer, curriculum: params.curriculum, grade: params.grade, subject: params.subject, standard: `${params.grade} - ${params.subject} - Lesson: ${params.topic}`
     }));
 
     const usedPlaceholderIds = new Set<string>();
@@ -255,7 +289,7 @@ const validateAndEnrichLessonData = (parsedData: any, params: LessonGenerationPa
         while (usedPlaceholderIds.has(uniqueId)) uniqueId = `${sourceId}-${suffix++}`;
         usedPlaceholderIds.add(uniqueId);
         placeholders.push({
-            id: crypto.randomUUID(),
+            id: generateUUID(),
             presentationId: lessonPlanId,
             slideNumber: 0,
             placeholderId: uniqueId,

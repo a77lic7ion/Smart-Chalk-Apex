@@ -110,7 +110,8 @@ const SettingsContent: React.FC<{ user: UserProfile; isAdmin: boolean }> = ({ us
       const discovered = await discoverModels({ provider, endpoint, apiKey, customEndpoint: settings.customEndpoint });
       setModels(discovered);
       if (discovered.length > 0 && !selectedModel) updateModel(discovered[0].id);
-      setModelStatus({ tone: 'success', text: `${discovered.length} model${discovered.length === 1 ? '' : 's'} available${provider === 'openRouter' ? ' after the “free” filter' : ''}.` });
+      const freeOnlyProvider = provider === 'openRouter' || provider === 'nous';
+      setModelStatus({ tone: 'success', text: `${discovered.length} model${discovered.length === 1 ? '' : 's'} available${freeOnlyProvider ? ' after the “free” filter' : ''}.` });
     } catch (error) {
       setModels([]);
       setModelStatus({ tone: 'error', text: error instanceof Error ? error.message : 'Model discovery failed.' });
@@ -165,7 +166,7 @@ const SettingsContent: React.FC<{ user: UserProfile; isAdmin: boolean }> = ({ us
               )}
             </div>
             <input id="provider-endpoint" type="url" value={endpoint} onChange={(event) => updateEndpoint(event.target.value)} placeholder="https://…" className="w-full rounded-lg border border-slate-300 p-3 text-sm text-brand-black focus:border-brand-yellow focus:ring-1 focus:ring-brand-yellow" />
-            <p className="mt-1 text-xs text-slate-500">{provider === 'openRouter' ? 'OpenRouter results are limited to model IDs or names containing “free”.' : 'You can replace the prefilled endpoint with a compatible server URL.'}</p>
+            <p className="mt-1 text-xs text-slate-500">{provider === 'openRouter' || provider === 'nous' ? `${PROVIDER_LABELS[provider]} results are limited to models explicitly marked free by their ID, label, provider flag, or zero-price metadata.` : 'You can replace the prefilled endpoint with a compatible server URL.'}</p>
           </div>
           <div>
             <label htmlFor="provider-api-key" className="mb-1.5 block text-sm font-medium text-slate-700">API key {provider === 'ollama' || provider === 'lmStudio' ? <span className="font-normal text-slate-500">(optional for local servers)</span> : null}</label>
