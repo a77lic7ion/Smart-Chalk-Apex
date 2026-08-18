@@ -195,6 +195,15 @@ export const Header: React.FC<HeaderProps> = ({ currentView, setView, user, onLo
           <div className="flex items-center gap-2">
             <button
               type="button"
+              onClick={onLogout}
+              aria-label="Switch account"
+              title="Switch account"
+              className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-brand-yellow bg-white text-brand-black transition-colors hover:bg-brand-yellow focus:outline-none focus:ring-2 focus:ring-brand-yellow"
+            >
+              <UserAvatar user={user} size="sm" />
+            </button>
+            <button
+              type="button"
               onClick={onThemeToggle}
               aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} theme`}
               aria-pressed={theme === 'dark'}
